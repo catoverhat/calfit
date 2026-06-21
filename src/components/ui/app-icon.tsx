@@ -11,7 +11,11 @@ export type AppIconName =
   | 'calories'
   | 'trophy'
   | 'strength'
-  | 'play';
+  | 'play'
+  | 'home'
+  | 'workouts'
+  | 'progress'
+  | 'profile';
 
 const icons: Record<AppIconName, { sf: string; fallback: string }> = {
   bell: { sf: 'bell', fallback: '◇' },
@@ -22,6 +26,10 @@ const icons: Record<AppIconName, { sf: string; fallback: string }> = {
   trophy: { sf: 'trophy.fill', fallback: '★' },
   strength: { sf: 'dumbbell.fill', fallback: '↔' },
   play: { sf: 'play.fill', fallback: '▶' },
+  home: { sf: 'house.fill', fallback: '⌂' },
+  workouts: { sf: 'dumbbell.fill', fallback: '↔' },
+  progress: { sf: 'chart.bar.fill', fallback: '↗' },
+  profile: { sf: 'person.fill', fallback: '○' },
 };
 
 type AppIconProps = {

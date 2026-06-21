@@ -9,8 +9,8 @@ import {
 } from '@/components/dashboard';
 import { Header } from '@/components/header';
 import { ThemedText } from '@/components/themed-text';
+import { MOCK_USER, MOCK_WORKOUTS } from '@/constants/mock-data';
 import {
-  BottomTabInset,
   Fonts,
   MaxContentWidth,
   Palette,
@@ -20,18 +20,8 @@ import {
 import { useTheme } from '@/hooks/use-theme';
 
 const mockDashboard = {
-  user: {
-    name: 'Alex',
-    avatarUrl:
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-  },
-  workout: {
-    title: 'Full Body Power',
-    duration: '45 mins',
-    intensity: 'Intense',
-    imageUrl:
-      'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1200&q=85',
-  },
+  user: MOCK_USER,
+  workout: MOCK_WORKOUTS[0],
   stats: {
     streak: { value: '5', suffix: 'days', progress: 0.72 },
     calories: { value: '1,250', suffix: 'kcal', progress: 0.84 },
@@ -108,7 +98,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   scrollContent: {
     alignItems: 'center',
-    paddingBottom: BottomTabInset + Spacing.five,
+    paddingBottom: Spacing.five,
     paddingHorizontal: Spacing.three,
   },
   dashboard: {
