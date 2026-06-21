@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Header } from '@/components/header';
+import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
 import { AppIcon } from '@/components/ui/app-icon';
 import { MOCK_USER, MOCK_WORKOUTS } from '@/constants/mock-data';
@@ -13,10 +14,7 @@ export function WorkoutListScreen() {
   const theme = useTheme();
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={styles.scrollContent}
-      style={{ backgroundColor: theme.background }}>
+    <TabScreen contentContainerStyle={styles.scrollContent}>
       <View style={styles.content}>
         <Header avatarUrl={MOCK_USER.avatarUrl} profileName={MOCK_USER.name} />
         <View style={styles.heading}>
@@ -65,7 +63,7 @@ export function WorkoutListScreen() {
           </Link>
         ))}
       </View>
-    </ScrollView>
+    </TabScreen>
   );
 }
 

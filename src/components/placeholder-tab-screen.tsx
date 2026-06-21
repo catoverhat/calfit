@@ -1,6 +1,7 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Header } from '@/components/header';
+import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
 import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
 import { MOCK_USER } from '@/constants/mock-data';
@@ -21,10 +22,7 @@ export function PlaceholderTabScreen({
   const theme = useTheme();
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={styles.scrollContent}
-      style={{ backgroundColor: theme.background }}>
+    <TabScreen contentContainerStyle={styles.scrollContent}>
       <View style={styles.content}>
         <Header avatarUrl={MOCK_USER.avatarUrl} profileName={MOCK_USER.name} />
         <View
@@ -43,7 +41,7 @@ export function PlaceholderTabScreen({
           </ThemedText>
         </View>
       </View>
-    </ScrollView>
+    </TabScreen>
   );
 }
 

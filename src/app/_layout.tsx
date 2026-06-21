@@ -1,4 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
@@ -14,6 +15,7 @@ export default function TabLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <StatusBar style="auto" />
       <AnimatedSplashOverlay />
       <AppTabs />
     </ThemeProvider>

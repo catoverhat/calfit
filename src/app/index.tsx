@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import {
   AchievementsCard,
@@ -8,6 +8,7 @@ import {
   WorkoutCard,
 } from '@/components/dashboard';
 import { Header } from '@/components/header';
+import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
 import { MOCK_USER, MOCK_WORKOUTS } from '@/constants/mock-data';
 import {
@@ -17,7 +18,6 @@ import {
   Spacing,
   Typography,
 } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
 
 const mockDashboard = {
   user: MOCK_USER,
@@ -51,13 +51,8 @@ const mockDashboard = {
 };
 
 export default function DashboardScreen() {
-  const theme = useTheme();
-
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={styles.scrollContent}
-      style={{ backgroundColor: theme.background }}>
+    <TabScreen contentContainerStyle={styles.scrollContent}>
       <View style={styles.dashboard}>
         <Header
           avatarUrl={mockDashboard.user.avatarUrl}
@@ -91,7 +86,7 @@ export default function DashboardScreen() {
         <AchievementsCard achievements={mockDashboard.achievements} />
         <RecommendedCard {...mockDashboard.recommended} />
       </View>
-    </ScrollView>
+    </TabScreen>
   );
 }
 
