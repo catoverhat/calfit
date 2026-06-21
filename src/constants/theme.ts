@@ -99,6 +99,18 @@ export const Fonts = {
   mono: Platform.select({ ios: 'ui-monospace', default: 'monospace', web: 'var(--font-mono)' }),
 } as const;
 
+export const Typography = {
+  xs: { fontSize: 12, lineHeight: 16 },
+  sm: { fontSize: 14, lineHeight: 20 },
+  base: { fontSize: 16, lineHeight: 24 },
+  lg: { fontSize: 18, lineHeight: 28 },
+  xl: { fontSize: 20, lineHeight: 28 },
+  '2xl': { fontSize: 24, lineHeight: 32 },
+  '3xl': { fontSize: 30, lineHeight: 36 },
+  '4xl': { fontSize: 36, lineHeight: 40 },
+  '5xl': { fontSize: 48, lineHeight: 48 },
+} as const;
+
 export const Spacing = {
   half: 2,
   one: 4,
