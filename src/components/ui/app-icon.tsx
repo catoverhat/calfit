@@ -15,9 +15,17 @@ export type AppIconName =
   | 'home'
   | 'workouts'
   | 'progress'
-  | 'profile';
+  | 'profile'
+  | 'bodyFat'
+  | 'bicep'
+  | 'waist'
+  | 'edit';
 
 const icons: Record<AppIconName, { sf: string; fallback: string }> = {
+  bodyFat: { sf: 'percent', fallback: '%' },
+  bicep: { sf: 'dumbbell.fill', fallback: '↔' },
+  waist: { sf: 'figure.arms.open', fallback: '↕' },
+  edit: { sf: 'pencil', fallback: '✎' },
   bell: { sf: 'bell', fallback: '◇' },
   clock: { sf: 'clock', fallback: '◷' },
   intensity: { sf: 'bolt.fill', fallback: '◆' },
