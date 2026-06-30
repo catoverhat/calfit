@@ -36,7 +36,7 @@ export default function AppTabs() {
       <TabSlot style={styles.tabSlot} />
       <TabList asChild>
         <CustomTabList>
-          <TabTrigger name="home" href="/" asChild>
+          <TabTrigger name="home" href="/(tabs)/index" asChild>
             <TabButton icon="home" label="Home" />
           </TabTrigger>
           <TabTrigger name="workouts" href="/workouts/index" asChild>
