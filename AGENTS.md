@@ -2,6 +2,12 @@
 
 Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before writing any code.
 
+## Development Server
+
+- Do not start the Expo dev server, including `pnpm start`, `expo start`, or background `Start-Process` server commands.
+- The user will start and manage the Expo dev server manually.
+- You may run non-server verification commands such as TypeScript, lint, and tests when useful.
+
 ## Fonts
 
 Follow https://docs.expo.dev/develop/user-interface/fonts/.
