@@ -7,6 +7,7 @@ import {
   type TabListProps,
   type TabTriggerSlotProps,
 } from 'expo-router/ui';
+import { usePathname } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -31,10 +32,13 @@ type TabButtonProps = TabTriggerSlotProps & {
 };
 
 export default function AppTabs() {
+  const pathname = usePathname();
+  const sessionFocused = /^\/workouts\/[^/]+\/session\/?$/.test(pathname);
+
   return (
     <Tabs>
-      <TabSlot style={styles.tabSlot} />
-      <TabList asChild>
+      <TabSlot style={[styles.tabSlot, sessionFocused && styles.focusedTabSlot]} />
+      <TabList asChild style={sessionFocused ? styles.hidden : undefined}>
         <CustomTabList>
           <TabTrigger name="home" href="/" asChild>
             <TabButton icon="home" label="Home" />
@@ -69,11 +73,11 @@ function TabButton({ icon, isFocused, label, ...props }: TabButtonProps) {
   );
 }
 
-function CustomTabList(props: TabListProps) {
+function CustomTabList({ style, ...props }: TabListProps) {
   const theme = useTheme();
 
   return (
-    <View {...props} style={styles.tabListContainer}>
+    <View {...props} style={[styles.tabListContainer, style]}>
       <ThemedView
         type="backgroundElement"
         style={[styles.innerContainer, { borderColor: theme.border }]}>
@@ -87,6 +91,12 @@ const styles = StyleSheet.create({
   tabSlot: {
     height: '100%',
     paddingBottom: WEB_TAB_BAR_SPACE,
+  },
+  focusedTabSlot: {
+    paddingBottom: 0,
+  },
+  hidden: {
+    display: 'none',
   },
   tabListContainer: {
     alignItems: 'center',

@@ -19,9 +19,19 @@ export type AppIconName =
   | 'bodyFat'
   | 'bicep'
   | 'waist'
-  | 'edit';
+  | 'edit'
+  | 'check'
+  | 'add'
+  | 'more'
+  | 'stopwatch'
+  | 'complete';
 
 const icons: Record<AppIconName, { sf: string; fallback: string }> = {
+  check: { sf: 'checkmark', fallback: '\u2713' },
+  add: { sf: 'plus', fallback: '+' },
+  more: { sf: 'ellipsis', fallback: '...' },
+  stopwatch: { sf: 'stopwatch', fallback: 'o' },
+  complete: { sf: 'checkmark.circle.fill', fallback: '\u2713' },
   bodyFat: { sf: 'percent', fallback: '%' },
   bicep: { sf: 'dumbbell.fill', fallback: '↔' },
   waist: { sf: 'figure.arms.open', fallback: '↕' },

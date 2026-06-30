@@ -1,16 +1,20 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { usePathname } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
 import { Colors, Fonts, Typography } from '@/constants/theme';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
+  const pathname = usePathname();
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const sessionFocused = /^\/workouts\/[^/]+\/session\/?$/.test(pathname);
 
   return (
     <NativeTabs
       backgroundColor={colors.backgroundElement}
       disableIndicator
+      hidden={sessionFocused}
       iconColor={{ default: colors.textSecondary, selected: colors.primary }}
       labelStyle={{
         default: {

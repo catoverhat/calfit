@@ -76,6 +76,17 @@ export function WorkoutDetailScreen({ workout }: WorkoutDetailScreenProps) {
             </View>
           ))}
         </View>
+
+        <Link
+          href={{ pathname: '/workouts/[id]/session', params: { id: workout.id } }}
+          asChild>
+          <Pressable
+            accessibilityLabel={`Start ${workout.title}`}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.startButton, pressed && styles.pressed]}>
+            <ThemedText style={styles.startButtonText}>Start Workout</ThemedText>
+          </Pressable>
+        </Link>
       </View>
     </ScrollView>
   );
@@ -180,5 +191,27 @@ const styles = StyleSheet.create({
     ...Typography.sm,
     color: Palette.white,
     fontFamily: Fonts.bodyBold,
+  },
+  startButton: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: Palette.primary[600],
+    borderCurve: 'continuous',
+    borderRadius: 9,
+    justifyContent: 'center',
+    marginHorizontal: Spacing.three,
+    minHeight: 52,
+    paddingHorizontal: Spacing.four,
+    width: '90%',
+  },
+  startButtonText: {
+    ...Typography.sm,
+    color: Palette.white,
+    fontFamily: Fonts.bodyBold,
+    textTransform: 'uppercase',
+  },
+  pressed: {
+    opacity: 0.76,
+    transform: [{ scale: 0.99 }],
   },
 });

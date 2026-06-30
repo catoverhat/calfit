@@ -14,9 +14,42 @@ export const MOCK_WORKOUTS = [
       'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1200&q=85',
     description: 'A strength-focused session built around powerful compound movements.',
     exercises: [
-      { id: 'goblet-squat', name: 'Goblet Squat', sets: 4, reps: '10 reps' },
-      { id: 'dumbbell-press', name: 'Dumbbell Press', sets: 4, reps: '8 reps' },
-      { id: 'romanian-deadlift', name: 'Romanian Deadlift', sets: 3, reps: '12 reps' },
+      {
+        id: 'barbell-squats',
+        name: 'Barbell Squats',
+        sets: 3,
+        reps: '8–10 reps',
+        tip: 'Keep it up! Your form looks solid.',
+        sessionSets: [
+          { id: 'barbell-squats-1', weight: '135', reps: '10', completed: true },
+          { id: 'barbell-squats-2', weight: '145', reps: '10', completed: true },
+          { id: 'barbell-squats-3', weight: '155', reps: '8', completed: false },
+        ],
+      },
+      {
+        id: 'dumbbell-press',
+        name: 'Dumbbell Press',
+        sets: 3,
+        reps: '8–10 reps',
+        tip: 'Brace your core and keep both wrists stacked.',
+        sessionSets: [
+          { id: 'dumbbell-press-1', weight: '45', reps: '8', completed: false },
+          { id: 'dumbbell-press-2', weight: '45', reps: '8', completed: false },
+          { id: 'dumbbell-press-3', weight: '40', reps: '10', completed: false },
+        ],
+      },
+      {
+        id: 'romanian-deadlift',
+        name: 'Romanian Deadlift',
+        sets: 3,
+        reps: '12 reps',
+        tip: 'Push your hips back and keep the bar close to your legs.',
+        sessionSets: [
+          { id: 'romanian-deadlift-1', weight: '135', reps: '12', completed: false },
+          { id: 'romanian-deadlift-2', weight: '135', reps: '12', completed: false },
+          { id: 'romanian-deadlift-3', weight: '125', reps: '12', completed: false },
+        ],
+      },
     ],
   },
 ] as const;
