@@ -1,98 +1,121 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
+import {
+  AchievementsCard,
+  type Achievement,
+  RecommendedCard,
+  StatCard,
+  WorkoutCard,
+} from '@/components/dashboard';
+import { Header } from '@/components/header';
+import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { MOCK_USER, MOCK_WORKOUTS } from '@/constants/mock-data';
+import {
+  Fonts,
+  MaxContentWidth,
+  Palette,
+  Spacing,
+  Typography,
+} from '@/constants/theme';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+const mockDashboard = {
+  user: MOCK_USER,
+  workout: MOCK_WORKOUTS[0],
+  stats: {
+    streak: { value: '5', suffix: 'days', progress: 0.72 },
+    calories: { value: '1,250', suffix: 'kcal', progress: 0.84 },
+  },
+  achievements: [
+    {
+      id: 'streak',
+      icon: 'trophy',
+      title: '7-Day Streak',
+      detail: 'Unlocked today',
+      tone: 'primary',
+    },
+    {
+      id: 'squat',
+      icon: 'strength',
+      title: 'Personal Best: Squat',
+      detail: '105 kg · Yesterday',
+      tone: 'tertiary',
+    },
+  ] satisfies Achievement[],
+  recommended: {
+    title: '10-Min Morning Mobility',
+    duration: '10:00',
+    imageUrl:
+      'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=85',
+  },
+};
 
-export default function HomeScreen() {
+export default function DashboardScreen() {
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
+    <TabScreen contentContainerStyle={styles.scrollContent}>
+      <View style={styles.dashboard}>
+        <Header
+          avatarUrl={mockDashboard.user.avatarUrl}
+          profileName={mockDashboard.user.name}
+        />
+
+        <View style={styles.greeting}>
+          <ThemedText style={styles.greetingTitle}>Good morning, {mockDashboard.user.name}!</ThemedText>
+          <ThemedText style={styles.greetingSubtitle} themeColor="textSecondary">
+            Ready to crush it today?
           </ThemedText>
-        </ThemedView>
+        </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        <WorkoutCard {...mockDashboard.workout} />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+        <View style={styles.statsRow}>
+          <StatCard
+            accentColor={Palette.primary[700]}
+            icon="flame"
+            label="Weekly streak"
+            {...mockDashboard.stats.streak}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
+          <StatCard
+            accentColor={Palette.tertiary[500]}
+            icon="calories"
+            label="Calories"
+            {...mockDashboard.stats.calories}
           />
-        </ThemedView>
+        </View>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        <AchievementsCard achievements={mockDashboard.achievements} />
+        <RecommendedCard {...mockDashboard.recommended} />
+      </View>
+    </TabScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+  scrollContent: {
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
+    paddingBottom: Spacing.five,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  },
+  dashboard: {
+    gap: Spacing.three,
+    maxWidth: MaxContentWidth,
+    paddingTop: Spacing.two,
+    width: '100%',
+  },
+  greeting: {
+    gap: 3,
+    paddingVertical: Spacing.one,
+  },
+  greetingTitle: {
+    ...Typography['2xl'],
+    fontFamily: Fonts.heading,
+  },
+  greetingSubtitle: {
+    ...Typography.sm,
+    fontFamily: Fonts.body,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: Spacing.three,
   },
 });

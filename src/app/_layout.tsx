@@ -1,13 +1,21 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
+import { useAppFonts } from '@/hooks/use-app-fonts';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const [fontsLoaded, fontError] = useAppFonts();
+
+  if (fontError) throw fontError;
+  if (!fontsLoaded) return null;
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <StatusBar style="auto" />
       <AnimatedSplashOverlay />
       <AppTabs />
     </ThemeProvider>
