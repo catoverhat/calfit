@@ -7,7 +7,7 @@ export function generateStaticParams() {
   return MOCK_WORKOUTS.map(({ id }) => ({ id }));
 }
 
-export default function WorkoutDetailRoute() {
+export default function RoutineDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const workout = MOCK_WORKOUTS.find((item) => item.id === id);
 

@@ -11,14 +11,14 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Fonts, MaxContentWidth, Spacing, Typography } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { Fonts, MaxContentWidth, Palette, Spacing, Typography } from '@/constants/theme';
 
 const WEB_TAB_BAR_SPACE = 92;
 
 const tabIcons = {
-  home: require('@/assets/icons/tabs/home.svg'),
-  workouts: require('@/assets/icons/tabs/workouts.svg'),
+  today: require('@/assets/icons/tabs/today.svg'),
+  routines: require('@/assets/icons/tabs/routines.svg'),
+  exercises: require('@/assets/icons/tabs/exercises.svg'),
   progress: require('@/assets/icons/tabs/progress.svg'),
   profile: require('@/assets/icons/tabs/profile.svg'),
 } satisfies Record<string, ImageSource>;
@@ -36,11 +36,14 @@ export default function AppTabs() {
       <TabSlot style={styles.tabSlot} />
       <TabList asChild>
         <CustomTabList>
-          <TabTrigger name="home" href="/(tabs)/index" asChild>
-            <TabButton icon="home" label="Home" />
+          <TabTrigger name="today" href="/(tabs)" asChild>
+            <TabButton icon="today" label="Today" />
           </TabTrigger>
-          <TabTrigger name="workouts" href="/workouts/index" asChild>
-            <TabButton icon="workouts" label="Workouts" />
+          <TabTrigger name="routines" href="/routines/index" asChild>
+            <TabButton icon="routines" label="Routines" />
+          </TabTrigger>
+          <TabTrigger name="exercises" href="/exercises" asChild>
+            <TabButton icon="exercises" label="Exercises" />
           </TabTrigger>
           <TabTrigger name="progress" href="/progress" asChild>
             <TabButton icon="progress" label="Progress" />
@@ -55,8 +58,7 @@ export default function AppTabs() {
 }
 
 function TabButton({ icon, isFocused, label, ...props }: TabButtonProps) {
-  const theme = useTheme();
-  const color = isFocused ? theme.primary : theme.textSecondary;
+  const color = isFocused ? Palette.primary[500] : Palette.neutral[300];
 
   return (
     <Pressable
@@ -70,13 +72,9 @@ function TabButton({ icon, isFocused, label, ...props }: TabButtonProps) {
 }
 
 function CustomTabList(props: TabListProps) {
-  const theme = useTheme();
-
   return (
     <View {...props} style={styles.tabListContainer}>
-      <ThemedView
-        type="backgroundElement"
-        style={[styles.innerContainer, { borderColor: theme.border }]}>
+      <ThemedView style={styles.innerContainer}>
         {props.children}
       </ThemedView>
     </View>
@@ -101,13 +99,15 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   innerContainer: {
+    backgroundColor: Palette.secondary[950],
+    borderColor: Palette.secondary[800],
     borderCurve: 'continuous',
-    borderRadius: 14,
+    borderRadius: 12,
     borderWidth: 1,
-    boxShadow: '0 4px 18px rgba(26, 28, 35, 0.12)',
+    boxShadow: '0 4px 18px rgba(0, 0, 0, 0.24)',
     flexDirection: 'row',
     maxWidth: Math.min(MaxContentWidth, 520),
-    minHeight: 64,
+    minHeight: 62,
     overflow: 'hidden',
     paddingHorizontal: Spacing.two,
     width: '100%',
@@ -117,9 +117,9 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: Spacing.half,
     justifyContent: 'center',
-    minHeight: 62,
-    minWidth: 64,
-    paddingHorizontal: Spacing.one,
+    minHeight: 60,
+    minWidth: 52,
+    paddingHorizontal: Spacing.half,
     paddingVertical: Spacing.two,
   },
   icon: {
@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
   label: {
     ...Typography.xs,
     fontFamily: Fonts.label,
+    fontSize: 11,
   },
   pressed: {
     opacity: 0.58,

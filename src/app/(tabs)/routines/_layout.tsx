@@ -3,7 +3,7 @@ import { Stack } from 'expo-router/stack';
 import { Fonts } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-export default function WorkoutsLayout() {
+export default function RoutinesLayout() {
   const theme = useTheme();
 
   return (
@@ -17,7 +17,7 @@ export default function WorkoutsLayout() {
         headerTitleStyle: { fontFamily: Fonts.heading },
       }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="[id]" options={{ title: 'Workout' }} />
+      <Stack.Screen name="[id]" options={{ title: 'Routine' }} />
     </Stack>
   );
 }

@@ -18,16 +18,16 @@ export function WorkoutListScreen() {
       <View style={styles.content}>
         <Header avatarUrl={MOCK_USER.avatarUrl} profileName={MOCK_USER.name} />
         <View style={styles.heading}>
-          <ThemedText style={styles.title}>Workouts</ThemedText>
+          <ThemedText style={styles.title}>Routines</ThemedText>
           <ThemedText style={styles.subtitle} themeColor="textSecondary">
-            Choose a session and open its detail route.
+            Choose a training routine and open its detail route.
           </ThemedText>
         </View>
 
         {MOCK_WORKOUTS.map((workout) => (
           <Link
             key={workout.id}
-            href={{ pathname: '/workouts/[id]', params: { id: workout.id } }}
+            href={{ pathname: '/routines/[id]', params: { id: workout.id } }}
             asChild>
             <Pressable
               accessibilityLabel={`Open ${workout.title}`}

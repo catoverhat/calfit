@@ -21,7 +21,7 @@ export function LoginScreen() {
   const contentWidth = Math.min(width - Spacing.three * 2, 360);
 
   const enterApp = () => {
-    router.replace('/(tabs)/index');
+    router.replace('/(tabs)');
   };
 
   return (

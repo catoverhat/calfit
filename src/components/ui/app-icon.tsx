@@ -12,24 +12,30 @@ export type AppIconName =
   | 'trophy'
   | 'strength'
   | 'play'
+  | 'today'
+  | 'routines'
+  | 'exercises'
   | 'home'
   | 'workouts'
   | 'progress'
   | 'profile';
 
 const icons: Record<AppIconName, { sf: string; fallback: string }> = {
-  bell: { sf: 'bell', fallback: '◇' },
-  clock: { sf: 'clock', fallback: '◷' },
-  intensity: { sf: 'bolt.fill', fallback: '◆' },
-  flame: { sf: 'flame.fill', fallback: '↟' },
-  calories: { sf: 'figure.run', fallback: '≋' },
-  trophy: { sf: 'trophy.fill', fallback: '★' },
-  strength: { sf: 'dumbbell.fill', fallback: '↔' },
-  play: { sf: 'play.fill', fallback: '▶' },
-  home: { sf: 'house.fill', fallback: '⌂' },
-  workouts: { sf: 'dumbbell.fill', fallback: '↔' },
-  progress: { sf: 'chart.bar.fill', fallback: '↗' },
-  profile: { sf: 'person.fill', fallback: '○' },
+  bell: { sf: 'bell', fallback: 'B' },
+  clock: { sf: 'clock', fallback: 'C' },
+  intensity: { sf: 'bolt.fill', fallback: 'I' },
+  flame: { sf: 'flame.fill', fallback: 'F' },
+  calories: { sf: 'figure.run', fallback: 'K' },
+  trophy: { sf: 'trophy.fill', fallback: 'T' },
+  strength: { sf: 'dumbbell.fill', fallback: 'S' },
+  play: { sf: 'play.fill', fallback: '>' },
+  today: { sf: 'calendar', fallback: 'D' },
+  routines: { sf: 'figure.run', fallback: 'R' },
+  exercises: { sf: 'list.bullet.rectangle', fallback: 'E' },
+  home: { sf: 'house.fill', fallback: 'H' },
+  workouts: { sf: 'dumbbell.fill', fallback: 'W' },
+  progress: { sf: 'chart.bar.fill', fallback: 'P' },
+  profile: { sf: 'person.fill', fallback: 'U' },
 };
 
 type AppIconProps = {

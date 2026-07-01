@@ -1,11 +1,5 @@
-import { PlaceholderTabScreen } from '@/components/placeholder-tab-screen';
+import { ProfileSetupScreen } from '@/components/profile/profile-setup-screen';
 
 export default function ProfileScreen() {
-  return (
-    <PlaceholderTabScreen
-      description="Your fitness preferences, goals, and account settings will live here."
-      icon="profile"
-      title="Profile"
-    />
-  );
+  return <ProfileSetupScreen />;
 }

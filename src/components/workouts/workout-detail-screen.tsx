@@ -21,10 +21,10 @@ export function WorkoutDetailScreen({ workout }: WorkoutDetailScreenProps) {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.missingContent}
         style={{ backgroundColor: theme.background }}>
-        <ThemedText style={styles.title}>Workout not found</ThemedText>
-        <Link href="/workouts/index" asChild>
+        <ThemedText style={styles.title}>Routine not found</ThemedText>
+        <Link href="/routines/index" asChild>
           <Pressable style={styles.backButton}>
-            <ThemedText style={styles.backButtonText}>Back to Workouts</ThemedText>
+            <ThemedText style={styles.backButtonText}>Back to Routines</ThemedText>
           </Pressable>
         </Link>
       </ScrollView>

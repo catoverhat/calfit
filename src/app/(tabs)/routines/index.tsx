@@ -1,5 +1,5 @@
 import { WorkoutListScreen } from '@/components/workouts/workout-list-screen';
 
-export default function WorkoutsRoute() {
+export default function RoutinesRoute() {
   return <WorkoutListScreen />;
 }
