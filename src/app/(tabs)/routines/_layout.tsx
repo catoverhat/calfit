@@ -16,6 +16,7 @@ export default function RoutinesLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="[id]" options={{ title: 'Routine' }} />
       <Stack.Screen name="create" options={{ title: 'Kinetic Pulse' }} />
+      <Stack.Screen name="add-exercise" options={{ title: 'Add Exercise' }} />
       <Stack.Screen name="[id]/edit" options={{ title: 'Kinetic Pulse' }} />
     </Stack>
   );

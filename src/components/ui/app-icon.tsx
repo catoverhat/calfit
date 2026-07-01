@@ -6,6 +6,8 @@ import { Fonts } from '@/constants/theme';
 export type AppIconName =
   | 'bell'
   | 'cloud'
+  | 'search'
+  | 'check'
   | 'clock'
   | 'intensity'
   | 'flame'
@@ -30,6 +32,8 @@ export type AppIconName =
 const icons: Record<AppIconName, { sf: string; fallback: string }> = {
   bell: { sf: 'bell', fallback: 'B' },
   cloud: { sf: 'icloud', fallback: 'C' },
+  search: { sf: 'magnifyingglass', fallback: 'S' },
+  check: { sf: 'checkmark', fallback: 'V' },
   clock: { sf: 'clock', fallback: 'C' },
   intensity: { sf: 'bolt.fill', fallback: 'I' },
   flame: { sf: 'flame.fill', fallback: 'F' },

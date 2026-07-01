@@ -64,21 +64,6 @@ export function RoutineEditorScreen({ mode, routineId }: RoutineEditorScreenProp
   );
   const [exercises, setExercises] = useState(initialExercises);
 
-  const addExercise = () => {
-    setExercises((items) => [
-      ...items,
-      {
-        id: `exercise-${items.length + 1}`,
-        name: 'New Exercise',
-        sets: '3',
-        reps: '10',
-        weight: '-',
-        speed: '-',
-        dist: '-',
-      },
-    ]);
-  };
-
   const deleteExercise = (id: string) => {
     setExercises((items) => items.filter((item) => item.id !== id));
   };
@@ -159,7 +144,7 @@ export function RoutineEditorScreen({ mode, routineId }: RoutineEditorScreenProp
         <Pressable
           accessibilityLabel="Add Exercise"
           accessibilityRole="button"
-          onPress={addExercise}
+          onPress={() => router.push('/routines/add-exercise')}
           style={({ pressed }) => [styles.addExerciseCard, pressed && styles.pressed]}>
           <View style={styles.addIconCircle}>
             <Text style={styles.addIcon}>+</Text>
