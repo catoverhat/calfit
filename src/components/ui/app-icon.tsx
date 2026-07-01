@@ -5,6 +5,7 @@ import { Fonts } from '@/constants/theme';
 
 export type AppIconName =
   | 'bell'
+  | 'cloud'
   | 'clock'
   | 'intensity'
   | 'flame'
@@ -12,6 +13,12 @@ export type AppIconName =
   | 'trophy'
   | 'strength'
   | 'play'
+  | 'add'
+  | 'edit'
+  | 'open'
+  | 'briefcase'
+  | 'body'
+  | 'running'
   | 'today'
   | 'routines'
   | 'exercises'
@@ -22,6 +29,7 @@ export type AppIconName =
 
 const icons: Record<AppIconName, { sf: string; fallback: string }> = {
   bell: { sf: 'bell', fallback: 'B' },
+  cloud: { sf: 'icloud', fallback: 'C' },
   clock: { sf: 'clock', fallback: 'C' },
   intensity: { sf: 'bolt.fill', fallback: 'I' },
   flame: { sf: 'flame.fill', fallback: 'F' },
@@ -29,6 +37,12 @@ const icons: Record<AppIconName, { sf: string; fallback: string }> = {
   trophy: { sf: 'trophy.fill', fallback: 'T' },
   strength: { sf: 'dumbbell.fill', fallback: 'S' },
   play: { sf: 'play.fill', fallback: '>' },
+  add: { sf: 'plus', fallback: '+' },
+  edit: { sf: 'pencil', fallback: 'P' },
+  open: { sf: 'arrow.up.right.square', fallback: 'O' },
+  briefcase: { sf: 'briefcase.fill', fallback: 'L' },
+  body: { sf: 'figure.strengthtraining.traditional', fallback: 'F' },
+  running: { sf: 'figure.run', fallback: 'R' },
   today: { sf: 'calendar', fallback: 'D' },
   routines: { sf: 'figure.run', fallback: 'R' },
   exercises: { sf: 'list.bullet.rectangle', fallback: 'E' },

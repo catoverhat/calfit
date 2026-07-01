@@ -8,11 +8,14 @@ import {
 } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { AppIcon } from '@/components/ui/app-icon';
+import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
 import { Fonts, Palette, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type HeaderProps = {
+  actionAccessibilityLabel?: string;
+  actionIcon?: AppIconName;
+  actionIconColor?: string;
   avatarUrl: string;
   onNotificationsPress?: () => void;
   onProfilePress?: () => void;
@@ -22,6 +25,9 @@ type HeaderProps = {
 };
 
 export function Header({
+  actionAccessibilityLabel = 'Open notifications',
+  actionIcon = 'bell',
+  actionIconColor,
   avatarUrl,
   onNotificationsPress,
   onProfilePress,
@@ -48,12 +54,12 @@ export function Header({
       </Pressable>
       <ThemedText style={styles.brand}>{title}</ThemedText>
       <Pressable
-        accessibilityLabel="Open notifications"
+        accessibilityLabel={actionAccessibilityLabel}
         accessibilityRole="button"
         hitSlop={12}
         onPress={onNotificationsPress}
         style={({ pressed }) => [styles.notificationButton, pressed && styles.pressed]}>
-        <AppIcon color={theme.text} name="bell" size={19} />
+        <AppIcon color={actionIconColor ?? theme.text} name={actionIcon} size={19} />
       </Pressable>
     </View>
   );
