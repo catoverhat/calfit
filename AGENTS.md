@@ -8,6 +8,12 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - The user will start and manage the Expo dev server manually.
 - You may run non-server verification commands such as TypeScript, lint, and tests when useful.
 
+## Design Reference
+
+- Read `docs/design.md` before making UI changes.
+- Treat `docs/design.md` as the source of truth for visual style: dark-mode-first technical athleticism, Electric Orange primary actions, 8px spacing rhythm, 8px standard radius, tonal borders over heavy shadows, and Montserrat/Inter typography roles.
+- Prefer the design file over ad hoc styling choices unless the user provides a newer screenshot or direct instruction.
+
 ## Fonts
 
 Follow https://docs.expo.dev/develop/user-interface/fonts/.
