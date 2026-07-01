@@ -8,6 +8,7 @@ export type AppIconName =
   | 'cloud'
   | 'search'
   | 'check'
+  | 'menu'
   | 'clock'
   | 'intensity'
   | 'flame'
@@ -34,6 +35,7 @@ const icons: Record<AppIconName, { sf: string; fallback: string }> = {
   cloud: { sf: 'icloud', fallback: 'C' },
   search: { sf: 'magnifyingglass', fallback: 'S' },
   check: { sf: 'checkmark', fallback: 'V' },
+  menu: { sf: 'ellipsis', fallback: 'M' },
   clock: { sf: 'clock', fallback: 'C' },
   intensity: { sf: 'bolt.fill', fallback: 'I' },
   flame: { sf: 'flame.fill', fallback: 'F' },

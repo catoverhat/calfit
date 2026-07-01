@@ -1,11 +1,5 @@
-import { PlaceholderTabScreen } from '@/components/placeholder-tab-screen';
+import { ExerciseCatalogScreen } from '@/components/exercises/exercise-catalog-screen';
 
 export default function ExercisesScreen() {
-  return (
-    <PlaceholderTabScreen
-      description="Your exercise library and movement details will appear here."
-      icon="exercises"
-      title="Exercises"
-    />
-  );
+  return <ExerciseCatalogScreen />;
 }

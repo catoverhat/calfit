@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
+import { EXERCISE_CATALOG, type ExerciseCatalogItem } from '@/constants/exercise-catalog';
 import {
   ComponentTokens,
   DesignColors,
@@ -24,61 +25,12 @@ import {
   Typography,
 } from '@/constants/theme';
 
-type ExerciseCategory = 'Chest' | 'Back' | 'Legs' | 'Shoulders';
-type ExerciseFilter = 'All' | ExerciseCategory;
-
-type ExerciseOption = {
-  category: ExerciseCategory;
-  equipment: string;
-  id: string;
-  imageUrl: string;
-  name: string;
-};
+type ExerciseFilter = 'All' | ExerciseCatalogItem['muscleGroup'];
 
 const FILTERS: readonly ExerciseFilter[] = ['All', 'Chest', 'Back', 'Legs', 'Shoulders'];
-
-const EXERCISES: readonly ExerciseOption[] = [
-  {
-    id: 'bench-press',
-    name: 'Bench Press',
-    category: 'Chest',
-    equipment: 'Barbell',
-    imageUrl:
-      'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?auto=format&fit=crop&w=180&q=80',
-  },
-  {
-    id: 'dumbbell-fly',
-    name: 'Dumbbell Fly',
-    category: 'Chest',
-    equipment: 'Dumbbell',
-    imageUrl:
-      'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=180&q=80',
-  },
-  {
-    id: 'lat-pulldown',
-    name: 'Lat Pulldown',
-    category: 'Back',
-    equipment: 'Machine',
-    imageUrl:
-      'https://images.unsplash.com/photo-1596357395217-80de13130e92?auto=format&fit=crop&w=180&q=80',
-  },
-  {
-    id: 'barbell-squat',
-    name: 'Barbell Squat',
-    category: 'Legs',
-    equipment: 'Barbell',
-    imageUrl:
-      'https://images.unsplash.com/photo-1534368420009-621bfab424a8?auto=format&fit=crop&w=180&q=80',
-  },
-  {
-    id: 'pull-up',
-    name: 'Pull Up',
-    category: 'Back',
-    equipment: 'Bodyweight',
-    imageUrl:
-      'https://images.unsplash.com/photo-1598971639058-fab3c3109a00?auto=format&fit=crop&w=180&q=80',
-  },
-];
+const PICKER_EXERCISES = EXERCISE_CATALOG.filter(({ id }) =>
+  ['bench-press', 'dumbbell-fly', 'lat-pulldown', 'squat', 'pull-ups'].includes(id)
+);
 
 const INITIAL_SELECTED_IDS = ['bench-press', 'dumbbell-fly', 'lat-pulldown'];
 
@@ -90,9 +42,10 @@ export function AddExerciseScreen() {
   const filteredExercises = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return EXERCISES.filter((exercise) => {
-      const matchesFilter = selectedFilter === 'All' || exercise.category === selectedFilter;
-      const searchableText = `${exercise.name} ${exercise.category} ${exercise.equipment}`.toLowerCase();
+    return PICKER_EXERCISES.filter((exercise) => {
+      const matchesFilter = selectedFilter === 'All' || exercise.muscleGroup === selectedFilter;
+      const searchableText =
+        `${exercise.name} ${exercise.muscleGroup} ${exercise.equipment}`.toLowerCase();
       const matchesQuery = normalizedQuery.length === 0 || searchableText.includes(normalizedQuery);
 
       return matchesFilter && matchesQuery;
@@ -207,7 +160,7 @@ function ExerciseRow({
   onToggle,
   selected,
 }: {
-  exercise: ExerciseOption;
+  exercise: ExerciseCatalogItem;
   onToggle: () => void;
   selected: boolean;
 }) {
@@ -224,7 +177,7 @@ function ExerciseRow({
       <View style={styles.exerciseCopy}>
         <Text style={styles.exerciseName}>{exercise.name}</Text>
         <Text style={styles.exerciseMeta}>
-          {exercise.category} - {exercise.equipment}
+          {exercise.muscleGroup} - {exercise.equipment}
         </Text>
       </View>
 
