@@ -17,11 +17,21 @@ export function WorkoutListScreen() {
     <TabScreen contentContainerStyle={styles.scrollContent}>
       <View style={styles.content}>
         <Header avatarUrl={MOCK_USER.avatarUrl} profileName={MOCK_USER.name} />
-        <View style={styles.heading}>
-          <ThemedText style={styles.title}>Routines</ThemedText>
-          <ThemedText style={styles.subtitle} themeColor="textSecondary">
-            Choose a training routine and open its detail route.
-          </ThemedText>
+        <View style={styles.headingRow}>
+          <View style={styles.heading}>
+            <ThemedText style={styles.title}>Routines</ThemedText>
+            <ThemedText style={styles.subtitle} themeColor="textSecondary">
+              Choose a training routine and open its detail route.
+            </ThemedText>
+          </View>
+          <Link href="/routines/create" asChild>
+            <Pressable
+              accessibilityLabel="Create Routine"
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.createButton, pressed && styles.pressed]}>
+              <ThemedText style={styles.createButtonText}>Create</ThemedText>
+            </Pressable>
+          </Link>
         </View>
 
         {MOCK_WORKOUTS.map((workout) => (
@@ -80,7 +90,14 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   heading: {
+    flex: 1,
     gap: Spacing.one,
+  },
+  headingRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: Spacing.three,
+    justifyContent: 'space-between',
   },
   title: {
     ...Typography['2xl'],
@@ -89,6 +106,18 @@ const styles = StyleSheet.create({
   subtitle: {
     ...Typography.sm,
     fontFamily: Fonts.body,
+  },
+  createButton: {
+    backgroundColor: Palette.primary[500],
+    borderCurve: 'continuous',
+    borderRadius: 8,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
+  createButtonText: {
+    ...Typography.sm,
+    color: Palette.secondary[950],
+    fontFamily: Fonts.bodyBold,
   },
   card: {
     alignItems: 'center',

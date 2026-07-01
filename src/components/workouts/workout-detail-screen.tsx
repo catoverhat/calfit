@@ -53,6 +53,16 @@ export function WorkoutDetailScreen({ workout }: WorkoutDetailScreenProps) {
             <ThemedText style={styles.metadataText}>{workout.duration}</ThemedText>
             <ThemedText style={styles.metadataText}>{workout.intensity}</ThemedText>
           </View>
+          <Link
+            href={{ pathname: '/routines/[id]/edit', params: { id: workout.id } }}
+            asChild>
+            <Pressable
+              accessibilityLabel={`Edit ${workout.title}`}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}>
+              <ThemedText style={styles.editButtonText}>Edit Routine</ThemedText>
+            </Pressable>
+          </Link>
         </View>
 
         <View style={styles.exerciseSection}>
@@ -180,5 +190,25 @@ const styles = StyleSheet.create({
     ...Typography.sm,
     color: Palette.white,
     fontFamily: Fonts.bodyBold,
+  },
+  editButton: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: Palette.primary[500],
+    borderCurve: 'continuous',
+    borderRadius: 8,
+    justifyContent: 'center',
+    minHeight: 40,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
+  editButtonText: {
+    ...Typography.sm,
+    color: Palette.secondary[950],
+    fontFamily: Fonts.bodyBold,
+  },
+  pressed: {
+    opacity: 0.72,
+    transform: [{ scale: 0.99 }],
   },
 });
