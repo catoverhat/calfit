@@ -9,6 +9,9 @@ export type AppIconName =
   | 'search'
   | 'check'
   | 'menu'
+  | 'camera'
+  | 'chevronDown'
+  | 'chevrons'
   | 'clock'
   | 'intensity'
   | 'flame'
@@ -36,6 +39,9 @@ const icons: Record<AppIconName, { sf: string; fallback: string }> = {
   search: { sf: 'magnifyingglass', fallback: 'S' },
   check: { sf: 'checkmark', fallback: 'V' },
   menu: { sf: 'ellipsis', fallback: 'M' },
+  camera: { sf: 'camera.fill', fallback: 'C' },
+  chevronDown: { sf: 'chevron.down', fallback: 'v' },
+  chevrons: { sf: 'chevron.up.chevron.down', fallback: '<' },
   clock: { sf: 'clock', fallback: 'C' },
   intensity: { sf: 'bolt.fill', fallback: 'I' },
   flame: { sf: 'flame.fill', fallback: 'F' },

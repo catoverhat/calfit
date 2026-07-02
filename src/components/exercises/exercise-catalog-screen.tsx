@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { router, type Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
   Pressable,
@@ -35,6 +36,7 @@ type CatalogFilter = 'All Categories' | ExerciseCatalogCategory;
 
 const FILTERS: readonly CatalogFilter[] = ['All Categories', 'Strength', 'Cardio', 'Mobility'];
 const FEATURED_EXERCISE_IDS = ['bench-press', 'squat', 'pull-ups', 'running'];
+const CREATE_EXERCISE_HREF = '/(tabs)/exercises/create' as Href;
 
 export function ExerciseCatalogScreen() {
   const [query, setQuery] = useState('');
@@ -84,7 +86,7 @@ export function ExerciseCatalogScreen() {
           <Pressable
             accessibilityLabel="Create Exercise"
             accessibilityRole="button"
-            onPress={() => undefined}
+            onPress={() => router.push(CREATE_EXERCISE_HREF)}
             style={({ pressed }) => [styles.createButton, pressed && styles.pressed]}>
             <AppIcon color={DesignColors.onPrimaryContainer} name="add" size={14} />
             <Text style={styles.createButtonText}>Create Exercise</Text>
@@ -145,7 +147,7 @@ export function ExerciseCatalogScreen() {
           <Pressable
             accessibilityLabel="Add Custom Exercise"
             accessibilityRole="button"
-            onPress={() => undefined}
+            onPress={() => router.push(CREATE_EXERCISE_HREF)}
             style={({ pressed }) => [styles.addCustomCard, pressed && styles.pressed]}>
             <View style={styles.addCustomIcon}>
               <AppIcon color={SemanticColors.textPrimary} name="add" size={18} />
@@ -183,10 +185,15 @@ function ExerciseCatalogCard({ exercise }: { exercise: ExerciseCatalogItem }) {
           </View>
 
           <Pressable
-            accessibilityLabel={`Open ${exercise.name} menu`}
+            accessibilityLabel={`Edit ${exercise.name}`}
             accessibilityRole="button"
             hitSlop={8}
-            onPress={() => undefined}
+            onPress={() =>
+              router.push({
+                pathname: '/(tabs)/exercises/[id]/edit',
+                params: { id: exercise.id },
+              } as unknown as Href)
+            }
             style={({ pressed }) => [styles.menuButton, pressed && styles.pressed]}>
             <AppIcon color={SemanticColors.textSecondary} name="menu" size={16} />
           </Pressable>
