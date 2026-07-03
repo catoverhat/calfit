@@ -1,3 +1,4 @@
+import { router, type Href } from 'expo-router';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Header } from '@/components/header';
@@ -124,13 +125,17 @@ export function ProgressDashboardScreen() {
           ))}
         </View>
 
-        <View style={styles.card}>
+        <Pressable
+          accessibilityLabel="Open body measurements"
+          accessibilityRole="button"
+          onPress={() => router.push('/progress/measurements' as Href)}
+          style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Body Weight Trend</Text>
             <Text style={styles.cardAction}>82.4 kg</Text>
           </View>
           <LinePlot segments={bodyTrendSegments} style={styles.bodyPlot} />
-        </View>
+        </Pressable>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Sessions per week</Text>
@@ -324,6 +329,10 @@ const styles = StyleSheet.create({
     borderWidth: ComponentTokens.card.borderWidth,
     gap: Spacing.three,
     padding: Spacing.three,
+  },
+  cardPressed: {
+    opacity: 0.72,
+    transform: [{ scale: 0.99 }],
   },
   cardHeader: {
     alignItems: 'center',

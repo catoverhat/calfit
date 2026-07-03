@@ -12,6 +12,7 @@ export default function ProgressLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="summary" />
       <Stack.Screen name="history" />
+      <Stack.Screen name="measurements" />
     </Stack>
   );
 }
