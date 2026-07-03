@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -42,7 +42,10 @@ export function TodayDashboardScreen() {
   const [selectedDate, setSelectedDate] = useState('24');
 
   const startWorkout = () => {
-    router.push({ pathname: '/routines/[id]', params: { id: todayDashboard.routine.id } });
+    router.push({
+      pathname: '/workout-session/[id]',
+      params: { id: todayDashboard.routine.id },
+    } as unknown as Href);
   };
 
   return (

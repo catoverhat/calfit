@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
+import { Link, router, type Href } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -14,6 +14,15 @@ type WorkoutDetailScreenProps = {
 
 export function WorkoutDetailScreen({ workout }: WorkoutDetailScreenProps) {
   const theme = useTheme();
+
+  const startWorkout = () => {
+    if (!workout) return;
+
+    router.push({
+      pathname: '/workout-session/[id]',
+      params: { id: workout.id },
+    } as unknown as Href);
+  };
 
   if (!workout) {
     return (
@@ -53,16 +62,25 @@ export function WorkoutDetailScreen({ workout }: WorkoutDetailScreenProps) {
             <ThemedText style={styles.metadataText}>{workout.duration}</ThemedText>
             <ThemedText style={styles.metadataText}>{workout.intensity}</ThemedText>
           </View>
-          <Link
-            href={{ pathname: '/routines/[id]/edit', params: { id: workout.id } }}
-            asChild>
+          <View style={styles.actionRow}>
             <Pressable
-              accessibilityLabel={`Edit ${workout.title}`}
+              accessibilityLabel={`Start ${workout.title}`}
               accessibilityRole="button"
-              style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}>
-              <ThemedText style={styles.editButtonText}>Edit Routine</ThemedText>
+              onPress={startWorkout}
+              style={({ pressed }) => [styles.startWorkoutButton, pressed && styles.pressed]}>
+              <ThemedText style={styles.startWorkoutText}>Start Workout</ThemedText>
             </Pressable>
-          </Link>
+            <Link
+              href={{ pathname: '/routines/[id]/edit', params: { id: workout.id } }}
+              asChild>
+              <Pressable
+                accessibilityLabel={`Edit ${workout.title}`}
+                accessibilityRole="button"
+                style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}>
+                <ThemedText style={styles.editButtonText}>Edit Routine</ThemedText>
+              </Pressable>
+            </Link>
+          </View>
         </View>
 
         <View style={styles.exerciseSection}>
@@ -191,20 +209,42 @@ const styles = StyleSheet.create({
     color: Palette.white,
     fontFamily: Fonts.bodyBold,
   },
-  editButton: {
+  actionRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two,
+  },
+  startWorkoutButton: {
     alignItems: 'center',
-    alignSelf: 'flex-start',
     backgroundColor: Palette.primary[500],
     borderCurve: 'continuous',
     borderRadius: 8,
     justifyContent: 'center',
-    minHeight: 40,
+    minHeight: 44,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
+  startWorkoutText: {
+    ...Typography.sm,
+    color: Palette.secondary[950],
+    fontFamily: Fonts.bodyBold,
+  },
+  editButton: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'transparent',
+    borderColor: Palette.primary[500],
+    borderCurve: 'continuous',
+    borderRadius: 8,
+    borderWidth: 1,
+    justifyContent: 'center',
+    minHeight: 44,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
   },
   editButtonText: {
     ...Typography.sm,
-    color: Palette.secondary[950],
+    color: Palette.primary[300],
     fontFamily: Fonts.bodyBold,
   },
   pressed: {

@@ -13,6 +13,12 @@ export type AppIconName =
   | 'chevronDown'
   | 'chevrons'
   | 'clock'
+  | 'timer'
+  | 'info'
+  | 'lock'
+  | 'stop'
+  | 'offline'
+  | 'next'
   | 'intensity'
   | 'flame'
   | 'calories'
@@ -43,6 +49,12 @@ const icons: Record<AppIconName, { sf: string; fallback: string }> = {
   chevronDown: { sf: 'chevron.down', fallback: 'v' },
   chevrons: { sf: 'chevron.up.chevron.down', fallback: '<' },
   clock: { sf: 'clock', fallback: 'C' },
+  timer: { sf: 'timer', fallback: 'T' },
+  info: { sf: 'info.circle', fallback: 'i' },
+  lock: { sf: 'lock.fill', fallback: 'L' },
+  stop: { sf: 'square', fallback: 'S' },
+  offline: { sf: 'icloud.slash', fallback: 'O' },
+  next: { sf: 'forward.end.fill', fallback: 'N' },
   intensity: { sf: 'bolt.fill', fallback: 'I' },
   flame: { sf: 'flame.fill', fallback: 'F' },
   calories: { sf: 'figure.run', fallback: 'K' },
