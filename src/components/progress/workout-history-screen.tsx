@@ -1,3 +1,4 @@
+import { router, type Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -111,6 +112,7 @@ export function WorkoutHistoryScreen() {
           actionIcon="cloud"
           actionIconColor={SemanticColors.actionSoft}
           avatarUrl={MOCK_USER.avatarUrl}
+          onNotificationsPress={() => router.push('/progress/sync' as Href)}
           profileName={MOCK_USER.name}
         />
 

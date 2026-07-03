@@ -53,6 +53,7 @@ export function WorkoutSummaryScreen() {
           actionIcon="cloud"
           actionIconColor={SemanticColors.actionSoft}
           avatarUrl={MOCK_USER.avatarUrl}
+          onNotificationsPress={() => router.push('/progress/sync' as Href)}
           profileName={MOCK_USER.name}
         />
 

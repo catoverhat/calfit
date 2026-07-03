@@ -18,6 +18,13 @@ export type AppIconName =
   | 'lock'
   | 'stop'
   | 'offline'
+  | 'wifi'
+  | 'wifiOff'
+  | 'device'
+  | 'sync'
+  | 'database'
+  | 'warning'
+  | 'upload'
   | 'next'
   | 'star'
   | 'notes'
@@ -60,6 +67,13 @@ const icons: Record<AppIconName, { sf: string; fallback: string }> = {
   lock: { sf: 'lock.fill', fallback: 'L' },
   stop: { sf: 'square', fallback: 'S' },
   offline: { sf: 'icloud.slash', fallback: 'O' },
+  wifi: { sf: 'wifi', fallback: 'W' },
+  wifiOff: { sf: 'wifi.slash', fallback: 'X' },
+  device: { sf: 'iphone', fallback: 'D' },
+  sync: { sf: 'arrow.triangle.2.circlepath', fallback: 'R' },
+  database: { sf: 'externaldrive.fill', fallback: 'D' },
+  warning: { sf: 'exclamationmark.triangle.fill', fallback: '!' },
+  upload: { sf: 'arrow.up.circle.fill', fallback: 'U' },
   next: { sf: 'forward.end.fill', fallback: 'N' },
   star: { sf: 'star.fill', fallback: '*' },
   notes: { sf: 'text.alignleft', fallback: 'N' },
