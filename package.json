@@ -6,6 +6,7 @@
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/montserrat": "^0.4.2",
     "@expo/ui": "~56.0.18",
+    "@react-native-vector-icons/lucide": "^13.1.2",
     "expo": "~56.0.12",
     "expo-constants": "~56.0.18",
     "expo-device": "~56.0.4",
