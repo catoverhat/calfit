@@ -62,7 +62,7 @@ export function ActiveWorkoutSessionScreen({ workout }: ActiveWorkoutSessionScre
   const sessionTitle = useMemo(() => workout.title || 'Push Day', [workout.title]);
 
   const finishWorkout = () => {
-    router.replace('/progress' as Href);
+    router.replace('/progress/summary' as Href);
   };
 
   const toggleCompletedSet = (setId: number) => {

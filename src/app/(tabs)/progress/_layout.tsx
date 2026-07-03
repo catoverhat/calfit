@@ -10,6 +10,7 @@ export default function ProgressLayout() {
         headerShown: false,
       }}>
       <Stack.Screen name="index" />
+      <Stack.Screen name="summary" />
       <Stack.Screen name="history" />
     </Stack>
   );

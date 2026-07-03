@@ -1,5 +1,5 @@
-import { WorkoutSummaryScreen } from '@/components/progress/workout-summary-screen';
+import { ProgressDashboardScreen } from '@/components/progress/progress-dashboard-screen';
 
 export default function ProgressScreen() {
-  return <WorkoutSummaryScreen />;
+  return <ProgressDashboardScreen />;
 }
