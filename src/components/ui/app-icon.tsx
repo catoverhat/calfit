@@ -19,6 +19,12 @@ export type AppIconName =
   | 'stop'
   | 'offline'
   | 'next'
+  | 'star'
+  | 'notes'
+  | 'save'
+  | 'history'
+  | 'sets'
+  | 'volume'
   | 'intensity'
   | 'flame'
   | 'calories'
@@ -55,6 +61,12 @@ const icons: Record<AppIconName, { sf: string; fallback: string }> = {
   stop: { sf: 'square', fallback: 'S' },
   offline: { sf: 'icloud.slash', fallback: 'O' },
   next: { sf: 'forward.end.fill', fallback: 'N' },
+  star: { sf: 'star.fill', fallback: '*' },
+  notes: { sf: 'text.alignleft', fallback: 'N' },
+  save: { sf: 'square.and.arrow.down.fill', fallback: 'S' },
+  history: { sf: 'clock.arrow.circlepath', fallback: 'H' },
+  sets: { sf: 'list.bullet', fallback: '=' },
+  volume: { sf: 'chart.line.uptrend.xyaxis', fallback: 'V' },
   intensity: { sf: 'bolt.fill', fallback: 'I' },
   flame: { sf: 'flame.fill', fallback: 'F' },
   calories: { sf: 'figure.run', fallback: 'K' },

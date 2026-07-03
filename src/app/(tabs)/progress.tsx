@@ -1,11 +1,5 @@
-import { PlaceholderTabScreen } from '@/components/placeholder-tab-screen';
+import { WorkoutSummaryScreen } from '@/components/progress/workout-summary-screen';
 
 export default function ProgressScreen() {
-  return (
-    <PlaceholderTabScreen
-      description="Your training history, personal records, and trends will appear here."
-      icon="progress"
-      title="Progress"
-    />
-  );
+  return <WorkoutSummaryScreen />;
 }
