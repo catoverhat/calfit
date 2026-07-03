@@ -24,6 +24,14 @@ Follow https://docs.expo.dev/develop/user-interface/fonts/.
 - Keep font-family tokens in `src/constants/theme.ts` and use those tokens instead of hard-coded family names.
 - After adding or changing embedded fonts, create a new development build. Embedded fonts are not available in Expo Go.
 
+## Icons
+
+- Use `@react-native-vector-icons/lucide` for app icons.
+- Prefer static icon-font imports: `import { Lucide } from '@react-native-vector-icons/lucide/static';`.
+- Render icons with the shared design tokens for color and sizing; avoid hard-coded icon colors unless the design explicitly calls for one.
+- Keep `@react-native-vector-icons/lucide` in the Expo `plugins` array when using static imports so the icon font is embedded at build time.
+- Do not introduce `@expo/vector-icons` for new icon work.
+
 ## Navigation
 
 Follow https://docs.expo.dev/router/advanced/stack/ and the SDK 56 Expo Router documentation.
