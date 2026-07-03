@@ -1,6 +1,6 @@
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 
-import { DesignColors, Fonts, Palette, Typography } from "@/constants/theme";
+import { DesignColors, Fonts, Typography } from "@/constants/theme";
 
 export default function AppTabs() {
   return (
@@ -23,7 +23,7 @@ export default function AppTabs() {
           fontSize: Typography.xs.fontSize,
         },
       }}
-      rippleColor={Palette.secondary[800]}
+      rippleColor="transparent"
     >
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Today</NativeTabs.Trigger.Label>
