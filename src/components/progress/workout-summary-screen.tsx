@@ -135,6 +135,7 @@ export function WorkoutSummaryScreen() {
           <Pressable
             accessibilityLabel="View workout history"
             accessibilityRole="button"
+            onPress={() => router.push('/progress/history' as Href)}
             style={({ pressed }) => [styles.historyButton, pressed && styles.pressed]}>
             <AppIcon color={SemanticColors.action} name="history" size={17} />
             <Text style={styles.historyText}>View History</Text>
