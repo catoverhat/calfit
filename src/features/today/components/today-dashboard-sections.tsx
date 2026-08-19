@@ -1,14 +1,17 @@
-import { Image } from 'expo-image';
-import { Pressable, Text, View } from 'react-native';
+import { Image } from "expo-image";
+import { Pressable, Text, View } from "react-native";
 
-import { styles } from '../today-dashboard-screen.styles';
-import type { TodayDashboardData, TodayDashboardRoutine } from '../today-dashboard.viewmodel';
+import { styles } from "../today-dashboard-screen.styles";
+import type {
+  TodayDashboardData,
+  TodayDashboardRoutine,
+} from "../today-dashboard.viewmodel";
 
 export function TodayHeader({
   avatarUrl,
   name,
   syncLabel,
-}: Pick<TodayDashboardData, 'avatarUrl' | 'name' | 'syncLabel'>) {
+}: Pick<TodayDashboardData, "avatarUrl" | "name" | "syncLabel">) {
   const initials = name.slice(0, 2).toUpperCase();
 
   return (
@@ -23,7 +26,10 @@ export function TodayHeader({
               style={styles.avatar}
             />
           ) : (
-            <View accessibilityLabel={`${name}'s local profile initials`} style={styles.avatarFallback}>
+            <View
+              accessibilityLabel={`${name}'s local profile initials`}
+              style={styles.avatarFallback}
+            >
               <Text style={styles.avatarInitials}>{initials}</Text>
             </View>
           )}
@@ -35,40 +41,6 @@ export function TodayHeader({
         </View>
       </View>
     </>
-  );
-}
-
-export function WeekSelector({
-  onSelect,
-  selectedDate,
-  weekDays,
-}: {
-  onSelect: (date: string) => void;
-  selectedDate: string;
-  weekDays: TodayDashboardData['weekDays'];
-}) {
-  return (
-    <View style={styles.weekCard}>
-      {weekDays.map((item) => {
-        const selected = item.date === selectedDate;
-
-        return (
-          <Pressable
-            accessibilityLabel={`${item.day} ${item.date}`}
-            accessibilityRole="button"
-            key={`${item.day}-${item.date}`}
-            onPress={() => onSelect(item.date)}
-            style={({ pressed }) => [
-              styles.dayCell,
-              selected && styles.dayCellSelected,
-              pressed && styles.pressed,
-            ]}>
-            <Text style={[styles.dayLabel, selected && styles.dayTextSelected]}>{item.day}</Text>
-            <Text style={[styles.dayDate, selected && styles.dayTextSelected]}>{item.date}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
   );
 }
 
@@ -95,7 +67,9 @@ export function TodayRoutineCard({
         <>
           <View style={styles.schedulePill}>
             <View style={styles.scheduleDot} />
-            <Text style={styles.scheduleText}>Scheduled for {routine.scheduledTime}</Text>
+            <Text style={styles.scheduleText}>
+              Scheduled for {routine.scheduledTime}
+            </Text>
           </View>
           <View style={styles.cardTitleRow}>
             <View style={styles.workoutCopy}>
@@ -117,12 +91,16 @@ export function TodayRoutineCard({
         </>
       ) : (
         <StatusCard
-          body={isLoading ? 'Preparing your local routine data.' : 'Create a routine to see it here.'}
-          title={isLoading ? 'Loading local routine' : 'No routine ready'}
+          body={
+            isLoading
+              ? "Preparing your local routine data."
+              : "Create a routine to see it here."
+          }
+          title={isLoading ? "Loading local routine" : "No routine ready"}
         />
       )}
       <Pressable
-        accessibilityLabel={isStarting ? 'Starting workout' : 'Start Workout'}
+        accessibilityLabel={isStarting ? "Starting workout" : "Start Workout"}
         accessibilityRole="button"
         accessibilityState={{ disabled: startDisabled }}
         disabled={startDisabled}
@@ -131,17 +109,26 @@ export function TodayRoutineCard({
           styles.startButton,
           startDisabled && styles.startButtonDisabled,
           pressed && !startDisabled && styles.startButtonPressed,
-        ]}>
-        <Text style={styles.playIcon}>{'>'}</Text>
+        ]}
+      >
+        <Text style={styles.playIcon}>{">"}</Text>
         <Text style={styles.startButtonText}>
-          {isStarting ? 'Starting...' : isLoading ? 'Loading...' : 'Start Workout'}
+          {isStarting
+            ? "Starting..."
+            : isLoading
+              ? "Loading..."
+              : "Start Workout"}
         </Text>
       </Pressable>
     </View>
   );
 }
 
-export function ProgressSummary({ progress }: { progress: TodayDashboardData['progress'] }) {
+export function ProgressSummary({
+  progress,
+}: {
+  progress: TodayDashboardData["progress"];
+}) {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionEyebrow}>Recent Progress</Text>
@@ -155,7 +142,12 @@ export function ProgressSummary({ progress }: { progress: TodayDashboardData['pr
           <Text style={styles.progressLabel}>Streak</Text>
           <Text style={styles.progressValue}>{progress.streak}</Text>
           <View style={styles.streakTrack}>
-            <View style={[styles.streakFill, { width: `${progress.streakProgress * 100}%` }]} />
+            <View
+              style={[
+                styles.streakFill,
+                { width: `${progress.streakProgress * 100}%` },
+              ]}
+            />
           </View>
         </View>
       </View>
@@ -225,5 +217,9 @@ export function ClockIcon() {
 }
 
 export function MedalIcon() {
-  return <Text accessibilityElementsHidden style={styles.medalIcon}>O</Text>;
+  return (
+    <Text accessibilityElementsHidden style={styles.medalIcon}>
+      O
+    </Text>
+  );
 }

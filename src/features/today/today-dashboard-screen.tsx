@@ -1,28 +1,32 @@
-import { styles } from './today-dashboard-screen.styles';
-import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styles } from "./today-dashboard-screen.styles";
 
-import { useTodayDashboard } from './use-today-dashboard';
 import {
   ProgressSummary,
   TodayHeader,
   TodayRoutineCard,
   TrainingTip,
-  WeekSelector,
-} from './components/today-dashboard-sections';
+} from "./components/today-dashboard-sections";
+import { useTodayDashboard } from "./use-today-dashboard";
 
 export function TodayDashboardScreen() {
-  const { data: todayDashboard, error, isLoading, isStarting, startWorkout } = useTodayDashboard();
-  const [selectedDate, setSelectedDate] = useState(todayDashboard.selectedDate);
+  const {
+    data: todayDashboard,
+    error,
+    isLoading,
+    isStarting,
+    startWorkout,
+  } = useTodayDashboard();
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
+    <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        style={styles.screen}>
+        style={styles.screen}
+      >
         <View style={styles.content}>
           <TodayHeader
             avatarUrl={todayDashboard.avatarUrl}
@@ -32,14 +36,11 @@ export function TodayDashboardScreen() {
 
           <View style={styles.greetingBlock}>
             <Text style={styles.dateLabel}>{todayDashboard.dateLabel}</Text>
-            <Text style={styles.greeting}>Good morning, {todayDashboard.name}!</Text>
+            <Text style={styles.greeting}>
+              Good morning, {todayDashboard.name}!
+            </Text>
           </View>
 
-          <WeekSelector
-            onSelect={setSelectedDate}
-            selectedDate={selectedDate}
-            weekDays={todayDashboard.weekDays}
-          />
           <TodayRoutineCard
             error={error}
             isLoading={isLoading}
