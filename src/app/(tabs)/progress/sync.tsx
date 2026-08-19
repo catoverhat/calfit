@@ -1,4 +1,4 @@
-import { OfflineSyncStatesScreen } from '@/components/progress/offline-sync-states-screen';
+import { OfflineSyncStatesScreen } from '@/features/progress/offline-sync-states-screen';
 
 export default function OfflineSyncStatesRoute() {
   return <OfflineSyncStatesScreen />;

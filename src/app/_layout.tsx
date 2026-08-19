@@ -3,7 +3,9 @@ import { Stack } from 'expo-router/stack';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import '@/global.css';
+
+import { AnimatedSplashOverlay } from '@/components/layout/animated-splash-overlay';
 import { useAppFonts } from '@/hooks/use-app-fonts';
 
 export const unstable_settings = {

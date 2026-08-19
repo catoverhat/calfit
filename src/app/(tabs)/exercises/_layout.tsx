@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router/stack';
 
-import { Fonts, SemanticColors } from '@/constants/theme';
+import { Fonts, SemanticColors } from '@/theme/tokens';
 
 export default function ExercisesLayout() {
   return (

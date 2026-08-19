@@ -11,43 +11,53 @@ export {
   seedStarterData,
 } from './schema';
 export {
-  completeWorkoutSession,
-  createBodyMeasurement,
   createExercise,
-  createRoutine,
   getExerciseCatalog,
   getExerciseCategories,
   getExerciseDetail,
-  getLatestBodyMeasurement,
-  getLocalUserProfile,
-  getRoutineDetail,
-  getTodayRoutine,
-  getTodayDashboardSnapshot,
-  getWorkoutHistory,
-  getWorkoutSessionDetail,
-  getWorkoutStreak,
-  logWorkoutSet,
   seedBuiltInExercisesIfEmpty,
-  seedStarterRoutineIfEmpty,
-  startWorkoutFromRoutine,
   updateExercise,
-  updateRoutine,
-  updateRoutineExerciseTarget,
-} from './repositories';
+} from './repositories/exercises';
 export type {
-  CreateBodyMeasurementInput,
   CreateExerciseInput,
   ExerciseCatalogRow,
   ExerciseDetail,
+  UpdateExerciseInput,
+} from './repositories/exercises';
+export { getLocalUserProfile } from './repositories/users';
+export {
+  createBodyMeasurement,
+  getLatestBodyMeasurement,
+  getRecentBodyMeasurements,
+} from './repositories/body-measurements';
+export type { CreateBodyMeasurementInput } from './repositories/body-measurements';
+export { getTodayDashboardSnapshot, getWorkoutStreak } from './repositories/dashboard';
+export {
+  createRoutine,
+  getRoutineDetail,
+  getTodayRoutine,
+  seedStarterRoutineIfEmpty,
+  updateRoutine,
+  updateRoutineExerciseTarget,
+} from './repositories/routines';
+export type {
   CreateRoutineExerciseInput,
   CreateRoutineInput,
   CreateRoutineTargetInput,
-  LogWorkoutSetInput,
-  StartWorkoutFromRoutineInput,
-  UpdateExerciseInput,
   UpdateRoutineInput,
   UpdateRoutineTargetInput,
-} from './repositories';
+} from './repositories/routines';
+export {
+  completeWorkoutSession,
+  getWorkoutHistory,
+  getWorkoutSessionDetail,
+  logWorkoutSet,
+  startWorkoutFromRoutine,
+} from './repositories/workout-sessions';
+export type {
+  LogWorkoutSetInput,
+  StartWorkoutFromRoutineInput,
+} from './repositories/workout-sessions';
 export type {
   BodyMeasurementRow,
   CategoryRow,

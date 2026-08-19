@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router/stack';
 
-import { Fonts, Palette } from '@/constants/theme';
+import { Fonts, Palette } from '@/theme/tokens';
 
 export default function RoutinesLayout() {
   return (

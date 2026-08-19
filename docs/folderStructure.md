@@ -1,6 +1,6 @@
 # Folder Structure
 
-This document defines the target source organization for Calfit. It is the source of truth for where new code belongs and how existing code should be migrated.
+This document defines Calfit's source organization. It is the source of truth for where new and existing code belongs.
 
 The architecture is **route-first at the navigation boundary and feature-first everywhere else**:
 
@@ -9,13 +9,11 @@ The architecture is **route-first at the navigation boundary and feature-first e
 - Reusable UI, navigation, persistence, theme, and test data have explicit shared locations.
 - Related code stays close together so a feature can be understood and changed without searching several global folders.
 
-## Target Tree
+## Repository Tree
 
 ```text
 assets/                         # Expo-configured images, icons, and native assets
 docs/                           # Product, design, architecture, and workflow documentation
-scripts/                        # Repository maintenance scripts
-
 src/
 ├── app/                        # Expo Router routes and layouts only
 │   ├── _layout.tsx
@@ -68,15 +66,29 @@ src/
 │
 ├── db/                         # SQLite infrastructure and shared persistence types
 │   ├── database.ts
+│   ├── database.test.ts
 │   ├── id.ts
 │   ├── index.ts
 │   ├── schema.ts
+│   ├── schema.test.ts
 │   ├── types.ts
-│   └── repositories/           # Repositories split by domain
-│       ├── exercises.ts
-│       ├── routines.ts
-│       ├── users.ts
-│       └── workout-sessions.ts
+│   ├── repositories/           # Repositories split by domain
+│   │   ├── body-measurements.ts
+│   │   ├── body-measurements.test.ts
+│   │   ├── dashboard.ts
+│   │   ├── dashboard.test.ts
+│   │   ├── exercises.ts
+│   │   ├── exercises.test.ts
+│   │   ├── routines.ts
+│   │   ├── routines.test.ts
+│   │   ├── users.ts
+│   │   ├── users.test.ts
+│   │   ├── workout-sessions.ts
+│   │   └── workout-sessions.test.ts
+│   ├── seed-data/
+│   │   └── exercise-catalog.ts
+│   └── testing/                # Shared database test support
+│       └── memory-database.ts
 │
 ├── theme/                      # Design tokens and theme utilities
 │   ├── tokens.ts
@@ -96,7 +108,7 @@ src/
 
 Configuration files such as `app.json`, `package.json`, `tsconfig.json`, and `eslint.config.js` remain at the repository root. Expo assets remain in the root `assets` directory.
 
-The tree is a target, not a requirement to create every directory immediately. Do not add empty folders merely to match the diagram.
+The tree describes active ownership boundaries, not a requirement to create every possible directory. Do not add empty folders merely to match the diagram.
 
 ## Folder Responsibilities
 
@@ -230,13 +242,11 @@ src/app
 
 Shared modules must not import route files. Database infrastructure must not import UI. Reusable UI must not import feature screens or feature state.
 
-## Incremental Migration Rules
+## Structure Maintenance Rules
 
-The current repository predates this structure and will be migrated feature by feature.
+The feature-first migration is complete. When moving or introducing code:
 
-When migrating:
-
-1. Select a coherent vertical slice, such as exercises or progress.
+1. Work in a coherent vertical slice, such as exercises or progress.
 2. Preserve behavior and any unrelated user changes.
 3. Move its screens, hooks, view models, tests, and feature-only components together, placing every unit or component test beside its source file.
 4. Update imports in the same change.
@@ -244,8 +254,7 @@ When migrating:
 6. Remove obsolete originals after references have been updated; do not maintain duplicate implementations.
 7. Remove empty directories and unused barrel files created by the move.
 8. Run TypeScript, lint, and relevant tests without starting the Expo development server.
-
-Until a shared module is migrated, use its existing location. Do not create a duplicate `theme`, fixture, hook, or database module solely to satisfy the target tree. The module should move once, with its consumers updated atomically.
+9. Keep screen files focused on state, navigation, and composition; extract feature-owned sections and keep their styles beside them.
 
 ## Placement Checklist
 

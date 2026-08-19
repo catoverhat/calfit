@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router/stack';
 
-import { SemanticColors } from '@/constants/theme';
+import { SemanticColors } from '@/theme/tokens';
 
 export default function ProgressLayout() {
   return (

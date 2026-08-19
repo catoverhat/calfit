@@ -1,5 +1,5 @@
-import { WorkoutListScreen } from '@/components/workouts/workout-list-screen';
+import { RoutineListScreen } from '@/features/routines/routine-list-screen';
 
 export default function RoutinesRoute() {
-  return <WorkoutListScreen />;
+  return <RoutineListScreen />;
 }

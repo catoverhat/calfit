@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { Text } from 'react-native';
 
-import { Fonts } from '@/constants/theme';
+import { Fonts } from '@/theme/tokens';
 
 export type AppIconName =
   | 'bell'

@@ -1,4 +1,4 @@
-import { AddExerciseScreen } from '@/components/routines/add-exercise-screen';
+import { AddExerciseScreen } from '@/features/routines/add-exercise-screen';
 
 export default function AddExerciseRoute() {
   return <AddExerciseScreen />;

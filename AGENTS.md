@@ -11,12 +11,12 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 ## Project Structure
 
 - Read `docs/folderStructure.md` before creating, moving, or substantially changing source files.
-- Treat `docs/folderStructure.md` as the source of truth for module ownership, folder boundaries, naming, imports, tests, and incremental migrations.
+- Treat `docs/folderStructure.md` as the source of truth for module ownership, folder boundaries, naming, imports, and test colocation.
 - Keep `src/app` route-only. Route files may read route parameters and compose a feature screen, but feature UI, hooks, types, state, and business logic belong outside `src/app`.
 - Organize product code by feature under `src/features`. Do not add feature-specific code to global `src/components`, `src/hooks`, or `src/constants` buckets.
 - Put only genuinely reusable, feature-agnostic UI in `src/components`; keep app-wide navigation, theme, database, and fixture code in their dedicated folders.
 - Colocate unit and component tests beside the source file they cover, using matching names such as `exercise-card.tsx` and `exercise-card.test.tsx`. Do not create `__tests__` folders for these tests.
-- The repository is migrating incrementally. When touching legacy code, migrate a coherent feature slice when practical, update all imports in the same change, and do not leave duplicate old and new modules.
+- Preserve the feature-first structure when changing existing code. Move a coherent feature slice when ownership changes, update all imports in the same change, and do not leave duplicate modules.
 - Do not create empty placeholder directories. Add a directory only when it has an immediate owner and contents.
 
 ## Design Reference
@@ -32,7 +32,7 @@ Follow https://docs.expo.dev/develop/user-interface/fonts/.
 - Embed native fonts at build time with the `expo-font` config plugin in `app.json`.
 - Do not load fonts at runtime on Android or iOS with `useFonts`.
 - Load fonts at runtime only on web through `src/hooks/use-app-fonts.web.ts`, because config plugins do not run on web.
-- Keep font-family tokens in the shared theme module described by `docs/folderStructure.md` and use those tokens instead of hard-coded family names. During the migration, the existing module remains `src/constants/theme.ts` until it is moved coherently.
+- Keep font-family tokens in `src/theme/tokens.ts` and use those tokens instead of hard-coded family names.
 - After adding or changing embedded fonts, create a new development build. Embedded fonts are not available in Expo Go.
 
 ## Icons
@@ -54,4 +54,4 @@ Follow https://docs.expo.dev/router/advanced/stack/ and the SDK 56 Expo Router d
 - Navigate with Expo Router `Link` or `router.push`; do not simulate navigation with local component state.
 - Use the shared branded `Header` on tab landing screens. Use Stack headers and native back behavior on detail screens.
 - Make a `ScrollView`, `FlatList`, or `SectionList` with `contentInsetAdjustmentBehavior="automatic"` the first rendered view of Stack screens.
-- Keep the native and web `app-tabs` implementations aligned so both expose the same top-level destinations. Their target location is documented in `docs/folderStructure.md`.
+- Keep `src/navigation/app-tabs.tsx` and `src/navigation/app-tabs.web.tsx` aligned so native and web expose the same top-level destinations.
