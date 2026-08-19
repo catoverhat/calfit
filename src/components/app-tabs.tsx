@@ -1,44 +1,56 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
+import { NativeTabs } from "expo-router/unstable-native-tabs";
 
-import { Colors, Fonts, Typography } from '@/constants/theme';
+import { DesignColors, Fonts, Typography } from "@/constants/theme";
 
 export default function AppTabs() {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-
   return (
     <NativeTabs
-      backgroundColor={colors.backgroundElement}
+      backgroundColor={DesignColors.surfaceContainer}
       disableIndicator
-      iconColor={{ default: colors.textSecondary, selected: colors.primary }}
+      iconColor={{
+        default: DesignColors.secondary,
+        selected: DesignColors.primaryContainer,
+      }}
       labelStyle={{
         default: {
-          color: colors.textSecondary,
+          color: DesignColors.secondary,
           fontFamily: Fonts.label,
           fontSize: Typography.xs.fontSize,
+          fontWeight: "500",
         },
         selected: {
-          color: colors.primary,
-          fontFamily: Fonts.bodySemiBold,
+          color: DesignColors.primaryContainer,
+          fontFamily: Fonts.label,
           fontSize: Typography.xs.fontSize,
+          fontWeight: "700",
         },
       }}
-      rippleColor={colors.backgroundSelected}
-      tintColor={colors.primary}>
+      rippleColor="transparent"
+    >
       <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Today</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          md="home"
-          sf={{ default: 'house', selected: 'house.fill' }}
+          md="calendar_today"
+          sf={{ default: "calendar", selected: "calendar" }}
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="workouts">
-        <NativeTabs.Trigger.Label>Workouts</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="routines">
+        <NativeTabs.Trigger.Label>Routines</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          md="fitness_center"
-          sf={{ default: 'dumbbell', selected: 'dumbbell.fill' }}
+          md="alt_route"
+          sf={{ default: "figure.run", selected: "figure.run" }}
+        />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="exercises">
+        <NativeTabs.Trigger.Label>Exercises</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          md="apps"
+          sf={{
+            default: "list.bullet.rectangle",
+            selected: "list.bullet.rectangle.fill",
+          }}
         />
       </NativeTabs.Trigger>
 
@@ -46,7 +58,7 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>Progress</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           md="bar_chart"
-          sf={{ default: 'chart.bar', selected: 'chart.bar.fill' }}
+          sf={{ default: "chart.bar", selected: "chart.bar.fill" }}
         />
       </NativeTabs.Trigger>
 
@@ -54,7 +66,7 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           md="person"
-          sf={{ default: 'person', selected: 'person.fill' }}
+          sf={{ default: "person", selected: "person.fill" }}
         />
       </NativeTabs.Trigger>
     </NativeTabs>

@@ -5,31 +5,101 @@ import { Fonts } from '@/constants/theme';
 
 export type AppIconName =
   | 'bell'
+  | 'cloud'
+  | 'search'
+  | 'check'
+  | 'menu'
+  | 'camera'
+  | 'chevronDown'
+  | 'chevrons'
   | 'clock'
+  | 'timer'
+  | 'info'
+  | 'lock'
+  | 'stop'
+  | 'offline'
+  | 'wifi'
+  | 'wifiOff'
+  | 'device'
+  | 'sync'
+  | 'database'
+  | 'warning'
+  | 'upload'
+  | 'next'
+  | 'star'
+  | 'notes'
+  | 'save'
+  | 'history'
+  | 'sets'
+  | 'volume'
   | 'intensity'
   | 'flame'
   | 'calories'
   | 'trophy'
   | 'strength'
   | 'play'
+  | 'add'
+  | 'edit'
+  | 'open'
+  | 'briefcase'
+  | 'body'
+  | 'running'
+  | 'today'
+  | 'routines'
+  | 'exercises'
   | 'home'
   | 'workouts'
   | 'progress'
   | 'profile';
 
 const icons: Record<AppIconName, { sf: string; fallback: string }> = {
-  bell: { sf: 'bell', fallback: '◇' },
-  clock: { sf: 'clock', fallback: '◷' },
-  intensity: { sf: 'bolt.fill', fallback: '◆' },
-  flame: { sf: 'flame.fill', fallback: '↟' },
-  calories: { sf: 'figure.run', fallback: '≋' },
-  trophy: { sf: 'trophy.fill', fallback: '★' },
-  strength: { sf: 'dumbbell.fill', fallback: '↔' },
-  play: { sf: 'play.fill', fallback: '▶' },
-  home: { sf: 'house.fill', fallback: '⌂' },
-  workouts: { sf: 'dumbbell.fill', fallback: '↔' },
-  progress: { sf: 'chart.bar.fill', fallback: '↗' },
-  profile: { sf: 'person.fill', fallback: '○' },
+  bell: { sf: 'bell', fallback: 'B' },
+  cloud: { sf: 'icloud', fallback: 'C' },
+  search: { sf: 'magnifyingglass', fallback: 'S' },
+  check: { sf: 'checkmark', fallback: 'V' },
+  menu: { sf: 'ellipsis', fallback: 'M' },
+  camera: { sf: 'camera.fill', fallback: 'C' },
+  chevronDown: { sf: 'chevron.down', fallback: 'v' },
+  chevrons: { sf: 'chevron.up.chevron.down', fallback: '<' },
+  clock: { sf: 'clock', fallback: 'C' },
+  timer: { sf: 'timer', fallback: 'T' },
+  info: { sf: 'info.circle', fallback: 'i' },
+  lock: { sf: 'lock.fill', fallback: 'L' },
+  stop: { sf: 'square', fallback: 'S' },
+  offline: { sf: 'icloud.slash', fallback: 'O' },
+  wifi: { sf: 'wifi', fallback: 'W' },
+  wifiOff: { sf: 'wifi.slash', fallback: 'X' },
+  device: { sf: 'iphone', fallback: 'D' },
+  sync: { sf: 'arrow.triangle.2.circlepath', fallback: 'R' },
+  database: { sf: 'externaldrive.fill', fallback: 'D' },
+  warning: { sf: 'exclamationmark.triangle.fill', fallback: '!' },
+  upload: { sf: 'arrow.up.circle.fill', fallback: 'U' },
+  next: { sf: 'forward.end.fill', fallback: 'N' },
+  star: { sf: 'star.fill', fallback: '*' },
+  notes: { sf: 'text.alignleft', fallback: 'N' },
+  save: { sf: 'square.and.arrow.down.fill', fallback: 'S' },
+  history: { sf: 'clock.arrow.circlepath', fallback: 'H' },
+  sets: { sf: 'list.bullet', fallback: '=' },
+  volume: { sf: 'chart.line.uptrend.xyaxis', fallback: 'V' },
+  intensity: { sf: 'bolt.fill', fallback: 'I' },
+  flame: { sf: 'flame.fill', fallback: 'F' },
+  calories: { sf: 'figure.run', fallback: 'K' },
+  trophy: { sf: 'trophy.fill', fallback: 'T' },
+  strength: { sf: 'dumbbell.fill', fallback: 'S' },
+  play: { sf: 'play.fill', fallback: '>' },
+  add: { sf: 'plus', fallback: '+' },
+  edit: { sf: 'pencil', fallback: 'P' },
+  open: { sf: 'arrow.up.right.square', fallback: 'O' },
+  briefcase: { sf: 'briefcase.fill', fallback: 'L' },
+  body: { sf: 'figure.strengthtraining.traditional', fallback: 'F' },
+  running: { sf: 'figure.run', fallback: 'R' },
+  today: { sf: 'calendar', fallback: 'D' },
+  routines: { sf: 'figure.run', fallback: 'R' },
+  exercises: { sf: 'list.bullet.rectangle', fallback: 'E' },
+  home: { sf: 'house.fill', fallback: 'H' },
+  workouts: { sf: 'dumbbell.fill', fallback: 'W' },
+  progress: { sf: 'chart.bar.fill', fallback: 'P' },
+  profile: { sf: 'person.fill', fallback: 'U' },
 };
 
 type AppIconProps = {

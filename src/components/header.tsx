@@ -2,18 +2,22 @@ import { Image } from 'expo-image';
 import {
   Pressable,
   StyleSheet,
+  Text,
   View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { AppIcon } from '@/components/ui/app-icon';
+import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
 import { Fonts, Palette, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type HeaderProps = {
-  avatarUrl: string;
+  actionAccessibilityLabel?: string;
+  actionIcon?: AppIconName;
+  actionIconColor?: string;
+  avatarUrl?: string | null;
   onNotificationsPress?: () => void;
   onProfilePress?: () => void;
   profileName: string;
@@ -22,6 +26,9 @@ type HeaderProps = {
 };
 
 export function Header({
+  actionAccessibilityLabel = 'Open notifications',
+  actionIcon = 'bell',
+  actionIconColor,
   avatarUrl,
   onNotificationsPress,
   onProfilePress,
@@ -30,6 +37,7 @@ export function Header({
   title = 'Kinetic Pulse',
 }: HeaderProps) {
   const theme = useTheme();
+  const initials = profileName.slice(0, 2).toUpperCase();
 
   return (
     <View style={[styles.container, style]}>
@@ -39,21 +47,29 @@ export function Header({
         hitSlop={8}
         onPress={onProfilePress}
         style={({ pressed }) => pressed && styles.pressed}>
-        <Image
-          accessibilityLabel={`${profileName}'s profile photo`}
-          source={avatarUrl}
-          style={[styles.avatar, { borderColor: theme.border }]}
-          transition={150}
-        />
+        {avatarUrl ? (
+          <Image
+            accessibilityLabel={`${profileName}'s profile photo`}
+            source={avatarUrl}
+            style={[styles.avatar, { borderColor: theme.border }]}
+            transition={150}
+          />
+        ) : (
+          <View
+            accessibilityLabel={`${profileName}'s profile initials`}
+            style={[styles.avatarFallback, { borderColor: theme.border }]}>
+            <Text style={styles.avatarInitials}>{initials}</Text>
+          </View>
+        )}
       </Pressable>
       <ThemedText style={styles.brand}>{title}</ThemedText>
       <Pressable
-        accessibilityLabel="Open notifications"
+        accessibilityLabel={actionAccessibilityLabel}
         accessibilityRole="button"
         hitSlop={12}
         onPress={onNotificationsPress}
         style={({ pressed }) => [styles.notificationButton, pressed && styles.pressed]}>
-        <AppIcon color={theme.text} name="bell" size={19} />
+        <AppIcon color={actionIconColor ?? theme.text} name={actionIcon} size={19} />
       </Pressable>
     </View>
   );
@@ -71,6 +87,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 36,
     width: 36,
+  },
+  avatarFallback: {
+    alignItems: 'center',
+    backgroundColor: Palette.primary[500],
+    borderCurve: 'continuous',
+    borderRadius: 18,
+    borderWidth: 1,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  avatarInitials: {
+    color: Palette.secondary[950],
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    lineHeight: 14,
   },
   brand: {
     ...Typography.sm,
