@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { MOCK_USER, MOCK_WORKOUTS } from '@/constants/mock-data';
+import { MOCK_USER } from '@/constants/mock-data';
 import {
   ComponentTokens,
   DesignColors,
@@ -17,11 +17,12 @@ import {
   TypeScale,
   Typography,
 } from '@/constants/theme';
+import type { WorkoutViewModel } from '@/hooks/today-dashboard-view-model';
 
-type MockWorkout = (typeof MOCK_WORKOUTS)[number];
+export type ActiveWorkoutSessionWorkout = WorkoutViewModel;
 
 type ActiveWorkoutSessionScreenProps = {
-  workout: MockWorkout;
+  workout: ActiveWorkoutSessionWorkout;
 };
 
 const completedSetRows = [

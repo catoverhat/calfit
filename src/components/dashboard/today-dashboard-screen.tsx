@@ -1,52 +1,17 @@
 import { Image } from 'expo-image';
-import { router, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { MOCK_USER, MOCK_WORKOUTS } from '@/constants/mock-data';
 import { Fonts, MaxContentWidth, Palette, Spacing, Typography } from '@/constants/theme';
-
-const weekDays = [
-  { date: '23', day: 'M' },
-  { date: '24', day: 'T' },
-  { date: '25', day: 'W' },
-  { date: '26', day: 'T' },
-  { date: '27', day: 'F' },
-  { date: '28', day: 'S' },
-  { date: '29', day: 'S' },
-] as const;
-
-const todayDashboard = {
-  dateLabel: 'Tuesday, Oct 24',
-  name: 'Dan',
-  routine: {
-    id: MOCK_WORKOUTS[0].id,
-    title: 'Push Day',
-    focus: 'Hypertrophy - Chest, Shoulders, Triceps',
-    scheduledTime: '9:00 AM',
-    exercises: 6,
-    duration: '45 min',
-  },
-  progress: {
-    bodyWeight: '78.4 kg',
-    bodyWeightDelta: '+0.2kg vs last week',
-    streak: '12 days',
-    calories: '1,840 / 2,400',
-    caloriesProgress: 0.76,
-  },
-  tip: '"Intensity over duration. Focus on the squeeze today."',
-} as const;
+import { useTodayDashboard } from '../../hooks/use-today-dashboard';
 
 export function TodayDashboardScreen() {
-  const [selectedDate, setSelectedDate] = useState('24');
-
-  const startWorkout = () => {
-    router.push({
-      pathname: '/workout-session/[id]',
-      params: { id: todayDashboard.routine.id },
-    } as unknown as Href);
-  };
+  const { data: todayDashboard, error, isLoading, isStarting, startWorkout } = useTodayDashboard();
+  const [selectedDate, setSelectedDate] = useState(todayDashboard.selectedDate);
+  const routine = todayDashboard.routine;
+  const startDisabled = isLoading || isStarting || !routine;
+  const initials = todayDashboard.name.slice(0, 2).toUpperCase();
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
@@ -58,17 +23,25 @@ export function TodayDashboardScreen() {
         <View style={styles.content}>
           <View style={styles.brandBar}>
             <View style={styles.brandLeft}>
-              <Image
-                accessibilityLabel={`${MOCK_USER.name}'s profile photo`}
-                contentFit="cover"
-                source={MOCK_USER.avatarUrl}
-                style={styles.avatar}
-              />
+              {todayDashboard.avatarUrl ? (
+                <Image
+                  accessibilityLabel={`${todayDashboard.name}'s profile photo`}
+                  contentFit="cover"
+                  source={todayDashboard.avatarUrl}
+                  style={styles.avatar}
+                />
+              ) : (
+                <View
+                  accessibilityLabel={`${todayDashboard.name}'s local profile initials`}
+                  style={styles.avatarFallback}>
+                  <Text style={styles.avatarInitials}>{initials}</Text>
+                </View>
+              )}
               <Text style={styles.brandName}>Kinetic Pulse</Text>
             </View>
             <View style={styles.syncPill}>
               <CloudCheckIcon />
-              <Text style={styles.syncText}>Sync completed</Text>
+              <Text style={styles.syncText}>{todayDashboard.syncLabel}</Text>
             </View>
           </View>
 
@@ -78,7 +51,7 @@ export function TodayDashboardScreen() {
           </View>
 
           <View style={styles.weekCard}>
-            {weekDays.map((item) => {
+            {todayDashboard.weekDays.map((item) => {
               const selected = item.date === selectedDate;
 
               return (
@@ -104,39 +77,59 @@ export function TodayDashboardScreen() {
           </View>
 
           <View style={styles.workoutCard}>
-            <View style={styles.schedulePill}>
-              <View style={styles.scheduleDot} />
-              <Text style={styles.scheduleText}>
-                Scheduled for {todayDashboard.routine.scheduledTime}
-              </Text>
-            </View>
+            {error ? (
+              <StatusCard
+                body={error}
+                title="Local database unavailable"
+              />
+            ) : routine ? (
+              <>
+                <View style={styles.schedulePill}>
+                  <View style={styles.scheduleDot} />
+                  <Text style={styles.scheduleText}>Scheduled for {routine.scheduledTime}</Text>
+                </View>
 
-            <View style={styles.cardTitleRow}>
-              <View style={styles.workoutCopy}>
-                <Text style={styles.workoutTitle}>{todayDashboard.routine.title}</Text>
-                <Text style={styles.focusText}>Focus: {todayDashboard.routine.focus}</Text>
-              </View>
-              <DumbbellMark />
-            </View>
+                <View style={styles.cardTitleRow}>
+                  <View style={styles.workoutCopy}>
+                    <Text style={styles.workoutTitle}>{routine.title}</Text>
+                    <Text style={styles.focusText}>Focus: {routine.focus}</Text>
+                  </View>
+                  <DumbbellMark />
+                </View>
 
-            <View style={styles.workoutMeta}>
-              <View style={styles.metaItem}>
-                <GridIcon />
-                <Text style={styles.metaText}>{todayDashboard.routine.exercises} Exercises</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <ClockIcon />
-                <Text style={styles.metaText}>{todayDashboard.routine.duration}</Text>
-              </View>
-            </View>
+                <View style={styles.workoutMeta}>
+                  <View style={styles.metaItem}>
+                    <GridIcon />
+                    <Text style={styles.metaText}>{routine.exercises} Exercises</Text>
+                  </View>
+                  <View style={styles.metaItem}>
+                    <ClockIcon />
+                    <Text style={styles.metaText}>{routine.duration}</Text>
+                  </View>
+                </View>
+              </>
+            ) : (
+              <StatusCard
+                body={isLoading ? 'Preparing your local routine data.' : 'Create a routine to see it here.'}
+                title={isLoading ? 'Loading local routine' : 'No routine ready'}
+              />
+            )}
 
             <Pressable
-              accessibilityLabel="Start Workout"
+              accessibilityLabel={isStarting ? 'Starting workout' : 'Start Workout'}
               accessibilityRole="button"
+              accessibilityState={{ disabled: startDisabled }}
+              disabled={startDisabled}
               onPress={startWorkout}
-              style={({ pressed }) => [styles.startButton, pressed && styles.startButtonPressed]}>
+              style={({ pressed }) => [
+                styles.startButton,
+                startDisabled && styles.startButtonDisabled,
+                pressed && !startDisabled && styles.startButtonPressed,
+              ]}>
               <Text style={styles.playIcon}>{'>'}</Text>
-              <Text style={styles.startButtonText}>Start Workout</Text>
+              <Text style={styles.startButtonText}>
+                {isStarting ? 'Starting...' : isLoading ? 'Loading...' : 'Start Workout'}
+              </Text>
             </Pressable>
           </View>
 
@@ -153,27 +146,13 @@ export function TodayDashboardScreen() {
                 <Text style={styles.progressLabel}>Streak</Text>
                 <Text style={styles.progressValue}>{todayDashboard.progress.streak}</Text>
                 <View style={styles.streakTrack}>
-                  <View style={styles.streakFill} />
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.caloriesCard}>
-              <View style={styles.caloriesHeader}>
-                <Text style={styles.progressLabel}>Daily Calories</Text>
-                <FlameIcon />
-              </View>
-              <Text style={styles.calorieValue}>{todayDashboard.progress.calories}</Text>
-              <View style={styles.calorieProgressRow}>
-                <View style={styles.calorieTrack}>
                   <View
                     style={[
-                      styles.calorieFill,
-                      { width: `${todayDashboard.progress.caloriesProgress * 100}%` },
+                      styles.streakFill,
+                      { width: `${todayDashboard.progress.streakProgress * 100}%` },
                     ]}
                   />
                 </View>
-                <Text style={styles.caloriePercent}>76%</Text>
               </View>
             </View>
           </View>
@@ -187,6 +166,17 @@ export function TodayDashboardScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function StatusCard({ body, title }: { body: string; title: string }) {
+  return (
+    <View style={styles.statusCard}>
+      <Text style={styles.statusTitle}>{title}</Text>
+      <Text selectable style={styles.statusBody}>
+        {body}
+      </Text>
+    </View>
   );
 }
 
@@ -227,10 +217,6 @@ function ClockIcon() {
       <View style={styles.clockHandWide} />
     </View>
   );
-}
-
-function FlameIcon() {
-  return <Text accessibilityElementsHidden style={styles.flameIcon}>F</Text>;
 }
 
 function MedalIcon() {
@@ -283,6 +269,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 38,
     width: 38,
+  },
+  avatarFallback: {
+    alignItems: 'center',
+    backgroundColor: Palette.primary[500],
+    borderColor: Palette.primary[700],
+    borderRadius: 19,
+    borderWidth: 1,
+    height: 38,
+    justifyContent: 'center',
+    width: 38,
+  },
+  avatarInitials: {
+    color: Palette.secondary[950],
+    fontFamily: Fonts.bodyBold,
+    fontSize: 12,
+    lineHeight: 16,
   },
   brandName: {
     ...Typography.base,
@@ -545,6 +547,9 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.primary[600],
     transform: [{ scale: 0.99 }],
   },
+  startButtonDisabled: {
+    opacity: 0.54,
+  },
   playIcon: {
     color: Palette.secondary[950],
     fontFamily: Fonts.bodyBold,
@@ -559,6 +564,27 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: Spacing.two,
+  },
+  statusCard: {
+    backgroundColor: '#1F1D1D',
+    borderColor: '#343131',
+    borderCurve: 'continuous',
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: Spacing.one,
+    padding: Spacing.three,
+  },
+  statusTitle: {
+    color: Palette.white,
+    fontFamily: Fonts.heading,
+    fontSize: 18,
+    lineHeight: 24,
+  },
+  statusBody: {
+    color: Palette.neutral[300],
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 13,
+    lineHeight: 18,
   },
   sectionEyebrow: {
     color: Palette.primary[400],
@@ -614,56 +640,6 @@ const styles = StyleSheet.create({
   streakFill: {
     backgroundColor: Palette.primary[500],
     height: '100%',
-    width: '58%',
-  },
-  caloriesCard: {
-    backgroundColor: '#1F1D1D',
-    borderColor: '#343131',
-    borderCurve: 'continuous',
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: Spacing.two,
-    padding: Spacing.three,
-  },
-  caloriesHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  flameIcon: {
-    color: Palette.tertiary[300],
-    fontFamily: Fonts.bodyBold,
-    fontSize: 16,
-    lineHeight: 18,
-  },
-  calorieValue: {
-    ...Typography['2xl'],
-    color: Palette.white,
-    fontFamily: Fonts.heading,
-    lineHeight: 30,
-  },
-  calorieProgressRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: Spacing.two,
-  },
-  calorieTrack: {
-    backgroundColor: '#3A3737',
-    borderRadius: 3,
-    flex: 1,
-    height: 8,
-    overflow: 'hidden',
-  },
-  calorieFill: {
-    backgroundColor: Palette.tertiary[300],
-    height: '100%',
-  },
-  caloriePercent: {
-    color: Palette.tertiary[300],
-    fontFamily: Fonts.bodyBold,
-    fontSize: 12,
-    lineHeight: 16,
-    width: 38,
   },
   tipCard: {
     alignItems: 'center',

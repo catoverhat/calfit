@@ -112,7 +112,7 @@ spacing:
 
 ## Brand & Style
 
-The design system is engineered for high-performance workout tracking, prioritizing utility, focus, and physical intensity over social interaction. The aesthetic is "Technical Athleticism"—a blend of modern minimalism and high-contrast professional sports equipment.
+The design system is engineered for high-performance workout tracking, prioritizing utility, focus, and physical intensity over social interaction. The aesthetic is "Technical Athleticism": a blend of modern minimalism and high-contrast professional sports equipment.
 
 The target audience is the dedicated athlete who requires a tool that feels as robust and disciplined as their training regimen. The UI evokes a sense of momentum and precision, using a dark-mode-first environment to reduce eye strain in gym lighting and allow the vibrant primary accent to guide the user's focus toward critical actions.
 

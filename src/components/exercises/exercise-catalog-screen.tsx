@@ -14,12 +14,6 @@ import { Header } from '@/components/header';
 import { TabScreen } from '@/components/tab-screen';
 import { AppIcon } from '@/components/ui/app-icon';
 import {
-  EXERCISE_CATALOG,
-  type ExerciseCatalogCategory,
-  type ExerciseCatalogItem,
-} from '@/constants/exercise-catalog';
-import { MOCK_USER } from '@/constants/mock-data';
-import {
   ComponentTokens,
   DesignColors,
   Fonts,
@@ -31,40 +25,23 @@ import {
   TypeScale,
   Typography,
 } from '@/constants/theme';
+import {
+  filterExerciseCatalogItems,
+  type ExerciseCatalogViewItem,
+} from '@/hooks/exercise-catalog-view-model';
+import { useExerciseCatalog } from '@/hooks/use-exercise-catalog';
 
-type CatalogFilter = 'All Categories' | ExerciseCatalogCategory;
-
-const FILTERS: readonly CatalogFilter[] = ['All Categories', 'Strength', 'Cardio', 'Mobility'];
-const FEATURED_EXERCISE_IDS = ['bench-press', 'squat', 'pull-ups', 'running'];
 const CREATE_EXERCISE_HREF = '/(tabs)/exercises/create' as Href;
 
 export function ExerciseCatalogScreen() {
+  const { data, error, isLoading } = useExerciseCatalog();
   const [query, setQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<CatalogFilter>('All Categories');
+  const [selectedFilter, setSelectedFilter] = useState('All Categories');
+  const activeFilter = data.filters.includes(selectedFilter) ? selectedFilter : 'All Categories';
 
   const exercises = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
-    return EXERCISE_CATALOG.filter((exercise) => FEATURED_EXERCISE_IDS.includes(exercise.id)).filter(
-      (exercise) => {
-        const matchesFilter =
-          selectedFilter === 'All Categories' || exercise.catalogCategory === selectedFilter;
-        const searchableText = [
-          exercise.name,
-          exercise.catalogCategory,
-          exercise.muscleGroup,
-          exercise.equipment,
-          ...exercise.tags,
-        ]
-          .join(' ')
-          .toLowerCase();
-        const matchesQuery =
-          normalizedQuery.length === 0 || searchableText.includes(normalizedQuery);
-
-        return matchesFilter && matchesQuery;
-      }
-    );
-  }, [query, selectedFilter]);
+    return filterExerciseCatalogItems(data.items, activeFilter, query);
+  }, [activeFilter, data.items, query]);
 
   return (
     <TabScreen contentContainerStyle={styles.scrollContent} style={styles.screen}>
@@ -73,8 +50,8 @@ export function ExerciseCatalogScreen() {
           actionAccessibilityLabel="Sync exercise catalog"
           actionIcon="cloud"
           actionIconColor={SemanticColors.actionSoft}
-          avatarUrl={MOCK_USER.avatarUrl}
-          profileName={MOCK_USER.name}
+          avatarUrl={data.avatarUrl}
+          profileName={data.profileName}
         />
 
         <View style={styles.heroRow}>
@@ -111,8 +88,8 @@ export function ExerciseCatalogScreen() {
           contentContainerStyle={styles.filterContent}
           showsHorizontalScrollIndicator={false}
           style={styles.filterScroll}>
-          {FILTERS.map((filter) => {
-            const selected = selectedFilter === filter;
+          {data.filters.map((filter) => {
+            const selected = activeFilter === filter;
 
             return (
               <Pressable
@@ -135,7 +112,11 @@ export function ExerciseCatalogScreen() {
         </ScrollView>
 
         <View style={styles.cardList}>
-          {exercises.length > 0 ? (
+          {error ? (
+            <StatusCard body={error} title="Local catalog unavailable" />
+          ) : isLoading ? (
+            <StatusCard body="Preparing your local exercise catalog." title="Loading exercises" />
+          ) : exercises.length > 0 ? (
             exercises.map((exercise) => <ExerciseCatalogCard exercise={exercise} key={exercise.id} />)
           ) : (
             <View style={styles.emptyState}>
@@ -160,16 +141,22 @@ export function ExerciseCatalogScreen() {
   );
 }
 
-function ExerciseCatalogCard({ exercise }: { exercise: ExerciseCatalogItem }) {
+function ExerciseCatalogCard({ exercise }: { exercise: ExerciseCatalogViewItem }) {
   return (
     <View style={styles.exerciseCard}>
-      <Image
-        accessibilityLabel={`${exercise.name} exercise image`}
-        contentFit="cover"
-        source={exercise.imageUrl}
-        style={styles.exerciseImage}
-        transition={220}
-      />
+      {exercise.imageUrl ? (
+        <Image
+          accessibilityLabel={`${exercise.name} exercise image`}
+          contentFit="cover"
+          source={exercise.imageUrl}
+          style={styles.exerciseImage}
+          transition={220}
+        />
+      ) : (
+        <View style={[styles.exerciseImage, styles.exerciseImageFallback]}>
+          <AppIcon color={SemanticColors.actionSoft} name="exercises" size={28} />
+        </View>
+      )}
 
       <View style={styles.cardBody}>
         <View style={styles.cardTitleRow}>
@@ -199,6 +186,17 @@ function ExerciseCatalogCard({ exercise }: { exercise: ExerciseCatalogItem }) {
           </Pressable>
         </View>
       </View>
+    </View>
+  );
+}
+
+function StatusCard({ body, title }: { body: string; title: string }) {
+  return (
+    <View style={styles.emptyState}>
+      <Text style={styles.emptyTitle}>{title}</Text>
+      <Text selectable style={styles.emptyText}>
+        {body}
+      </Text>
     </View>
   );
 }
@@ -325,6 +323,10 @@ const styles = StyleSheet.create({
     aspectRatio: 1.9,
     backgroundColor: DesignColors.surfaceContainerLowest,
     width: '100%',
+  },
+  exerciseImageFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardBody: {
     padding: Spacing.three,

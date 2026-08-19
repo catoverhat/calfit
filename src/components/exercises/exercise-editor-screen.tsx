@@ -1,6 +1,5 @@
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -11,7 +10,6 @@ import {
 } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { EXERCISE_CATALOG } from '@/constants/exercise-catalog';
 import {
   ComponentTokens,
   DesignColors,
@@ -24,64 +22,74 @@ import {
   TypeScale,
   Typography,
 } from '@/constants/theme';
+import type {
+  ExerciseEditorCategoryOption,
+  ExerciseEditorData,
+  ExerciseEditorSaveInput,
+} from '@/hooks/exercise-catalog-view-model';
+import { useExerciseEditor } from '@/hooks/use-exercise-editor';
 
 type ExerciseEditorScreenProps = {
   exerciseId?: string;
   mode: 'create' | 'edit';
 };
 
-const DEFAULT_EXERCISE = {
-  name: 'Dumbbell Incline Bench Press',
-  description:
-    'Maintain a 45-degree angle. Drive through the chest and keep shoulder blades retracted. Slow eccentric phase for maximum hypertrophy.',
-  category: 'Strength',
-  muscleGroup: 'Chest',
-  imageUrl:
-    'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?auto=format&fit=crop&w=1200&q=85',
-};
-
 export function ExerciseEditorScreen({ exerciseId, mode }: ExerciseEditorScreenProps) {
-  const sourceExercise = useMemo(
-    () => EXERCISE_CATALOG.find((exercise) => exercise.id === exerciseId),
-    [exerciseId]
-  );
-  const initialExercise =
-    mode === 'edit' && sourceExercise
-      ? {
-          name:
-            sourceExercise.id === 'bench-press'
-              ? DEFAULT_EXERCISE.name
-              : sourceExercise.name,
-          description:
-            sourceExercise.id === 'bench-press'
-              ? DEFAULT_EXERCISE.description
-              : `Refine ${sourceExercise.name.toLowerCase()} mechanics with controlled tempo, stable positioning, and clean range of motion.`,
-          category: sourceExercise.catalogCategory,
-          muscleGroup: sourceExercise.muscleGroup,
-          imageUrl: sourceExercise.imageUrl,
-        }
-      : mode === 'edit'
-        ? DEFAULT_EXERCISE
-        : {
-            ...DEFAULT_EXERCISE,
-            name: '',
-            description: '',
-          };
+  const { data, error, isLoading, isSaving, saveExercise } = useExerciseEditor({ exerciseId, mode });
 
-  const [active, setActive] = useState(true);
-  const [category] = useState(initialExercise.category);
-  const [description, setDescription] = useState(initialExercise.description);
-  const [muscleGroup] = useState(initialExercise.muscleGroup);
-  const [name, setName] = useState(initialExercise.name);
+  return (
+    <ExerciseEditorForm
+      data={data}
+      error={error}
+      isLoading={isLoading}
+      isSaving={isSaving}
+      key={`${mode}-${exerciseId ?? 'new'}-${data.initialValues.name}-${data.initialValues.categoryId ?? 'none'}`}
+      mode={mode}
+      saveExercise={saveExercise}
+    />
+  );
+}
+
+function ExerciseEditorForm({
+  data,
+  error,
+  isLoading,
+  isSaving,
+  mode,
+  saveExercise,
+}: {
+  data: ExerciseEditorData;
+  error: string | null;
+  isLoading: boolean;
+  isSaving: boolean;
+  mode: 'create' | 'edit';
+  saveExercise: (input: ExerciseEditorSaveInput) => Promise<void>;
+}) {
+  const [active, setActive] = useState(data.initialValues.active);
+  const [categoryId, setCategoryId] = useState<string | null>(data.initialValues.categoryId);
+  const [description, setDescription] = useState(data.initialValues.description);
+  const [imageUrl] = useState<string | null>(data.initialValues.imageUrl);
+  const [name, setName] = useState(data.initialValues.name);
+  const [videoUrl] = useState<string | null>(data.initialValues.videoUrl);
+  const selectedCategory = data.categories.find((category) => category.id === categoryId) ?? null;
+  const muscleGroup = selectedCategory?.muscleGroup ?? data.initialValues.muscleGroup;
 
   const title = mode === 'edit' ? 'Edit Exercise' : 'Create Exercise';
   const subtitle =
     mode === 'edit'
       ? 'Update the technical specifications for this movement.'
       : 'Define the technical specifications for this movement.';
+  const saveDisabled = isLoading || isSaving || !name.trim();
 
-  const saveExercise = () => {
-    router.replace('/exercises');
+  const handleSaveExercise = () => {
+    saveExercise({
+      active,
+      categoryId,
+      description,
+      imageUrl,
+      name,
+      videoUrl,
+    });
   };
 
   return (
@@ -102,13 +110,19 @@ export function ExerciseEditorScreen({ exerciseId, mode }: ExerciseEditorScreenP
           accessibilityRole="button"
           onPress={() => undefined}
           style={({ pressed }) => [styles.videoCard, pressed && styles.pressed]}>
-          <Image
-            accessibilityLabel="Exercise video preview"
-            contentFit="cover"
-            source={initialExercise.imageUrl}
-            style={styles.videoImage}
-            transition={200}
-          />
+          {imageUrl ? (
+            <Image
+              accessibilityLabel="Exercise video preview"
+              contentFit="cover"
+              source={imageUrl}
+              style={styles.videoImage}
+              transition={200}
+            />
+          ) : (
+            <View style={styles.videoPlaceholder}>
+              <AppIcon color={SemanticColors.actionSoft} name="camera" size={30} />
+            </View>
+          )}
           <View style={styles.videoOverlay} />
           <View style={styles.videoAction}>
             <View style={styles.playTile}>
@@ -134,6 +148,12 @@ export function ExerciseEditorScreen({ exerciseId, mode }: ExerciseEditorScreenP
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Exercise Identity</Text>
+
+          {error ? (
+            <StatusCard body={error} title="Local exercise unavailable" />
+          ) : isLoading ? (
+            <StatusCard body="Preparing local exercise data." title="Loading exercise" />
+          ) : null}
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Exercise Name</Text>
@@ -163,8 +183,12 @@ export function ExerciseEditorScreen({ exerciseId, mode }: ExerciseEditorScreenP
             />
           </View>
 
-          <SelectLikeRow label="Category" value={category} />
-          <SelectLikeRow label="Primary Muscle Group" value={muscleGroup} />
+          <CategoryPicker
+            categories={data.categories}
+            onSelect={setCategoryId}
+            selectedId={categoryId}
+          />
+          <InfoRow label="Primary Muscle Group" value={muscleGroup} />
 
           <View style={styles.statusCard}>
             <View style={styles.statusCopy}>
@@ -185,9 +209,15 @@ export function ExerciseEditorScreen({ exerciseId, mode }: ExerciseEditorScreenP
         <Pressable
           accessibilityLabel="Save Exercise"
           accessibilityRole="button"
-          onPress={saveExercise}
-          style={({ pressed }) => [styles.saveButton, pressed && styles.saveButtonPressed]}>
-          <Text style={styles.saveButtonText}>Save Exercise</Text>
+          accessibilityState={{ disabled: saveDisabled }}
+          disabled={saveDisabled}
+          onPress={handleSaveExercise}
+          style={({ pressed }) => [
+            styles.saveButton,
+            saveDisabled && styles.saveButtonDisabled,
+            pressed && !saveDisabled && styles.saveButtonPressed,
+          ]}>
+          <Text style={styles.saveButtonText}>{isSaving ? 'Saving...' : 'Save Exercise'}</Text>
           <AppIcon color={DesignColors.onPrimaryContainer} name="check" size={18} />
         </Pressable>
       </View>
@@ -195,22 +225,72 @@ export function ExerciseEditorScreen({ exerciseId, mode }: ExerciseEditorScreenP
   );
 }
 
-function SelectLikeRow({ label, value }: { label: string; value: string }) {
+function CategoryPicker({
+  categories,
+  onSelect,
+  selectedId,
+}: {
+  categories: ExerciseEditorCategoryOption[];
+  onSelect: (categoryId: string) => void;
+  selectedId: string | null;
+}) {
   return (
-    <Pressable
+    <View style={styles.categoryGroup}>
+      <Text style={styles.inputLabel}>Category</Text>
+      <ScrollView
+        horizontal
+        contentContainerStyle={styles.categoryChips}
+        showsHorizontalScrollIndicator={false}>
+        {categories.map((category) => {
+          const selected = category.id === selectedId;
+
+          return (
+            <Pressable
+              accessibilityLabel={`Choose ${category.label}`}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              key={category.id}
+              onPress={() => onSelect(category.id)}
+              style={({ pressed }) => [
+                styles.categoryChip,
+                selected && styles.categoryChipSelected,
+                pressed && styles.pressed,
+              ]}>
+              <Text style={[styles.categoryChipText, selected && styles.categoryChipTextSelected]}>
+                {category.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View
       accessibilityLabel={`${label}: ${value}`}
-      accessibilityRole="button"
-      onPress={() => undefined}
-      style={({ pressed }) => [styles.selectRow, pressed && styles.pressed]}>
+      style={styles.selectRow}>
       <View style={styles.selectCopy}>
         <Text style={styles.inputLabel}>{label}</Text>
         <Text style={styles.selectValue}>{value}</Text>
       </View>
       <View style={styles.selectIcons}>
-        <AppIcon color={SemanticColors.textMuted} name="chevronDown" size={15} />
         <AppIcon color={SemanticColors.actionSoft} name="chevrons" size={15} />
       </View>
-    </Pressable>
+    </View>
+  );
+}
+
+function StatusCard({ body, title }: { body: string; title: string }) {
+  return (
+    <View style={styles.statusMessage}>
+      <Text style={styles.statusMessageTitle}>{title}</Text>
+      <Text selectable style={styles.statusMessageBody}>
+        {body}
+      </Text>
+    </View>
   );
 }
 
@@ -256,6 +336,13 @@ const styles = StyleSheet.create({
   },
   videoImage: {
     height: '100%',
+    width: '100%',
+  },
+  videoPlaceholder: {
+    alignItems: 'center',
+    backgroundColor: DesignColors.surfaceContainerLowest,
+    height: '100%',
+    justifyContent: 'center',
     width: '100%',
   },
   videoOverlay: {
@@ -352,6 +439,41 @@ const styles = StyleSheet.create({
     minHeight: 112,
     padding: 0,
   },
+  categoryGroup: {
+    backgroundColor: ComponentTokens.input.background,
+    borderColor: ComponentTokens.input.borderColor,
+    borderCurve: 'continuous',
+    borderRadius: ComponentTokens.input.radius,
+    borderWidth: ComponentTokens.input.borderWidth,
+    gap: Space.sm,
+    padding: Spacing.three,
+  },
+  categoryChips: {
+    gap: Space.sm,
+  },
+  categoryChip: {
+    alignItems: 'center',
+    backgroundColor: SemanticColors.card,
+    borderColor: SemanticColors.border,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    justifyContent: 'center',
+    minHeight: 34,
+    paddingHorizontal: Spacing.three,
+  },
+  categoryChipSelected: {
+    backgroundColor: SemanticColors.action,
+    borderColor: SemanticColors.action,
+  },
+  categoryChipText: {
+    color: SemanticColors.textPrimary,
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    lineHeight: 14,
+  },
+  categoryChipTextSelected: {
+    color: DesignColors.onPrimaryContainer,
+  },
   selectRow: {
     alignItems: 'center',
     backgroundColor: ComponentTokens.input.background,
@@ -441,6 +563,9 @@ const styles = StyleSheet.create({
     backgroundColor: DesignColors.inversePrimary,
     transform: [{ scale: 0.99 }],
   },
+  saveButtonDisabled: {
+    opacity: 0.54,
+  },
   saveButtonText: {
     ...Typography.lg,
     color: DesignColors.onPrimaryContainer,
@@ -448,5 +573,24 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.72,
+  },
+  statusMessage: {
+    backgroundColor: ComponentTokens.card.background,
+    borderColor: ComponentTokens.card.borderColor,
+    borderCurve: 'continuous',
+    borderRadius: ComponentTokens.card.radius,
+    borderWidth: ComponentTokens.card.borderWidth,
+    gap: Space.xs,
+    padding: Spacing.three,
+  },
+  statusMessageTitle: {
+    ...Typography.sm,
+    color: SemanticColors.textPrimary,
+    fontFamily: Fonts.bodyBold,
+  },
+  statusMessageBody: {
+    ...Typography.xs,
+    color: SemanticColors.textSecondary,
+    fontFamily: Fonts.bodyMedium,
   },
 });

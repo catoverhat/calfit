@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import {
   Pressable,
   StyleSheet,
+  Text,
   View,
   type StyleProp,
   type ViewStyle,
@@ -16,7 +17,7 @@ type HeaderProps = {
   actionAccessibilityLabel?: string;
   actionIcon?: AppIconName;
   actionIconColor?: string;
-  avatarUrl: string;
+  avatarUrl?: string | null;
   onNotificationsPress?: () => void;
   onProfilePress?: () => void;
   profileName: string;
@@ -36,6 +37,7 @@ export function Header({
   title = 'Kinetic Pulse',
 }: HeaderProps) {
   const theme = useTheme();
+  const initials = profileName.slice(0, 2).toUpperCase();
 
   return (
     <View style={[styles.container, style]}>
@@ -45,12 +47,20 @@ export function Header({
         hitSlop={8}
         onPress={onProfilePress}
         style={({ pressed }) => pressed && styles.pressed}>
-        <Image
-          accessibilityLabel={`${profileName}'s profile photo`}
-          source={avatarUrl}
-          style={[styles.avatar, { borderColor: theme.border }]}
-          transition={150}
-        />
+        {avatarUrl ? (
+          <Image
+            accessibilityLabel={`${profileName}'s profile photo`}
+            source={avatarUrl}
+            style={[styles.avatar, { borderColor: theme.border }]}
+            transition={150}
+          />
+        ) : (
+          <View
+            accessibilityLabel={`${profileName}'s profile initials`}
+            style={[styles.avatarFallback, { borderColor: theme.border }]}>
+            <Text style={styles.avatarInitials}>{initials}</Text>
+          </View>
+        )}
       </Pressable>
       <ThemedText style={styles.brand}>{title}</ThemedText>
       <Pressable
@@ -77,6 +87,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 36,
     width: 36,
+  },
+  avatarFallback: {
+    alignItems: 'center',
+    backgroundColor: Palette.primary[500],
+    borderCurve: 'continuous',
+    borderRadius: 18,
+    borderWidth: 1,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  avatarInitials: {
+    color: Palette.secondary[950],
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    lineHeight: 14,
   },
   brand: {
     ...Typography.sm,

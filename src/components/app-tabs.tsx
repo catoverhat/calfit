@@ -16,11 +16,13 @@ export default function AppTabs() {
           color: DesignColors.secondary,
           fontFamily: Fonts.label,
           fontSize: Typography.xs.fontSize,
+          fontWeight: "500",
         },
         selected: {
           color: DesignColors.primaryContainer,
-          fontFamily: Fonts.bodyBold,
+          fontFamily: Fonts.label,
           fontSize: Typography.xs.fontSize,
+          fontWeight: "700",
         },
       }}
       rippleColor="transparent"

@@ -165,13 +165,41 @@ export const Colors = {
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = {
-  heading: 'Montserrat_600SemiBold',
-  headingRegular: 'Montserrat_400Regular',
-  body: 'Inter_400Regular',
-  bodyMedium: 'Inter_500Medium',
-  bodySemiBold: 'Inter_600SemiBold',
-  bodyBold: 'Inter_700Bold',
-  label: 'Inter_500Medium',
+  heading: Platform.select({
+    ios: 'Montserrat-SemiBold',
+    default: 'Montserrat_600SemiBold',
+    web: 'Montserrat_600SemiBold',
+  }),
+  headingRegular: Platform.select({
+    ios: 'Montserrat-Regular',
+    default: 'Montserrat_400Regular',
+    web: 'Montserrat_400Regular',
+  }),
+  body: Platform.select({
+    ios: 'Inter-Regular',
+    default: 'Inter_400Regular',
+    web: 'Inter_400Regular',
+  }),
+  bodyMedium: Platform.select({
+    ios: 'Inter-Medium',
+    default: 'Inter_500Medium',
+    web: 'Inter_500Medium',
+  }),
+  bodySemiBold: Platform.select({
+    ios: 'Inter-SemiBold',
+    default: 'Inter_600SemiBold',
+    web: 'Inter_600SemiBold',
+  }),
+  bodyBold: Platform.select({
+    ios: 'Inter-Bold',
+    default: 'Inter_700Bold',
+    web: 'Inter_700Bold',
+  }),
+  label: Platform.select({
+    ios: 'Inter-Medium',
+    default: 'Inter_500Medium',
+    web: 'Inter_500Medium',
+  }),
   mono: Platform.select({ ios: 'ui-monospace', default: 'monospace', web: 'var(--font-mono)' }),
 } as const;
 
