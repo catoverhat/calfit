@@ -161,6 +161,26 @@ The design system employs a consistent "Rounded Eight" (8px) logic for standard 
 ## Components
 
 - **Buttons:** Primary buttons are solid Electric Orange with black text for maximum contrast. Secondary buttons use a ghost style (orange outline, transparent fill).
+- **Navigation Buttons:** When a button navigates with Expo Router, compose it as `Link` -> `Pressable` -> `View` -> icon or label. Set `asChild` on `Link`, put accessibility props on `Pressable`, and apply the button's visual styles plus the render-prop `pressed` style to the inner `View`. This keeps linked buttons visually and behaviorally consistent across platforms:
+
+  ```tsx
+  <Link href="/routines/create" asChild>
+    <Pressable
+      accessibilityLabel="Create routine"
+      accessibilityRole="button"
+    >
+      {({ pressed }) => (
+        <View style={[styles.createButton, pressed && styles.pressed]}>
+          <AppIcon
+            color={DesignColors.onPrimaryContainer}
+            name="add"
+            size={20}
+          />
+        </View>
+      )}
+    </Pressable>
+  </Link>
+  ```
 - **Exercise Cards:** Use the Surface Container color with an 8px radius. Titles are bold white. Sub-text (reps/weight) uses the secondary text color.
 - **Set Logger:** A row-based component with large, accessible input fields. Success states (set completed) should transform the row background to a subtle dark green tint or use a bold checkmark.
 - **Progress Rings:** High-stroke circular indicators for rest timers, using Electric Orange for the active progress and the secondary neutral for the remaining track.
