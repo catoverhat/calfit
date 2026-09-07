@@ -119,4 +119,36 @@ describe('exercise repository', () => {
     expect(catalog.some((exercise) => exercise.exercise_id === inactiveExercise.exercise_id)).toBe(true);
   });
 
+  it('allows a built-in exercise to be edited and hidden locally', async () => {
+    const db = new MemoryDb();
+
+    await initializeLocalDatabase(db);
+    await seedBuiltInExercisesIfEmpty(db);
+    await updateExercise(db, {
+      exerciseId: 'bench-press',
+      name: 'Paused Bench Press',
+      description: 'Pause every repetition on the chest.',
+      active: false,
+      categoryId: 'cat-chest',
+      imageUrl: 'https://example.com/paused-bench.jpg',
+      videoUrl: 'https://example.com/paused-bench.mp4',
+      now: '2026-07-08T12:00:00.000Z',
+    });
+
+    const detail = await getExerciseDetail(db, 'bench-press');
+    const catalog = await getExerciseCatalog(db);
+
+    expect(detail).toEqual(
+      expect.objectContaining({
+        active: 0,
+        description: 'Pause every repetition on the chest.',
+        image_url: 'https://example.com/paused-bench.jpg',
+        name: 'Paused Bench Press',
+        user_id_fk: null,
+        video_url: 'https://example.com/paused-bench.mp4',
+      })
+    );
+    expect(catalog.some((exercise) => exercise.exercise_id === 'bench-press')).toBe(false);
+  });
+
 });

@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { router, type Href } from 'expo-router';
+import { Link } from 'expo-router';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
@@ -10,14 +10,12 @@ import { styles } from '../exercise-catalog-screen.styles';
 
 export function ExerciseCatalogToolbar({
   filters,
-  onCreate,
   onQueryChange,
   onSelectFilter,
   query,
   selectedFilter,
 }: {
   filters: string[];
-  onCreate: () => void;
   onQueryChange: (query: string) => void;
   onSelectFilter: (filter: string) => void;
   query: string;
@@ -30,14 +28,16 @@ export function ExerciseCatalogToolbar({
           <Text style={styles.title}>Catalog</Text>
           <Text style={styles.subtitle}>Browse or create your next move</Text>
         </View>
-        <Pressable
-          accessibilityLabel="Create Exercise"
-          accessibilityRole="button"
-          onPress={onCreate}
-          style={({ pressed }) => [styles.createButton, pressed && styles.pressed]}>
-          <AppIcon color={DesignColors.onPrimaryContainer} name="add" size={14} />
-          <Text style={styles.createButtonText}>Create Exercise</Text>
-        </Pressable>
+        <Link href="/(tabs)/exercises/create" push asChild>
+          <Pressable accessibilityLabel="Create Exercise" accessibilityRole="button">
+            {({ pressed }) => (
+              <View style={[styles.createButton, pressed && styles.pressed]}>
+                <AppIcon color={DesignColors.onPrimaryContainer} name="add" size={14} />
+                <Text style={styles.createButtonText}>Create Exercise</Text>
+              </View>
+            )}
+          </Pressable>
+        </Link>
       </View>
       <View style={styles.searchBox}>
         <AppIcon color={DesignColors.onSurfaceVariant} name="search" size={16} />
@@ -110,19 +110,24 @@ export function ExerciseCatalogCard({ exercise }: { exercise: ExerciseCatalogVie
             </View>
           </View>
 
-          <Pressable
-            accessibilityLabel={`Edit ${exercise.name}`}
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={() =>
-              router.push({
-                pathname: '/(tabs)/exercises/[id]/edit',
-                params: { id: exercise.id },
-              } as unknown as Href)
-            }
-            style={({ pressed }) => [styles.menuButton, pressed && styles.pressed]}>
-            <AppIcon color={SemanticColors.textSecondary} name="menu" size={16} />
-          </Pressable>
+          <Link
+            href={{
+              pathname: '/(tabs)/exercises/[id]/edit',
+              params: { id: exercise.id },
+            }}
+            push
+            asChild>
+            <Pressable
+              accessibilityLabel={`Edit ${exercise.name}`}
+              accessibilityRole="button"
+              hitSlop={8}>
+              {({ pressed }) => (
+                <View style={[styles.menuButton, pressed && styles.pressed]}>
+                  <AppIcon color={SemanticColors.textSecondary} name="edit" size={16} />
+                </View>
+              )}
+            </Pressable>
+          </Link>
         </View>
       </View>
     </View>

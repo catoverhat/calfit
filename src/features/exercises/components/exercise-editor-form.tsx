@@ -7,7 +7,7 @@ import { DesignColors, SemanticColors } from '@/theme/tokens';
 
 import { ExerciseCategoryPicker } from './exercise-category-picker';
 import { styles } from './exercise-editor-form.styles';
-import { ExerciseMediaCards } from './exercise-media-cards';
+
 export function ExerciseEditorForm({
   data,
   error,
@@ -62,8 +62,6 @@ export function ExerciseEditorForm({
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
-
-        <ExerciseMediaCards imageUrl={imageUrl} mode={mode} />
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Exercise Identity</Text>
@@ -154,7 +152,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
         <Text style={styles.selectValue}>{value}</Text>
       </View>
       <View style={styles.selectIcons}>
-        <AppIcon color={SemanticColors.actionSoft} name="chevrons" size={15} />
+        <AppIcon color={SemanticColors.actionSoft} name="info" size={15} />
       </View>
     </View>
   );
