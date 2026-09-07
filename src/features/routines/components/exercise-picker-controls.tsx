@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
@@ -62,9 +63,11 @@ export function ExercisePickerFilters({
 
 export function ExercisePickerFooter({
   onAddSelection,
+  routineName,
   selectedCount,
 }: {
   onAddSelection: () => void;
+  routineName: string;
   selectedCount: number;
 }) {
   return (
@@ -72,7 +75,7 @@ export function ExercisePickerFooter({
       <Pressable
         accessibilityLabel="Create Custom Exercise"
         accessibilityRole="button"
-        onPress={() => undefined}
+        onPress={() => router.push('/exercises/create')}
         style={({ pressed }) => [styles.customButton, pressed && styles.pressed]}>
         <View style={styles.customIcon}>
           <AppIcon color={SemanticColors.actionSoft} name="add" size={16} />
@@ -82,14 +85,14 @@ export function ExercisePickerFooter({
       <View style={styles.footer}>
         <View style={styles.footerCopy}>
           <Text style={styles.selectedCount}>{selectedCount} Exercises Selected</Text>
-          <Text style={styles.routineName}>Chest Day Routine</Text>
+          <Text numberOfLines={1} style={styles.routineName}>{routineName}</Text>
         </View>
         <Pressable
           accessibilityLabel="Add Selection"
           accessibilityRole="button"
           onPress={onAddSelection}
           style={({ pressed }) => [styles.addSelectionButton, pressed && styles.addSelectionPressed]}>
-          <Text style={styles.addSelectionText}>Add Selection</Text>
+          <Text style={styles.addSelectionText}>Add {selectedCount || ''} Selection{selectedCount === 1 ? '' : 's'}</Text>
         </Pressable>
       </View>
     </>

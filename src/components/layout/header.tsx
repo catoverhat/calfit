@@ -21,6 +21,7 @@ type HeaderProps = {
   onNotificationsPress?: () => void;
   onProfilePress?: () => void;
   profileName: string;
+  showAction?: boolean;
   style?: StyleProp<ViewStyle>;
   title?: string;
 };
@@ -33,6 +34,7 @@ export function Header({
   onNotificationsPress,
   onProfilePress,
   profileName,
+  showAction = true,
   style,
   title = 'Kinetic Pulse',
 }: HeaderProps) {
@@ -63,14 +65,18 @@ export function Header({
         )}
       </Pressable>
       <ThemedText style={styles.brand}>{title}</ThemedText>
-      <Pressable
-        accessibilityLabel={actionAccessibilityLabel}
-        accessibilityRole="button"
-        hitSlop={12}
-        onPress={onNotificationsPress}
-        style={({ pressed }) => [styles.notificationButton, pressed && styles.pressed]}>
-        <AppIcon color={actionIconColor ?? theme.text} name={actionIcon} size={19} />
-      </Pressable>
+      {showAction ? (
+        <Pressable
+          accessibilityLabel={actionAccessibilityLabel}
+          accessibilityRole="button"
+          hitSlop={12}
+          onPress={onNotificationsPress}
+          style={({ pressed }) => [styles.notificationButton, pressed && styles.pressed]}>
+          <AppIcon color={actionIconColor ?? theme.text} name={actionIcon} size={19} />
+        </Pressable>
+      ) : (
+        <View style={styles.notificationButton} />
+      )}
     </View>
   );
 }

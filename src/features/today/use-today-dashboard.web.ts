@@ -17,6 +17,7 @@ const mockRoutine: RoutineDetail = {
   active: 1,
   created_at: mockNow,
   updated_at: mockNow,
+  schedules: [],
   exercises: MOCK_WORKOUTS[0].exercises.map((exercise, index) => ({
     routine_exercise_id: `web-routine-exercise-${exercise.id}`,
     routine_id_fk: MOCK_WORKOUTS[0].id,

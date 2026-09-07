@@ -1,91 +1,111 @@
-import { styles } from './routine-list-screen.styles';
-import { Link } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { Link } from "expo-router";
+import { ActivityIndicator, Pressable, View } from "react-native";
 
-import { Header } from '@/components/layout/header';
-import { TabScreen } from '@/components/layout/tab-screen';
-import { ThemedText } from '@/components/ui/themed-text';
-import { AppIcon } from '@/components/ui/app-icon';
-import { MOCK_USER } from '@/fixtures/mock-data';
-import { DesignColors, SemanticColors } from '@/theme/tokens';
-import { RoutineCard, type RoutineSummary } from './components/routine-card';
+import { Header } from "@/components/layout/header";
+import { TabScreen } from "@/components/layout/tab-screen";
+import { AppIcon } from "@/components/ui/app-icon";
+import { ThemedText } from "@/components/ui/themed-text";
+import { DesignColors, SemanticColors } from "@/theme/tokens";
+import { RoutineCard } from "./components/routine-card";
+import { styles } from "./routine-list-screen.styles";
+import { useRoutineList } from "./use-routine-list";
 
-const ROUTINES: readonly RoutineSummary[] = [
-  {
-    id: 'push-day',
-    title: 'Push Day',
-    description: 'Focus on chest, shoulders, and triceps with heavy compound movements.',
-    icon: 'strength',
-    statLabel: 'Exercises',
-    statValue: 8,
-    schedule: ['M', 'W', 'F'],
-    lastCompleted: 'Last: Oct 24, 2023',
-  },
-  {
-    id: 'leg-day',
-    title: 'Leg Day',
-    description: 'High volume hypertrophy for quads, hamstrings, and calves.',
-    icon: 'briefcase',
-    statLabel: 'Exercises',
-    statValue: 6,
-    schedule: ['T'],
-    lastCompleted: 'Last: Oct 21, 2023',
-  },
-  {
-    id: 'full-body-power',
-    title: 'Full Body',
-    description: 'Efficient full body conditioning for busy days.',
-    icon: 'body',
-    statLabel: 'Exercises',
-    statValue: 12,
-    schedule: ['F'],
-    lastCompleted: 'Last: Never',
-  },
-  {
-    id: 'running-day',
-    title: 'Running Day',
-    description: '5km tempo run or interval training for cardiovascular endurance.',
-    icon: 'running',
-    statLabel: 'Intervals',
-    statValue: 1,
-    schedule: ['W', 'S'],
-    lastCompleted: 'Last: Oct 25, 2023',
-  },
-] as const;
+const ErrorState = ({
+  error,
+  reload,
+}: {
+  error: string;
+  reload: () => void;
+}) => {
+  return (
+    <View style={styles.stateCard}>
+      <View style={styles.stateIcon}>
+        <AppIcon color={SemanticColors.danger} name="warning" size={22} />
+      </View>
+      <ThemedText style={styles.stateTitle}>Routines unavailable</ThemedText>
+      <ThemedText style={styles.stateText}>{error}</ThemedText>
+      <Pressable
+        accessibilityRole="button"
+        onPress={reload}
+        style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
+      >
+        <ThemedText style={styles.retryText}>Try again</ThemedText>
+      </Pressable>
+    </View>
+  );
+};
 
 export function RoutineListScreen() {
+  const { error, isLoading, profileName, reload, routines } = useRoutineList();
+
   return (
-    <TabScreen contentContainerStyle={styles.scrollContent} style={styles.screen}>
+    <TabScreen
+      contentContainerStyle={styles.scrollContent}
+      style={styles.screen}
+    >
       <View style={styles.content}>
-        <Header
-          actionAccessibilityLabel="Sync routines"
-          actionIcon="cloud"
-          actionIconColor={SemanticColors.actionSoft}
-          avatarUrl={MOCK_USER.avatarUrl}
-          profileName={MOCK_USER.name}
-        />
-
-        <View style={styles.heading}>
-          <ThemedText style={styles.eyebrow}>Your Program</ThemedText>
-          <ThemedText style={styles.title}>Workout Routines</ThemedText>
-        </View>
-
-        <View style={styles.list}>
-          {ROUTINES.map((routine) => (
-            <RoutineCard key={routine.id} routine={routine} />
-          ))}
-        </View>
-
-        <View style={styles.fabRow}>
+        <Header profileName={profileName} showAction={false} />
+        <View style={styles.headingRow}>
+          <View style={styles.heading}>
+            <ThemedText style={styles.eyebrow}>Your program</ThemedText>
+            <ThemedText style={styles.title}>Workout Routines</ThemedText>
+            {!isLoading && !error ? (
+              <ThemedText style={styles.subtitle}>
+                {routines.length}{" "}
+                {routines.length === 1 ? "routine" : "routines"} stored locally
+              </ThemedText>
+            ) : null}
+          </View>
           <Link href="/routines/create" asChild>
             <Pressable
-              accessibilityLabel="Create Routine"
+              accessibilityLabel="Create routine"
               accessibilityRole="button"
-              style={({ pressed }) => [styles.fab, pressed && styles.pressed]}>
-              <AppIcon color={DesignColors.onPrimaryContainer} name="add" size={22} />
+            >
+              {({ pressed }) => (
+                <View style={[styles.createButton, pressed && styles.pressed]}>
+                  <AppIcon
+                    color={DesignColors.onPrimaryContainer}
+                    name="add"
+                    size={20}
+                  />
+                </View>
+              )}
             </Pressable>
           </Link>
         </View>
+
+        {isLoading ? (
+          <View accessibilityLabel="Loading routines" style={styles.stateCard}>
+            <ActivityIndicator color={SemanticColors.action} size="large" />
+            <ThemedText style={styles.stateText}>
+              Loading your routines…
+            </ThemedText>
+          </View>
+        ) : error ? (
+          <ErrorState error={error} reload={reload} />
+        ) : routines.length === 0 ? (
+          <View style={styles.stateCard}>
+            <View style={styles.stateIcon}>
+              <AppIcon
+                color={SemanticColors.actionSoft}
+                name="routines"
+                size={24}
+              />
+            </View>
+            <ThemedText style={styles.stateTitle}>
+              Build your first routine
+            </ThemedText>
+            <ThemedText style={styles.stateText}>
+              Combine exercises, set targets, and choose your training days.
+            </ThemedText>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {routines.map((routine) => (
+              <RoutineCard key={routine.id} routine={routine} />
+            ))}
+          </View>
+        )}
       </View>
     </TabScreen>
   );

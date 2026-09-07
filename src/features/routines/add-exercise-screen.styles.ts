@@ -20,6 +20,24 @@ export const styles = StyleSheet.create({
     maxWidth: Math.min(MaxContentWidth, 430),
     width: '100%',
   },
+  heading: {
+    gap: Space.xs,
+  },
+  eyebrow: {
+    ...TypeScale.labelMd,
+    color: SemanticColors.actionSoft,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+  },
+  title: {
+    ...TypeScale.headlineLg,
+    color: SemanticColors.textPrimary,
+  },
+  subtitle: {
+    ...Typography.sm,
+    color: SemanticColors.textSecondary,
+    fontFamily: Fonts.bodyMedium,
+  },
   searchBox: {
     alignItems: 'center',
     backgroundColor: ComponentTokens.input.background,
@@ -131,6 +149,17 @@ export const styles = StyleSheet.create({
     gap: Space.xs,
     padding: Spacing.four,
   },
+  stateCard: {
+    alignItems: 'center',
+    backgroundColor: ComponentTokens.card.background,
+    borderColor: ComponentTokens.card.borderColor,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    gap: Spacing.two,
+    justifyContent: 'center',
+    minHeight: 160,
+    padding: Spacing.four,
+  },
   emptyTitle: {
     ...TypeScale.headlineSm,
     color: SemanticColors.textPrimary,
@@ -141,6 +170,12 @@ export const styles = StyleSheet.create({
     color: SemanticColors.textSecondary,
     fontFamily: Fonts.bodyMedium,
     textAlign: 'center',
+  },
+  retryText: {
+    ...Typography.sm,
+    color: SemanticColors.actionSoft,
+    fontFamily: Fonts.bodyBold,
+    padding: Spacing.two,
   },
   customButton: {
     alignItems: 'center',

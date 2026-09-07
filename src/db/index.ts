@@ -35,7 +35,9 @@ export { getTodayDashboardSnapshot, getWorkoutStreak } from './repositories/dash
 export {
   createRoutine,
   getRoutineDetail,
+  getRoutineSummaries,
   getTodayRoutine,
+  seedDemoRoutinesIfEmpty,
   seedStarterRoutineIfEmpty,
   updateRoutine,
   updateRoutineExerciseTarget,
@@ -46,6 +48,7 @@ export type {
   CreateRoutineTargetInput,
   UpdateRoutineInput,
   UpdateRoutineTargetInput,
+  RoutineSummary,
 } from './repositories/routines';
 export {
   completeWorkoutSession,
@@ -69,6 +72,7 @@ export type {
   RoutineExerciseTargetRow,
   RoutineExerciseWithTargets,
   RoutineRow,
+  RoutineScheduleRow,
   SqlRunResult,
   SqlValue,
   UserRow,

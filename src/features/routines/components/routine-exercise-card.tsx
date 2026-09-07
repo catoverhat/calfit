@@ -1,80 +1,215 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, TextInput, View } from "react-native";
 
-import { styles } from '../routine-editor-screen.styles';
+import { AppIcon } from "@/components/ui/app-icon";
+import { ThemedText } from "@/components/ui/themed-text";
+import { DesignColors, SemanticColors } from "@/theme/tokens";
+import type {
+  RoutineExerciseDraft,
+  RoutineTargetDraft,
+} from "../routine-draft-context";
+import { styles } from "../routine-editor-screen.styles";
 
-export type EditableExercise = {
-  dist: string;
-  id: string;
-  name: string;
-  reps: string;
-  sets: string;
-  speed: string;
-  weight: string;
-};
 export function RoutineExerciseCard({
+  addTarget,
+  canMoveDown,
+  canMoveUp,
   exercise,
+  moveDown,
+  moveUp,
   onDelete,
+  removeTarget,
+  updateTarget,
 }: {
-  exercise: EditableExercise;
+  addTarget: () => void;
+  canMoveDown: boolean;
+  canMoveUp: boolean;
+  exercise: RoutineExerciseDraft;
+  moveDown: () => void;
+  moveUp: () => void;
   onDelete: () => void;
+  removeTarget: (targetId: string) => void;
+  updateTarget: (
+    targetId: string,
+    field: keyof Omit<RoutineTargetDraft, "id">,
+    value: string,
+  ) => void;
 }) {
   return (
     <View style={styles.exerciseCard}>
-      <View accessibilityElementsHidden style={styles.dragHandle}>
-        <View style={styles.dragDot} />
-        <View style={styles.dragDot} />
-        <View style={styles.dragDot} />
-      </View>
-
-      <View style={styles.exerciseBody}>
-        <View style={styles.exerciseTitleRow}>
-          <Text style={styles.exerciseName}>{exercise.name}</Text>
-          <Pressable
-            accessibilityLabel={`Delete ${exercise.name}`}
-            accessibilityRole="button"
-            hitSlop={8}
+      <View style={styles.exerciseTitleRow}>
+        <View style={styles.exerciseTitleCopy}>
+          <ThemedText style={styles.exerciseName}>{exercise.name}</ThemedText>
+          <ThemedText style={styles.exerciseMeta}>
+            {exercise.targets.length}{" "}
+            {exercise.targets.length === 1 ? "set" : "sets"}
+          </ThemedText>
+        </View>
+        <View style={styles.exerciseActions}>
+          <IconButton
+            disabled={!canMoveUp}
+            icon="arrowUp"
+            label={`Move ${exercise.name} up`}
+            onPress={moveUp}
+          />
+          <IconButton
+            disabled={!canMoveDown}
+            icon="arrowDown"
+            label={`Move ${exercise.name} down`}
+            onPress={moveDown}
+          />
+          <IconButton
+            icon="trash"
+            label={`Remove ${exercise.name}`}
             onPress={onDelete}
-            style={({ pressed }) => pressed && styles.pressed}>
-            <TrashIcon />
-          </Pressable>
-        </View>
-
-        <View style={styles.metricRow}>
-          <MetricCell label="Sets" value={exercise.sets} />
-          <MetricCell label="Reps" value={exercise.reps} />
-          <MetricCell label="Weight (kg)" tone="accent" value={exercise.weight} />
-          <MetricCell label="Speed" value={exercise.speed} />
-          <MetricCell label="Dist (m)" value={exercise.dist} />
+            tone="danger"
+          />
         </View>
       </View>
+      <View style={styles.targetEditorList}>
+        {exercise.targets.map((target, index) => (
+          <View key={target.id} style={styles.targetEditor}>
+            <View style={styles.targetHeader}>
+              <ThemedText style={styles.targetTitle}>
+                SET {index + 1}
+              </ThemedText>
+              <Pressable
+                accessibilityLabel={`Remove set ${index + 1}`}
+                disabled={exercise.targets.length === 1}
+                onPress={() => removeTarget(target.id)}
+                style={({ pressed }) => [
+                  styles.removeSetButton,
+                  exercise.targets.length === 1 && styles.buttonDisabled,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <AppIcon color={SemanticColors.danger} name="trash" size={16} />
+              </Pressable>
+            </View>
+            <View style={styles.targetFields}>
+              <TargetInput
+                field="reps"
+                label="Reps"
+                target={target}
+                updateTarget={updateTarget}
+              />
+              <TargetInput
+                decimal
+                field="weight"
+                label="Weight kg"
+                target={target}
+                updateTarget={updateTarget}
+              />
+              <TargetInput
+                decimal
+                field="speed"
+                label="Speed km/h"
+                target={target}
+                updateTarget={updateTarget}
+              />
+              <TargetInput
+                field="duration"
+                label="Duration sec"
+                target={target}
+                updateTarget={updateTarget}
+              />
+              <TargetInput
+                decimal
+                field="distance"
+                label="Distance m"
+                target={target}
+                updateTarget={updateTarget}
+              />
+              <TargetInput
+                field="rest"
+                label="Rest sec"
+                target={target}
+                updateTarget={updateTarget}
+              />
+            </View>
+          </View>
+        ))}
+      </View>
+      <Pressable
+        accessibilityRole="button"
+        onPress={addTarget}
+        style={({ pressed }) => [
+          styles.addSetButton,
+          pressed && styles.pressed,
+        ]}
+      >
+        <AppIcon color={SemanticColors.actionSoft} name="add" size={16} />
+        <ThemedText style={styles.addSetText}>Add target set</ThemedText>
+      </Pressable>
     </View>
   );
 }
 
-function MetricCell({
+function TargetInput({
+  decimal,
+  field,
   label,
-  tone,
-  value,
+  target,
+  updateTarget,
 }: {
+  decimal?: boolean;
+  field: keyof Omit<RoutineTargetDraft, "id">;
   label: string;
-  tone?: 'accent';
-  value: string;
+  target: RoutineTargetDraft;
+  updateTarget: (
+    targetId: string,
+    field: keyof Omit<RoutineTargetDraft, "id">,
+    value: string,
+  ) => void;
 }) {
   return (
-    <View style={styles.metricCell}>
-      <Text style={styles.metricLabel}>{label}</Text>
-      <Text style={[styles.metricValue, tone === 'accent' && styles.metricValueAccent]}>
-        {value}
-      </Text>
+    <View style={styles.targetField}>
+      <ThemedText style={styles.targetLabel}>{label}</ThemedText>
+      <TextInput
+        accessibilityLabel={label}
+        keyboardType={decimal ? "decimal-pad" : "number-pad"}
+        onChangeText={(value) => updateTarget(target.id, field, value)}
+        placeholder="—"
+        placeholderTextColor={DesignColors.onSecondaryContainer}
+        selectionColor={SemanticColors.action}
+        style={styles.targetInput}
+        value={target[field]}
+      />
     </View>
   );
 }
 
-function TrashIcon() {
+function IconButton({
+  disabled,
+  icon,
+  label,
+  onPress,
+  tone,
+}: {
+  disabled?: boolean;
+  icon: "arrowUp" | "arrowDown" | "trash";
+  label: string;
+  onPress: () => void;
+  tone?: "danger";
+}) {
   return (
-    <View accessibilityElementsHidden style={styles.trashIcon}>
-      <View style={styles.trashLid} />
-      <View style={styles.trashCan} />
-    </View>
+    <Pressable
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.exerciseIconButton,
+        disabled && styles.buttonDisabled,
+        pressed && styles.pressed,
+      ]}
+    >
+      <AppIcon
+        color={
+          tone === "danger" ? SemanticColors.danger : SemanticColors.textMuted
+        }
+        name={icon}
+        size={17}
+      />
+    </Pressable>
   );
 }

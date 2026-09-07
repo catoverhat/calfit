@@ -1,35 +1,88 @@
+import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { Pressable, View } from "react-native";
 
-import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
+import { AppIcon } from "@/components/ui/app-icon";
 import { ThemedText } from "@/components/ui/themed-text";
 import { SemanticColors } from "@/theme/tokens";
-
 import { styles } from "../routine-list-screen.styles";
+import type { RoutineSummaryViewModel } from "../routine.viewmodel";
 
-export type RoutineSummary = {
-  description: string;
-  icon: AppIconName;
-  id: string;
-  lastCompleted: string;
-  schedule: readonly string[];
-  statLabel: "Exercises" | "Intervals";
-  statValue: number;
-  title: string;
-};
-
-export function RoutineCard({ routine }: { routine: RoutineSummary }) {
+export function RoutineCard({ routine }: { routine: RoutineSummaryViewModel }) {
   return (
     <View style={styles.card}>
-      <View style={styles.cardTopRow}>
-        <View style={styles.iconTile}>
-          <AppIcon
-            color={SemanticColors.action}
-            name={routine.icon}
-            size={19}
+      <View style={styles.cardHeader}>
+        {routine.imageUrl ? (
+          <Image
+            accessibilityLabel={`${routine.title} exercise preview`}
+            contentFit="cover"
+            source={routine.imageUrl}
+            style={styles.cardImage}
+            transition={180}
           />
+        ) : (
+          <View style={styles.iconTile}>
+            <AppIcon
+              color={SemanticColors.action}
+              name={routine.focus === "cardio" ? "running" : "strength"}
+              size={24}
+            />
+          </View>
+        )}
+        <View style={styles.cardTitleBlock}>
+          <View style={styles.cardTitleRow}>
+            <ThemedText numberOfLines={1} style={styles.cardTitle}>
+              {routine.title}
+            </ThemedText>
+            <View
+              style={[
+                styles.statusDot,
+                !routine.active && styles.statusDotInactive,
+              ]}
+            />
+          </View>
+          <ThemedText numberOfLines={2} style={styles.cardDescription}>
+            {routine.description}
+          </ThemedText>
         </View>
+      </View>
 
+      <View style={styles.metricRow}>
+        <Metric
+          icon="exercises"
+          label="Exercises"
+          value={String(routine.exerciseCount)}
+        />
+        <Metric
+          icon="sets"
+          label="Target sets"
+          value={String(routine.setCount)}
+        />
+      </View>
+
+      <View style={styles.scheduleBlock}>
+        <ThemedText style={styles.metaLabel}>Weekly schedule</ThemedText>
+        <View style={styles.scheduleRow}>
+          {routine.schedule.length ? (
+            routine.schedule.map((day) => (
+              <View
+                accessibilityLabel={day.longLabel}
+                key={day.day}
+                style={styles.scheduleChip}
+              >
+                <ThemedText style={styles.scheduleText}>{day.label}</ThemedText>
+              </View>
+            ))
+          ) : (
+            <ThemedText style={styles.unscheduledText}>Flexible</ThemedText>
+          )}
+        </View>
+      </View>
+
+      <View style={styles.cardFooter}>
+        <ThemedText style={styles.lastCompleted}>
+          {routine.lastCompleted}
+        </ThemedText>
         <View style={styles.actionRow}>
           <Link
             href={{
@@ -41,20 +94,26 @@ export function RoutineCard({ routine }: { routine: RoutineSummary }) {
             <Pressable
               accessibilityLabel={`Edit ${routine.title}`}
               accessibilityRole="button"
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.iconButton,
-                pressed && styles.pressed,
-              ]}
             >
-              <AppIcon
-                color={SemanticColors.actionSoft}
-                name="edit"
-                size={17}
-              />
+              {({ pressed }) => (
+                <View
+                  style={[
+                    styles.footerActionButtonContent,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <ThemedText style={styles.footerActionButtonText}>
+                    Edit
+                  </ThemedText>
+                  <AppIcon
+                    color={SemanticColors.actionSoft}
+                    name="edit"
+                    size={16}
+                  />
+                </View>
+              )}
             </Pressable>
           </Link>
-
           <Link
             href={{ pathname: "/routines/[id]", params: { id: routine.id } }}
             asChild
@@ -62,53 +121,48 @@ export function RoutineCard({ routine }: { routine: RoutineSummary }) {
             <Pressable
               accessibilityLabel={`Open ${routine.title}`}
               accessibilityRole="button"
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.iconButton,
-                pressed && styles.pressed,
-              ]}
             >
-              <AppIcon
-                color={SemanticColors.actionSoft}
-                name="open"
-                size={17}
-              />
+              {({ pressed }) => (
+                <View
+                  style={[
+                    styles.footerActionButtonContent,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <ThemedText style={styles.footerActionButtonText}>
+                    View
+                  </ThemedText>
+                  <AppIcon
+                    color={SemanticColors.actionSoft}
+                    name="open"
+                    size={16}
+                  />
+                </View>
+              )}
             </Pressable>
           </Link>
         </View>
       </View>
+    </View>
+  );
+}
 
-      <View style={styles.cardCopy}>
-        <ThemedText style={styles.cardTitle}>{routine.title}</ThemedText>
-        <ThemedText style={styles.cardDescription}>
-          {routine.description}
-        </ThemedText>
+function Metric({
+  icon,
+  label,
+  value,
+}: {
+  icon: "exercises" | "sets";
+  label: string;
+  value: string;
+}) {
+  return (
+    <View style={styles.metric}>
+      <AppIcon color={SemanticColors.textMuted} name={icon} size={16} />
+      <View style={styles.metricTextBlock}>
+        <ThemedText style={styles.metricValue}>{value}</ThemedText>
+        <ThemedText style={styles.metricLabel}>{label}</ThemedText>
       </View>
-
-      <View style={styles.metaRow}>
-        <View style={styles.metricBlock}>
-          <ThemedText style={styles.metaLabel}>{routine.statLabel}</ThemedText>
-          <ThemedText style={styles.metricValue}>
-            {routine.statValue}
-          </ThemedText>
-        </View>
-
-        <View style={styles.metricBlock}>
-          <ThemedText style={styles.metaLabel}>Schedule</ThemedText>
-          <View style={styles.scheduleRow}>
-            {routine.schedule.map((day) => (
-              <View key={day} style={styles.scheduleChip}>
-                <ThemedText style={styles.scheduleText}>{day}</ThemedText>
-              </View>
-            ))}
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.divider} />
-      <ThemedText style={styles.lastCompleted}>
-        {routine.lastCompleted}
-      </ThemedText>
     </View>
   );
 }

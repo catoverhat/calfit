@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import type { ExerciseCatalogItem } from '@/db/seed-data/exercise-catalog';
+import type { ExerciseCatalogRow } from '@/db';
 import { DesignColors, SemanticColors } from '@/theme/tokens';
 
 import { styles } from '../add-exercise-screen.styles';
@@ -11,7 +11,7 @@ export function ExercisePickerRow({
   onToggle,
   selected,
 }: {
-  exercise: ExerciseCatalogItem;
+  exercise: ExerciseCatalogRow;
   onToggle: () => void;
   selected: boolean;
 }) {
@@ -20,7 +20,7 @@ export function ExercisePickerRow({
       <Image
         accessibilityLabel={`${exercise.name} thumbnail`}
         contentFit="cover"
-        source={exercise.imageUrl}
+        source={exercise.image_url}
         style={styles.exerciseImage}
         transition={180}
       />
@@ -28,7 +28,7 @@ export function ExercisePickerRow({
       <View style={styles.exerciseCopy}>
         <Text style={styles.exerciseName}>{exercise.name}</Text>
         <Text style={styles.exerciseMeta}>
-          {exercise.muscleGroup} - {exercise.equipment}
+          {exercise.category_muscle_group ?? 'Uncategorized'} · {exercise.category_name ?? 'Exercise'}
         </Text>
       </View>
 

@@ -1,106 +1,61 @@
-import { styles } from './routine-detail-screen.styles';
 import { Image } from 'expo-image';
-import { Link, router, type Href } from 'expo-router';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Link } from 'expo-router';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { ThemedText } from '@/components/ui/themed-text';
-import { useTheme } from '@/theme/use-theme';
+import type { RoutineExerciseTargetRow } from '@/db';
+import { DesignColors, SemanticColors } from '@/theme/tokens';
+import { getRoutineTotals, WEEKDAYS } from './routine.viewmodel';
+import { styles } from './routine-detail-screen.styles';
+import { useRoutineDetail } from './use-routine-detail';
 
-type MockWorkout = (typeof import('@/fixtures/mock-data').MOCK_WORKOUTS)[number];
+export function RoutineDetailScreen({ routineId }: { routineId?: string }) {
+  const { error, isLoading, isStarting, reload, routine, startWorkout } = useRoutineDetail(routineId);
 
-type RoutineDetailScreenProps = {
-  workout?: MockWorkout;
-};
+  if (isLoading) {
+    return <StateScreen loading message="Loading routine…" />;
+  }
 
-export function RoutineDetailScreen({ workout }: RoutineDetailScreenProps) {
-  const theme = useTheme();
-
-  const startWorkout = () => {
-    if (!workout) return;
-
-    router.push({
-      pathname: '/workout-session/[id]',
-      params: { id: workout.id },
-    } as unknown as Href);
-  };
-
-  if (!workout) {
+  if (!routine) {
     return (
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.missingContent}
-        style={{ backgroundColor: theme.background }}>
-        <ThemedText style={styles.title}>Routine not found</ThemedText>
-        <Link href="/routines" asChild>
-          <Pressable style={styles.backButton}>
-            <ThemedText style={styles.backButtonText}>Back to Routines</ThemedText>
-          </Pressable>
-        </Link>
+      <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.stateContent} style={styles.screen}>
+        <View style={styles.stateIcon}><AppIcon color={SemanticColors.danger} name="warning" size={24} /></View>
+        <ThemedText style={styles.title}>{error ? 'Routine unavailable' : 'Routine not found'}</ThemedText>
+        <ThemedText style={styles.stateText}>{error ?? 'This routine no longer exists.'}</ThemedText>
+        {error ? <Pressable onPress={reload} style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}><ThemedText style={styles.secondaryButtonText}>Try again</ThemedText></Pressable> : null}
+        <Link href="/routines" asChild><Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Back to routines</ThemedText></Pressable></Link>
       </ScrollView>
     );
   }
 
-  return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={styles.scrollContent}
-      style={{ backgroundColor: theme.background }}>
-      <View style={styles.content}>
-        <Image
-          accessibilityLabel="Athlete performing the selected workout"
-          contentFit="cover"
-          source={workout.imageUrl}
-          style={styles.heroImage}
-          transition={200}
-        />
-        <View style={styles.summary}>
-          <ThemedText style={styles.title}>{workout.title}</ThemedText>
-          <ThemedText style={styles.description} themeColor="textSecondary">
-            {workout.description}
-          </ThemedText>
-          <View style={styles.metadata}>
-            <ThemedText style={styles.metadataText}>{workout.duration}</ThemedText>
-            <ThemedText style={styles.metadataText}>{workout.intensity}</ThemedText>
-          </View>
-          <View style={styles.actionRow}>
-            <Pressable
-              accessibilityLabel={`Start ${workout.title}`}
-              accessibilityRole="button"
-              onPress={startWorkout}
-              style={({ pressed }) => [styles.startWorkoutButton, pressed && styles.pressed]}>
-              <ThemedText style={styles.startWorkoutText}>Start Workout</ThemedText>
-            </Pressable>
-            <Link
-              href={{ pathname: '/routines/[id]/edit', params: { id: workout.id } }}
-              asChild>
-              <Pressable
-                accessibilityLabel={`Edit ${workout.title}`}
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}>
-                <ThemedText style={styles.editButtonText}>Edit Routine</ThemedText>
-              </Pressable>
-            </Link>
-          </View>
-        </View>
+  const totals = getRoutineTotals(routine);
+  const hero = routine.exercises.find((exercise) => exercise.exercise.image_url)?.exercise.image_url;
 
+  return (
+    <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} style={styles.screen}>
+      <View style={styles.content}>
+        {hero ? <Image accessibilityLabel={`${routine.name} preview`} contentFit="cover" source={hero} style={styles.heroImage} transition={200} /> : <View style={styles.heroFallback}><AppIcon color={SemanticColors.action} name="strength" size={42} /></View>}
+        <View style={styles.summary}>
+          <View style={styles.titleRow}>
+            <View style={styles.titleCopy}><ThemedText style={styles.eyebrow}>{routine.active ? 'Active routine' : 'Inactive routine'}</ThemedText><ThemedText style={styles.title}>{routine.name}</ThemedText></View>
+            <Link href={{ pathname: '/routines/[id]/edit', params: { id: routine.routine_id } }} asChild><Pressable accessibilityLabel={`Edit ${routine.name}`} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}><AppIcon color={SemanticColors.actionSoft} name="edit" size={20} /></Pressable></Link>
+          </View>
+          <ThemedText style={styles.description}>{routine.description ?? 'No description yet.'}</ThemedText>
+          <View style={styles.statsRow}><Stat label="Exercises" value={String(totals.exerciseCount)} /><Stat label="Target sets" value={String(totals.setCount)} /><Stat label="Training days" value={String(routine.schedules.length)} /></View>
+          <View style={styles.scheduleRow}>{routine.schedules.length ? routine.schedules.map((schedule) => <View key={schedule.routine_schedule_id} style={styles.scheduleChip}><ThemedText style={styles.scheduleText}>{WEEKDAYS[schedule.day_of_week]?.longLabel}</ThemedText></View>) : <ThemedText style={styles.flexibleText}>Flexible schedule</ThemedText>}</View>
+          {error ? <ThemedText style={styles.inlineError}>{error}</ThemedText> : null}
+          <Pressable accessibilityLabel={`Start ${routine.name}`} accessibilityRole="button" disabled={isStarting || !routine.active} onPress={startWorkout} style={({ pressed }) => [styles.startButton, (!routine.active || isStarting) && styles.buttonDisabled, pressed && styles.pressed]}>
+            {isStarting ? <ActivityIndicator color={DesignColors.onPrimaryContainer} /> : <AppIcon color={DesignColors.onPrimaryContainer} name="play" size={20} />}
+            <ThemedText style={styles.startButtonText}>{isStarting ? 'Starting…' : 'Start workout'}</ThemedText>
+          </Pressable>
+        </View>
         <View style={styles.exerciseSection}>
-          <ThemedText style={styles.sectionTitle}>Exercises</ThemedText>
-          {workout.exercises.map((exercise, index) => (
-            <View
-              key={exercise.id}
-              style={[
-                styles.exerciseRow,
-                { backgroundColor: theme.backgroundElement, borderColor: theme.border },
-              ]}>
-              <View style={styles.exerciseIndex}>
-                <ThemedText style={styles.exerciseIndexText}>{index + 1}</ThemedText>
-              </View>
-              <View style={styles.exerciseCopy}>
-                <ThemedText style={styles.exerciseName}>{exercise.name}</ThemedText>
-                <ThemedText style={styles.exerciseDetail} themeColor="textSecondary">
-                  {exercise.sets} sets · {exercise.reps}
-                </ThemedText>
-              </View>
+          <ThemedText style={styles.sectionEyebrow}>Workout plan</ThemedText><ThemedText style={styles.sectionTitle}>Exercises</ThemedText>
+          {routine.exercises.map((item, index) => (
+            <View key={item.routine_exercise_id} style={styles.exerciseCard}>
+              <View style={styles.exerciseHeader}><View style={styles.exerciseIndex}><ThemedText style={styles.exerciseIndexText}>{index + 1}</ThemedText></View><View style={styles.exerciseCopy}><ThemedText style={styles.exerciseName}>{item.exercise.name}</ThemedText><ThemedText style={styles.exerciseDescription}>{item.exercise.description ?? `${item.targets.length} target sets`}</ThemedText></View></View>
+              <View style={styles.targetList}>{item.targets.map((target) => <TargetRow key={target.routine_exercise_target_id} target={target} />)}</View>
             </View>
           ))}
         </View>
@@ -108,3 +63,19 @@ export function RoutineDetailScreen({ workout }: RoutineDetailScreenProps) {
     </ScrollView>
   );
 }
+
+function StateScreen({ loading, message }: { loading: boolean; message: string }) {
+  return <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.stateContent} style={styles.screen}>{loading ? <ActivityIndicator color={SemanticColors.action} size="large" /> : null}<ThemedText style={styles.stateText}>{message}</ThemedText></ScrollView>;
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return <View style={styles.stat}><ThemedText style={styles.statValue}>{value}</ThemedText><ThemedText style={styles.statLabel}>{label}</ThemedText></View>;
+}
+
+function TargetRow({ target }: { target: RoutineExerciseTargetRow }) {
+  const values = [target.target_reps !== null ? `${target.target_reps} reps` : null, target.target_weight !== null ? `${target.target_weight} kg` : null, target.target_speed !== null ? `${target.target_speed} km/h` : null, target.target_duration_seconds !== null ? formatDuration(target.target_duration_seconds) : null, target.target_distance !== null ? formatDistance(target.target_distance) : null, target.rest_time_seconds !== null ? `${target.rest_time_seconds}s rest` : null].filter(Boolean);
+  return <View style={styles.targetRow}><ThemedText style={styles.setNumber}>SET {target.set_number}</ThemedText><ThemedText style={styles.targetText}>{values.join('  ·  ') || 'Open target'}</ThemedText></View>;
+}
+
+function formatDuration(seconds: number): string { return seconds >= 60 ? `${Math.round(seconds / 60)} min` : `${seconds} sec`; }
+function formatDistance(metres: number): string { return metres >= 1000 ? `${metres / 1000} km` : `${metres} m`; }

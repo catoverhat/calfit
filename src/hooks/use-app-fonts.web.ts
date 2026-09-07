@@ -10,6 +10,7 @@ import {
   Montserrat_600SemiBold,
   useFonts as useMontserratFonts,
 } from '@expo-google-fonts/montserrat';
+import { useFonts } from 'expo-font';
 
 export function useAppFonts() {
   const [interLoaded, interError] = useInterFonts({
@@ -22,6 +23,12 @@ export function useAppFonts() {
     Montserrat_400Regular,
     Montserrat_600SemiBold,
   });
+  const [iconsLoaded, iconsError] = useFonts({
+    Lucide: require('@react-native-vector-icons/lucide/fonts/Lucide.ttf'),
+  });
 
-  return [interLoaded && montserratLoaded, interError ?? montserratError] as const;
+  return [
+    interLoaded && montserratLoaded && iconsLoaded,
+    interError ?? montserratError ?? iconsError,
+  ] as const;
 }

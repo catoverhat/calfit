@@ -1,105 +1,111 @@
-import { Image } from 'expo-image';
-import { Text } from 'react-native';
-
-import { Fonts } from '@/theme/tokens';
+import {
+  Lucide,
+  type LucideIconName,
+} from "@react-native-vector-icons/lucide/static";
 
 export type AppIconName =
-  | 'bell'
-  | 'cloud'
-  | 'search'
-  | 'check'
-  | 'menu'
-  | 'camera'
-  | 'chevronDown'
-  | 'chevrons'
-  | 'clock'
-  | 'timer'
-  | 'info'
-  | 'lock'
-  | 'stop'
-  | 'offline'
-  | 'wifi'
-  | 'wifiOff'
-  | 'device'
-  | 'sync'
-  | 'database'
-  | 'warning'
-  | 'upload'
-  | 'next'
-  | 'star'
-  | 'notes'
-  | 'save'
-  | 'history'
-  | 'sets'
-  | 'volume'
-  | 'intensity'
-  | 'flame'
-  | 'calories'
-  | 'trophy'
-  | 'strength'
-  | 'play'
-  | 'add'
-  | 'edit'
-  | 'open'
-  | 'briefcase'
-  | 'body'
-  | 'running'
-  | 'today'
-  | 'routines'
-  | 'exercises'
-  | 'home'
-  | 'workouts'
-  | 'progress'
-  | 'profile';
+  | "bell"
+  | "cloud"
+  | "search"
+  | "check"
+  | "menu"
+  | "camera"
+  | "chevronDown"
+  | "chevrons"
+  | "clock"
+  | "timer"
+  | "info"
+  | "lock"
+  | "stop"
+  | "offline"
+  | "wifi"
+  | "wifiOff"
+  | "device"
+  | "sync"
+  | "database"
+  | "warning"
+  | "upload"
+  | "next"
+  | "star"
+  | "notes"
+  | "save"
+  | "history"
+  | "sets"
+  | "volume"
+  | "intensity"
+  | "flame"
+  | "calories"
+  | "trophy"
+  | "strength"
+  | "play"
+  | "add"
+  | "edit"
+  | "open"
+  | "briefcase"
+  | "body"
+  | "running"
+  | "today"
+  | "routines"
+  | "exercises"
+  | "home"
+  | "workouts"
+  | "progress"
+  | "profile"
+  | "trash"
+  | "arrowUp"
+  | "arrowDown";
 
-const icons: Record<AppIconName, { sf: string; fallback: string }> = {
-  bell: { sf: 'bell', fallback: 'B' },
-  cloud: { sf: 'icloud', fallback: 'C' },
-  search: { sf: 'magnifyingglass', fallback: 'S' },
-  check: { sf: 'checkmark', fallback: 'V' },
-  menu: { sf: 'ellipsis', fallback: 'M' },
-  camera: { sf: 'camera.fill', fallback: 'C' },
-  chevronDown: { sf: 'chevron.down', fallback: 'v' },
-  chevrons: { sf: 'chevron.up.chevron.down', fallback: '<' },
-  clock: { sf: 'clock', fallback: 'C' },
-  timer: { sf: 'timer', fallback: 'T' },
-  info: { sf: 'info.circle', fallback: 'i' },
-  lock: { sf: 'lock.fill', fallback: 'L' },
-  stop: { sf: 'square', fallback: 'S' },
-  offline: { sf: 'icloud.slash', fallback: 'O' },
-  wifi: { sf: 'wifi', fallback: 'W' },
-  wifiOff: { sf: 'wifi.slash', fallback: 'X' },
-  device: { sf: 'iphone', fallback: 'D' },
-  sync: { sf: 'arrow.triangle.2.circlepath', fallback: 'R' },
-  database: { sf: 'externaldrive.fill', fallback: 'D' },
-  warning: { sf: 'exclamationmark.triangle.fill', fallback: '!' },
-  upload: { sf: 'arrow.up.circle.fill', fallback: 'U' },
-  next: { sf: 'forward.end.fill', fallback: 'N' },
-  star: { sf: 'star.fill', fallback: '*' },
-  notes: { sf: 'text.alignleft', fallback: 'N' },
-  save: { sf: 'square.and.arrow.down.fill', fallback: 'S' },
-  history: { sf: 'clock.arrow.circlepath', fallback: 'H' },
-  sets: { sf: 'list.bullet', fallback: '=' },
-  volume: { sf: 'chart.line.uptrend.xyaxis', fallback: 'V' },
-  intensity: { sf: 'bolt.fill', fallback: 'I' },
-  flame: { sf: 'flame.fill', fallback: 'F' },
-  calories: { sf: 'figure.run', fallback: 'K' },
-  trophy: { sf: 'trophy.fill', fallback: 'T' },
-  strength: { sf: 'dumbbell.fill', fallback: 'S' },
-  play: { sf: 'play.fill', fallback: '>' },
-  add: { sf: 'plus', fallback: '+' },
-  edit: { sf: 'pencil', fallback: 'P' },
-  open: { sf: 'arrow.up.right.square', fallback: 'O' },
-  briefcase: { sf: 'briefcase.fill', fallback: 'L' },
-  body: { sf: 'figure.strengthtraining.traditional', fallback: 'F' },
-  running: { sf: 'figure.run', fallback: 'R' },
-  today: { sf: 'calendar', fallback: 'D' },
-  routines: { sf: 'figure.run', fallback: 'R' },
-  exercises: { sf: 'list.bullet.rectangle', fallback: 'E' },
-  home: { sf: 'house.fill', fallback: 'H' },
-  workouts: { sf: 'dumbbell.fill', fallback: 'W' },
-  progress: { sf: 'chart.bar.fill', fallback: 'P' },
-  profile: { sf: 'person.fill', fallback: 'U' },
+const icons: Record<AppIconName, LucideIconName> = {
+  bell: "bell",
+  cloud: "cloud",
+  search: "search",
+  check: "check",
+  menu: "ellipsis",
+  camera: "camera",
+  chevronDown: "chevron-down",
+  chevrons: "chevrons-up-down",
+  clock: "clock",
+  timer: "timer",
+  info: "info",
+  lock: "lock",
+  stop: "square",
+  offline: "cloud-off",
+  wifi: "wifi",
+  wifiOff: "wifi-off",
+  device: "smartphone",
+  sync: "refresh-cw",
+  database: "database",
+  warning: "triangle-alert",
+  upload: "upload",
+  next: "skip-forward",
+  star: "star",
+  notes: "text",
+  save: "save",
+  history: "history",
+  sets: "list",
+  volume: "chart-line",
+  intensity: "zap",
+  flame: "flame",
+  calories: "activity",
+  trophy: "trophy",
+  strength: "dumbbell",
+  play: "play",
+  add: "plus",
+  edit: "pencil",
+  open: "external-link",
+  briefcase: "briefcase",
+  body: "biceps-flexed",
+  running: "activity",
+  today: "calendar",
+  routines: "route",
+  exercises: "list",
+  home: "house",
+  workouts: "dumbbell",
+  progress: "chart-bar",
+  profile: "user",
+  trash: "trash-2",
+  arrowUp: "arrow-up",
+  arrowDown: "arrow-down",
 };
 
 type AppIconProps = {
@@ -109,31 +115,12 @@ type AppIconProps = {
 };
 
 export function AppIcon({ color, name, size = 16 }: AppIconProps) {
-  const icon = icons[name];
-
-  if (process.env.EXPO_OS === 'ios') {
-    return (
-      <Image
-        contentFit="contain"
-        source={`sf:${icon.sf}`}
-        style={{ height: size, width: size }}
-        tintColor={color}
-      />
-    );
-  }
-
   return (
-    <Text
+    <Lucide
       accessibilityElementsHidden
-      style={{
-        color,
-        fontFamily: Fonts.bodyBold,
-        fontSize: size,
-        lineHeight: size + 2,
-        textAlign: 'center',
-        width: size,
-      }}>
-      {icon.fallback}
-    </Text>
+      color={color}
+      name={icons[name]}
+      size={size}
+    />
   );
 }

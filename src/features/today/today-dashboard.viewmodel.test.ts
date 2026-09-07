@@ -27,6 +27,7 @@ const routine: RoutineDetail = {
   active: 1,
   created_at: '2026-07-06T12:00:00.000Z',
   updated_at: '2026-07-06T12:00:00.000Z',
+  schedules: [],
   exercises: [
     {
       routine_exercise_id: 'routine-exercise-1',

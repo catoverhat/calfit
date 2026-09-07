@@ -9,6 +9,7 @@ const PRIMARY_KEYS: Record<string, string> = {
   routines: 'routine_id',
   routine_exercises: 'routine_exercise_id',
   routine_exercise_targets: 'routine_exercise_target_id',
+  routine_schedules: 'routine_schedule_id',
   workout_sessions: 'workout_session_id',
   workout_exercises: 'workout_exercise_id',
   workout_sets: 'workout_set_id',
@@ -47,6 +48,19 @@ export class MemoryDb implements LocalDatabase {
       return this.selectBy('routines', 'routine_id', params[0]) as T[];
     }
 
+    if (
+      normalized ===
+      'select * from routines where user_id_fk = ? order by updated_at desc, created_at desc'
+    ) {
+      return this.selectBy('routines', 'user_id_fk', params[0]).sort((left, right) =>
+        compareNullableDates(right.updated_at, left.updated_at)
+      ) as T[];
+    }
+
+    if (normalized === 'select count(*) as routine_count from routines where user_id_fk = ?') {
+      return [{ routine_count: this.selectBy('routines', 'user_id_fk', params[0]).length } as T];
+    }
+
     if (normalized === 'select * from users where user_id = ?') {
       return this.selectBy('users', 'user_id', params[0]) as T[];
     }
@@ -64,6 +78,26 @@ export class MemoryDb implements LocalDatabase {
       return this.selectBy('body_measurements', 'user_id_fk', params[0])
         .sort((left, right) => compareNullableDates(right.created_at, left.created_at))
         .slice(0, 1) as T[];
+    }
+
+    if (
+      normalized ===
+      'select * from routine_schedules where routine_id_fk = ? and active = 1 order by day_of_week asc'
+    ) {
+      return this.selectBy('routine_schedules', 'routine_id_fk', params[0])
+        .filter((row) => row.active === 1)
+        .sort(byNumber('day_of_week')) as T[];
+    }
+
+    if (
+      normalized ===
+      "select completed_at from workout_sessions where routine_id_fk = ? and status = 'completed' and completed_at is not null order by completed_at desc limit 1"
+    ) {
+      return this.selectBy('workout_sessions', 'routine_id_fk', params[0])
+        .filter((row) => row.status === 'completed' && row.completed_at !== null)
+        .sort((left, right) => compareNullableDates(right.completed_at, left.completed_at))
+        .slice(0, 1)
+        .map((row) => ({ completed_at: row.completed_at })) as T[];
     }
 
     if (
@@ -168,6 +202,23 @@ export class MemoryDb implements LocalDatabase {
 
     if (normalized.startsWith('insert')) {
       return this.insert(source, params);
+    }
+
+    if (normalized.startsWith('delete from routine_exercise_targets')) {
+      const routineExerciseIds = this.selectBy('routine_exercises', 'routine_id_fk', params[0]).map(
+        (row) => row.routine_exercise_id
+      );
+      return this.deleteWhere('routine_exercise_targets', (row) =>
+        routineExerciseIds.includes(row.routine_exercise_id_fk)
+      );
+    }
+
+    if (normalized === 'delete from routine_exercises where routine_id_fk = ?') {
+      return this.deleteWhere('routine_exercises', (row) => row.routine_id_fk === params[0]);
+    }
+
+    if (normalized === 'delete from routine_schedules where routine_id_fk = ?') {
+      return this.deleteWhere('routine_schedules', (row) => row.routine_id_fk === params[0]);
     }
 
     if (normalized.startsWith('update routines')) {
@@ -279,6 +330,14 @@ export class MemoryDb implements LocalDatabase {
     Object.assign(row, patch);
 
     return { changes: 1 };
+  }
+
+  private deleteWhere(tableName: string, predicate: (row: TableRow) => boolean): SqlRunResult {
+    const rows = this.ensureTable(tableName);
+    const kept = rows.filter((row) => !predicate(row));
+    const changes = rows.length - kept.length;
+    this.tables.set(tableName, kept);
+    return { changes };
   }
 
   private routineExerciseJoin(routineId: string): TableRow[] {

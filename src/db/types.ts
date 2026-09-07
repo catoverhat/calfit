@@ -79,6 +79,18 @@ export interface RoutineExerciseTargetRow {
   created_at: string;
 }
 
+export interface RoutineScheduleRow {
+  routine_schedule_id: string;
+  user_id_fk: string;
+  routine_id_fk: string;
+  day_of_week: number;
+  start_date: string;
+  end_date: string | null;
+  recurrent: number;
+  active: number;
+  created_at: string;
+}
+
 export interface WorkoutSessionRow {
   workout_session_id: string;
   user_id_fk: string;
@@ -128,6 +140,7 @@ export interface RoutineExerciseWithTargets extends RoutineExerciseRow {
 
 export interface RoutineDetail extends RoutineRow {
   exercises: RoutineExerciseWithTargets[];
+  schedules: RoutineScheduleRow[];
 }
 
 export interface WorkoutExerciseWithSets extends WorkoutExerciseRow {

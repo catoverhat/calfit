@@ -11,6 +11,7 @@ import {
   updateExercise,
 } from '@/db';
 import { MemoryDb } from '../testing/memory-database';
+import { EXERCISE_CATALOG } from '../seed-data/exercise-catalog';
 
 describe('exercise repository', () => {
   it('seeds built-in exercises once and loads catalog rows with categories', async () => {
@@ -23,7 +24,7 @@ describe('exercise repository', () => {
     const categories = await getExerciseCategories(db);
     const catalog = await getExerciseCatalog(db);
 
-    expect(db.tables.get('exercises')).toHaveLength(7);
+    expect(db.tables.get('exercises')).toHaveLength(EXERCISE_CATALOG.length);
     expect(categories.map((category) => category.name)).toEqual([
       'Arms',
       'Back',
