@@ -1,19 +1,23 @@
 import { Stack } from 'expo-router/stack';
 
-import { SemanticColors } from '@/theme/tokens';
+import { Fonts, SemanticColors } from '@/theme/tokens';
 
 export default function ProgressLayout() {
   return (
     <Stack
       screenOptions={{
         contentStyle: { backgroundColor: SemanticColors.canvas },
-        headerShown: false,
+        headerBackButtonDisplayMode: 'minimal',
+        headerShadowVisible: false,
+        headerStyle: { backgroundColor: SemanticColors.canvas },
+        headerTintColor: SemanticColors.textPrimary,
+        headerTitleStyle: { color: SemanticColors.actionSoft, fontFamily: Fonts.heading },
       }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="summary" />
-      <Stack.Screen name="history" />
-      <Stack.Screen name="measurements" />
-      <Stack.Screen name="sync" />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="summary" options={{ title: 'Workout Summary' }} />
+      <Stack.Screen name="history" options={{ title: 'Workout History' }} />
+      <Stack.Screen name="measurements" options={{ title: 'Body Measurements' }} />
+      <Stack.Screen name="storage" options={{ title: 'Local Data' }} />
     </Stack>
   );
 }

@@ -1,9 +1,10 @@
 import { styles } from './active-workout-session-screen.styles';
-import { router, type Href } from 'expo-router';
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
+import { completeWorkoutSession, initializeLocalDatabase } from '@/db';
 import { SemanticColors } from '@/theme/tokens';
 import { LockedExerciseCard } from './components/locked-exercise-card';
 import { SessionActions } from './components/session-actions';
@@ -47,11 +48,23 @@ export function ActiveWorkoutSessionScreen({ workout }: ActiveWorkoutSessionScre
   const [currentWeight, setCurrentWeight] = useState('155');
   const [currentReps, setCurrentReps] = useState('8');
   const [currentSetDone, setCurrentSetDone] = useState(false);
+  const [finishError, setFinishError] = useState<string | null>(null);
+  const [isFinishing, setIsFinishing] = useState(false);
 
   const sessionTitle = useMemo(() => workout.title || 'Push Day', [workout.title]);
 
-  const finishWorkout = () => {
-    router.replace('/progress/summary' as Href);
+  const finishWorkout = async () => {
+    if (isFinishing) return;
+    setFinishError(null);
+    setIsFinishing(true);
+    try {
+      const db = await initializeLocalDatabase();
+      await completeWorkoutSession(db, workout.id);
+      router.replace({ pathname: '/progress/summary', params: { sessionId: workout.id } });
+    } catch (error) {
+      setFinishError(error instanceof Error ? error.message : 'Workout could not be completed.');
+      setIsFinishing(false);
+    }
   };
 
   const toggleCompletedSet = (setId: number) => {
@@ -105,7 +118,8 @@ export function ActiveWorkoutSessionScreen({ workout }: ActiveWorkoutSessionScre
           <SessionRestCard />
         </View>
         <LockedExerciseCard meta={lockedMeta} name={lockedExerciseName} />
-        <SessionActions onFinish={finishWorkout} />
+        {finishError ? <Text selectable style={styles.finishError}>{finishError}</Text> : null}
+        <SessionActions disabled={isFinishing} onFinish={finishWorkout} />
       </View>
     </ScrollView>
   );

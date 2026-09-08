@@ -6,6 +6,7 @@ import {
   createRoutine,
   getRoutineDetail,
   getWorkoutHistory,
+  getWorkoutSessionDetail,
   initializeLocalDatabase,
   logWorkoutSet,
   startWorkoutFromRoutine,
@@ -90,6 +91,7 @@ describe('workout session repository', () => {
     history = await getWorkoutHistory(db);
     const updatedRoutine = await getRoutineDetail(db, routine.routine_id);
     const completedSession = history[0];
+    const sessionDetail = await getWorkoutSessionDetail(db, session.workout_session_id);
 
     expect(updatedRoutine?.name).toBe('Strength A Edited');
     expect(updatedRoutine?.exercises[0].targets[0]).toEqual(
@@ -113,6 +115,20 @@ describe('workout session repository', () => {
         rest_time_seconds: 180,
         completed: 0,
       })
+    );
+    expect(sessionDetail).toEqual(expect.objectContaining({ workout_session_id: 'session-strength', status: 'completed' }));
+
+    await startWorkoutFromRoutine(db, {
+      id: 'session-scheduled',
+      routineId: routine.routine_id,
+      scheduledFor: '2026-07-08T13:00:00.000Z',
+      now: '2026-07-07T10:00:00.000Z',
+      status: 'scheduled',
+    });
+    history = await getWorkoutHistory(db);
+    expect(history.map((item) => item.status)).toEqual(expect.arrayContaining(['completed', 'scheduled']));
+    expect(await getWorkoutSessionDetail(db, 'session-scheduled')).toEqual(
+      expect.objectContaining({ started_at: null, status: 'scheduled' })
     );
   });
 

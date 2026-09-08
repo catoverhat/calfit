@@ -1,12 +1,7 @@
 import { Text, View } from 'react-native';
 
+import type { ProgressMetric } from '../progress.viewmodel';
 import { styles } from '../progress-dashboard-screen.styles';
-
-export type ProgressMetric = {
-  helper: string;
-  label: string;
-  value: string;
-};
 
 export function MetricCard({ metric }: { metric: ProgressMetric }) {
   return (

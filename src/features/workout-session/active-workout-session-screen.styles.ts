@@ -47,6 +47,16 @@ export const styles = StyleSheet.create({
     height: 44,
     width: 44,
   },
+  avatarFallback: {
+    alignItems: 'center',
+    backgroundColor: DesignColors.surfaceContainerHigh,
+    borderColor: SemanticColors.action,
+    borderRadius: 22,
+    borderWidth: 1,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
   titleBlock: {
     flex: 1,
     minWidth: 0,
@@ -417,6 +427,13 @@ export const styles = StyleSheet.create({
     lineHeight: 24,
     textAlign: 'center',
     textTransform: 'uppercase',
+  },
+  disabled: { opacity: 0.54 },
+  finishError: {
+    color: DesignColors.error,
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 12,
+    lineHeight: 17,
   },
   pressed: {
     opacity: 0.72,

@@ -43,7 +43,7 @@ src/
 │       │   ├── history.tsx
 │       │   ├── measurements.tsx
 │       │   ├── summary.tsx
-│       │   └── sync.tsx
+│       │   └── storage.tsx
 │       └── profile/
 │           └── index.tsx
 │

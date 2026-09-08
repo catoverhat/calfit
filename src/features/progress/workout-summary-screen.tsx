@@ -1,53 +1,24 @@
-import { styles } from './workout-summary-screen.styles';
-import { router, type Href } from 'expo-router';
-import { useState } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { Header } from '@/components/layout/header';
 import { TabScreen } from '@/components/layout/tab-screen';
-import { MOCK_USER } from '@/fixtures/mock-data';
-import { SemanticColors } from '@/theme/tokens';
-import {
-  IntensityDistributionChart,
-  PersonalRecordSummary,
-  WorkoutNotesSection,
-  WorkoutSummaryActions,
-  WorkoutSummaryHero,
-  WorkoutSummaryStats,
-} from './components/workout-summary-sections';
+import { WorkoutSummaryActions, WorkoutSummaryHero, WorkoutSummaryStats } from './components/workout-summary-sections';
+import { styles } from './workout-summary-screen.styles';
+import { useWorkoutSummary } from './use-workout-summary';
 
-export function WorkoutSummaryScreen() {
-  const [notes, setNotes] = useState('');
-
-  const saveWorkout = () => {
-    router.replace('/(tabs)' as Href);
-  };
+export function WorkoutSummaryScreen({ sessionId }: { sessionId?: string }) {
+  const { data, error, isLoading } = useWorkoutSummary(sessionId);
 
   return (
-    <TabScreen
-      contentContainerStyle={styles.scrollContent}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}>
+    <TabScreen contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
-        <Header
-          actionAccessibilityLabel="Sync workout summary"
-          actionIcon="cloud"
-          actionIconColor={SemanticColors.actionSoft}
-          avatarUrl={MOCK_USER.avatarUrl}
-          onNotificationsPress={() => router.push('/progress/sync' as Href)}
-          profileName={MOCK_USER.name}
-        />
-
-        <WorkoutSummaryHero />
-        <WorkoutSummaryStats />
-        <PersonalRecordSummary />
-        <WorkoutNotesSection notes={notes} onNotesChange={setNotes} />
-        <WorkoutSummaryActions
-          onHistory={() => router.push('/progress/history' as Href)}
-          onSave={saveWorkout}
-        />
-        <IntensityDistributionChart />
+        {error ? <StatusCard body={error} title="Summary unavailable" /> : null}
+        {isLoading ? <StatusCard body="Loading the saved workout session." title="Loading summary" /> : null}
+        {data ? <><WorkoutSummaryHero summary={data} /><WorkoutSummaryStats summary={data} /><WorkoutSummaryActions /></> : null}
       </View>
     </TabScreen>
   );
+}
+
+function StatusCard({ body, title }: { body: string; title: string }) {
+  return <View style={styles.statusCard}><Text style={styles.statusTitle}>{title}</Text><Text style={styles.statusBody}>{body}</Text></View>;
 }

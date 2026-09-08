@@ -1,8 +1,6 @@
-import { Image } from 'expo-image';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { MOCK_USER } from '@/fixtures/mock-data';
 import { SemanticColors } from '@/theme/tokens';
 
 import { styles } from '../active-workout-session-screen.styles';
@@ -12,12 +10,7 @@ export function SessionOverview({ title }: { title: string }) {
     <>
       <View style={styles.sessionHeader}>
         <View style={styles.sessionIdentity}>
-          <Image
-            accessibilityLabel={`${MOCK_USER.name}'s profile photo`}
-            contentFit="cover"
-            source={MOCK_USER.avatarUrl}
-            style={styles.avatar}
-          />
+          <View style={styles.avatarFallback}><AppIcon color={SemanticColors.textPrimary} name="profile" size={18} /></View>
           <View style={styles.titleBlock}>
             <Text numberOfLines={1} style={styles.sessionTitle}>
               {title}
@@ -31,12 +24,9 @@ export function SessionOverview({ title }: { title: string }) {
             <AppIcon color={SemanticColors.textPrimary} name="offline" size={13} />
             <Text style={styles.offlineText}>Saved Offline</Text>
           </View>
-          <Pressable
-            accessibilityLabel="Session timer"
-            accessibilityRole="button"
-            style={({ pressed }) => [styles.timerButton, pressed && styles.pressed]}>
+          <View style={styles.timerButton}>
             <AppIcon color={SemanticColors.action} name="timer" size={20} />
-          </Pressable>
+          </View>
         </View>
       </View>
 

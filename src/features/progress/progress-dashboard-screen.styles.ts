@@ -35,6 +35,9 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.two,
   },
+  quickLinks: { flexDirection: 'row', gap: Spacing.two },
+  quickLink: { alignItems: 'center', backgroundColor: DesignColors.surfaceContainerLow, borderColor: SemanticColors.border, borderRadius: Radius.md, borderWidth: 1, flex: 1, gap: Spacing.one, justifyContent: 'center', minHeight: 68, padding: Spacing.two },
+  quickLinkText: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold, fontSize: 10, lineHeight: 13, textAlign: 'center' },
   metricCard: {
     backgroundColor: DesignColors.surfaceContainerLow,
     borderColor: SemanticColors.border,
@@ -139,6 +142,7 @@ export const styles = StyleSheet.create({
     lineHeight: 12,
     textTransform: 'uppercase',
   },
+  barValue: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold, fontSize: 10, lineHeight: 13 },
   volumePlot: {
     minHeight: 184,
     position: 'relative',
@@ -293,4 +297,7 @@ export const styles = StyleSheet.create({
     opacity: 0.7,
     transform: [{ scale: 0.99 }],
   },
+  emptyText: { color: SemanticColors.textSecondary, fontFamily: Fonts.bodyMedium, fontSize: 12, lineHeight: 17 },
+  statusCard: { backgroundColor: DesignColors.surfaceContainerLow, borderColor: SemanticColors.border, borderRadius: Radius.md, borderWidth: 1, gap: Spacing.one, padding: Spacing.three },
+  statusTitle: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold, fontSize: 14, lineHeight: 19 },
 });

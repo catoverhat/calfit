@@ -269,4 +269,8 @@ export const styles = StyleSheet.create({
     opacity: 0.72,
     transform: [{ scale: 0.99 }],
   },
+  disabled: { opacity: 0.54 },
+  emptyText: { color: SemanticColors.textSecondary, fontFamily: Fonts.bodyMedium, fontSize: 12, lineHeight: 17 },
+  statusCard: { backgroundColor: DesignColors.surfaceContainerLow, borderColor: SemanticColors.border, borderRadius: Radius.md, borderWidth: 1, gap: Spacing.one, padding: Spacing.three },
+  statusTitle: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold, fontSize: 14, lineHeight: 19 },
 });
