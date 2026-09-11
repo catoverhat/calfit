@@ -2,101 +2,107 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
 import { ComponentTokens, DesignColors, SemanticColors } from '@/theme/tokens';
+import type {
+  WorkoutMetricField,
+  WorkoutSessionExerciseViewModel,
+  WorkoutSessionSetViewModel,
+  WorkoutSessionViewModel,
+} from '../workout-session.viewmodel';
 import { styles } from '../active-workout-session-screen.styles';
 
-const completedSetRows = [
-  { id: 1, reps: '10 reps', weight: '135 lb' },
-  { id: 2, reps: '8 reps', weight: '145 lb' },
-] as const;
-
 export function SessionSetEditor({
-  completedSets,
-  currentReps,
-  currentSetDone,
-  currentWeight,
-  onCurrentRepsChange,
-  onCurrentSetDoneChange,
-  onCurrentWeightChange,
-  onToggleCompletedSet,
+  exercise,
+  onBlurField,
+  onToggleSet,
+  onUpdateField,
+  saveErrors,
+  sets,
+  units,
 }: {
-  completedSets: Set<number>;
-  currentReps: string;
-  currentSetDone: boolean;
-  currentWeight: string;
-  onCurrentRepsChange: (value: string) => void;
-  onCurrentSetDoneChange: (done: boolean) => void;
-  onCurrentWeightChange: (value: string) => void;
-  onToggleCompletedSet: (setId: number) => void;
+  exercise: WorkoutSessionExerciseViewModel;
+  onBlurField: (setId: string) => void;
+  onToggleSet: (setId: string) => void;
+  onUpdateField: (setId: string, field: WorkoutMetricField, value: string) => void;
+  saveErrors: Record<string, string>;
+  sets: Record<string, WorkoutSessionSetViewModel>;
+  units: Pick<WorkoutSessionViewModel, 'distanceUnit' | 'speedUnit' | 'weightUnit'>;
 }) {
   return (
     <View style={styles.setList}>
-      {completedSetRows.map((setRow) => {
-        const completed = completedSets.has(setRow.id);
-
+      {exercise.sets.map((sourceSet) => {
+        const set = sets[sourceSet.id];
         return (
-          <View key={setRow.id} style={styles.completedSetRow}>
-            <View style={styles.setNumber}>
-              <Text style={styles.setNumberText}>{setRow.id}</Text>
+          <View key={set.id} style={[styles.dynamicSetCard, set.completed && styles.dynamicSetCardCompleted]}>
+            <View style={styles.dynamicSetHeader}>
+              <View style={styles.setNumber}>
+                <Text style={styles.setNumberText}>{set.setNumber}</Text>
+              </View>
+              <Text style={styles.dynamicSetLabel}>SET {set.setNumber}</Text>
+              <Pressable
+                accessibilityLabel={`${set.completed ? 'Reopen' : 'Complete'} set ${set.setNumber}`}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: set.completed }}
+                onPress={() => onToggleSet(set.id)}
+                style={({ pressed }) => [
+                  styles.setCheckButton,
+                  !set.completed && styles.setCheckButtonInactive,
+                  pressed && styles.pressed,
+                ]}>
+                <AppIcon
+                  color={set.completed ? DesignColors.primaryFixed : SemanticColors.textMuted}
+                  name="check"
+                  size={16}
+                />
+              </Pressable>
             </View>
-            <Text style={styles.setValue}>{setRow.weight}</Text>
-            <Text style={styles.setValue}>{setRow.reps}</Text>
-            <Pressable
-              accessibilityLabel={`Toggle set ${setRow.id}`}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: completed }}
-              onPress={() => onToggleCompletedSet(setRow.id)}
-              style={({ pressed }) => [
-                styles.setCheckButton,
-                !completed && styles.setCheckButtonInactive,
-                pressed && styles.pressed,
-              ]}>
-              <AppIcon
-                color={completed ? DesignColors.primaryFixed : SemanticColors.textMuted}
-                name="check"
-                size={16}
-              />
-            </Pressable>
+            <View style={styles.dynamicFieldRow}>
+              {set.fields.map((field) => (
+                <MetricInput
+                  field={field}
+                  key={field}
+                  onBlur={() => onBlurField(set.id)}
+                  onChange={(value) => onUpdateField(set.id, field, value)}
+                  set={set}
+                  units={units}
+                />
+              ))}
+            </View>
+            {saveErrors[set.id] ? <Text style={styles.setError}>{saveErrors[set.id]}</Text> : null}
           </View>
         );
       })}
-      <View style={styles.currentSetRow}>
-        <View style={styles.currentSetNumber}>
-          <Text style={styles.currentSetNumberText}>3</Text>
-        </View>
-        <TextInput
-          accessibilityLabel="Current set weight"
-          keyboardType="number-pad"
-          onChangeText={onCurrentWeightChange}
-          selectionColor={ComponentTokens.input.selectionColor}
-          style={styles.currentInput}
-          value={currentWeight}
-        />
-        <Text style={styles.multiplyText}>x</Text>
-        <TextInput
-          accessibilityLabel="Current set repetitions"
-          keyboardType="number-pad"
-          onChangeText={onCurrentRepsChange}
-          selectionColor={ComponentTokens.input.selectionColor}
-          style={styles.currentInput}
-          value={currentReps}
-        />
-        <Pressable
-          accessibilityLabel="Complete current set"
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: currentSetDone }}
-          onPress={() => onCurrentSetDoneChange(!currentSetDone)}
-          style={({ pressed }) => [
-            styles.currentToggle,
-            currentSetDone && styles.currentToggleDone,
-            pressed && styles.pressed,
-          ]}>
-          <AppIcon
-            color={currentSetDone ? DesignColors.onPrimaryContainer : DesignColors.primaryFixed}
-            name={currentSetDone ? 'check' : 'stop'}
-            size={16}
-          />
-        </Pressable>
-      </View>
+    </View>
+  );
+}
+
+function MetricInput({ field, onBlur, onChange, set, units }: {
+  field: WorkoutMetricField;
+  onBlur: () => void;
+  onChange: (value: string) => void;
+  set: WorkoutSessionSetViewModel;
+  units: Pick<WorkoutSessionViewModel, 'distanceUnit' | 'speedUnit' | 'weightUnit'>;
+}) {
+  const labels: Record<WorkoutMetricField, string> = {
+    reps: 'Reps',
+    weight: `Weight (${units.weightUnit})`,
+    speed: `Speed (${units.speedUnit === 'kmh' ? 'km/h' : 'mph'})`,
+    duration: 'Duration (sec)',
+    distance: `Distance (${units.distanceUnit})`,
+  };
+  return (
+    <View style={styles.dynamicField}>
+      <Text style={styles.dynamicFieldLabel}>{labels[field]}</Text>
+      <TextInput
+        accessibilityLabel={`${labels[field]} for set ${set.setNumber}`}
+        keyboardType={field === 'reps' || field === 'duration' ? 'number-pad' : 'decimal-pad'}
+        onBlur={onBlur}
+        onChangeText={onChange}
+        placeholder="—"
+        placeholderTextColor={SemanticColors.textMuted}
+        selectionColor={ComponentTokens.input.selectionColor}
+        style={styles.dynamicInput}
+        value={set[field]}
+      />
     </View>
   );
 }

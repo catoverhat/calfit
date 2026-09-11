@@ -1,4 +1,11 @@
-import type { BodyMeasurementRow, DashboardSnapshot, RoutineDetail, UserRow } from '@/db';
+import {
+  normalizeWeightUnit,
+  weightFromCanonical,
+  type BodyMeasurementRow,
+  type DashboardSnapshot,
+  type RoutineDetail,
+  type UserRow,
+} from '@/db';
 
 export interface TodayDashboardRoutine {
   id: string;
@@ -10,8 +17,11 @@ export interface TodayDashboardRoutine {
 }
 
 export interface TodayDashboardData {
+  actionLabel: string;
+  activeSessionId: string | null;
   avatarUrl: string | null;
   dateLabel: string;
+  greeting: string;
   name: string;
   weekDays: { date: string; day: string }[];
   selectedDate: string;
@@ -37,8 +47,11 @@ export function createTodayDashboardData(snapshot: DashboardSnapshot | null, dat
   );
 
   return {
+    actionLabel: snapshot?.activeSession ? 'Resume Workout' : 'Start Workout',
+    activeSessionId: snapshot?.activeSession?.workout_session_id ?? null,
     avatarUrl: null,
     dateLabel: formatDashboardDate(date),
+    greeting: createGreeting(date),
     name: user.username,
     weekDays: createWeekDays(date),
     selectedDate: formatDayNumber(date),
@@ -47,6 +60,13 @@ export function createTodayDashboardData(snapshot: DashboardSnapshot | null, dat
     progress,
     tip: createDashboardTip(snapshot),
   };
+}
+
+function createGreeting(date: Date): string {
+  const hour = date.getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
 }
 
 export function mapRoutineToDashboardRoutine(routine: RoutineDetail): TodayDashboardRoutine {
@@ -89,10 +109,11 @@ function createProgressData(
   previousMeasurement: BodyMeasurementRow | null,
   workoutStreak: number
 ): TodayDashboardData['progress'] {
+  const weightUnit = normalizeWeightUnit(user.weight_unit);
   return {
     bodyWeight:
       typeof latestMeasurement?.weight === 'number'
-        ? `${formatMeasurement(latestMeasurement.weight)} ${user.weight_unit}`
+        ? `${formatMeasurement(weightFromCanonical(latestMeasurement.weight, weightUnit))} ${weightUnit}`
         : 'Not logged',
     bodyWeightDelta: createWeightDeltaLabel(user, latestMeasurement, previousMeasurement),
     streak: `${workoutStreak} ${workoutStreak === 1 ? 'day' : 'days'}`,
@@ -115,8 +136,9 @@ function createWeightDeltaLabel(
 
   const delta = latestMeasurement.weight - previousMeasurement.weight;
   const sign = delta > 0 ? '+' : '';
+  const weightUnit = normalizeWeightUnit(user.weight_unit);
 
-  return `${sign}${formatMeasurement(delta)} ${user.weight_unit} vs previous`;
+  return `${sign}${formatMeasurement(weightFromCanonical(delta, weightUnit))} ${weightUnit} vs previous`;
 }
 
 function createDashboardTip(snapshot: DashboardSnapshot | null): string {
@@ -147,7 +169,7 @@ function createFallbackUser(): UserRow {
     height_unit: 'cm',
     weight_unit: 'kg',
     speed_unit: 'kmh',
-    distance_unit: 'm',
+    distance_unit: 'km',
     created_at: now,
     updated_at: now,
   };

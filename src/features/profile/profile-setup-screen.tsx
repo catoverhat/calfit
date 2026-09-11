@@ -1,7 +1,4 @@
-import { styles } from './profile-setup-screen.styles';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -12,30 +9,32 @@ import {
   UnitCard,
 } from './components/profile-form-controls';
 import { ProfileHeader, ProfileLaunchCard } from './components/profile-sections';
+import { styles } from './profile-setup-screen.styles';
+import { useProfile } from './use-profile';
 
 export function ProfileSetupScreen() {
-  const [username, setUsername] = useState('');
-  const [birthDate, setBirthDate] = useState('');
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
-  const [heightUnit, setHeightUnit] = useState<'cm' | 'ft'>('cm');
-  const [weightUnit, setWeightUnit] = useState<'kg' | 'lb'>('kg');
-  const [speedUnit, setSpeedUnit] = useState<'km/h' | 'mph'>('km/h');
-  const [distanceUnit, setDistanceUnit] = useState<'km' | 'mi'>('km');
-
-  const saveProfile = () => {
-    router.replace('/(tabs)');
-  };
+  const {
+    changeHeightUnit,
+    changeWeightUnit,
+    draft,
+    error,
+    isLoading,
+    isSaving,
+    save,
+    setField,
+    success,
+  } = useProfile();
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         style={styles.screen}>
         <View style={styles.content}>
-          <ProfileHeader />
+          <ProfileHeader name={draft.username} />
 
           <View style={styles.heroCopy}>
             <Text style={styles.title}>Set up your profile</Text>
@@ -47,50 +46,50 @@ export function ProfileSetupScreen() {
           <View style={styles.formStack}>
             <SetupField
               label="Username"
-              onChangeText={setUsername}
+              onChangeText={(value) => setField('username', value)}
               placeholder="e.g. IronPulse_88"
-              value={username}
+              value={draft.username}
             />
             <SetupField
               accessory={<CalendarIcon />}
               label="Date of Birth"
-              onChangeText={setBirthDate}
-              placeholder="mm/dd/yyyy"
-              value={birthDate}
+              onChangeText={(value) => setField('birthDate', value)}
+              placeholder="YYYY-MM-DD"
+              value={draft.birthDate}
             />
             <SetupField
               accessory={
                 <SegmentedControl
-                  onChange={setHeightUnit}
+                  onChange={changeHeightUnit}
                   options={[
                     { label: 'cm', value: 'cm' },
                     { label: 'ft', value: 'ft' },
                   ]}
-                  value={heightUnit}
+                  value={draft.heightUnit}
                 />
               }
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               label="Height"
-              onChangeText={setHeight}
-              placeholder="180"
-              value={height}
+              onChangeText={(value) => setField('height', value)}
+              placeholder={draft.heightUnit === 'cm' ? '180' : '5.11'}
+              value={draft.height}
             />
             <SetupField
               accessory={
                 <SegmentedControl
-                  onChange={setWeightUnit}
+                  onChange={changeWeightUnit}
                   options={[
                     { label: 'kg', value: 'kg' },
                     { label: 'lb', value: 'lb' },
                   ]}
-                  value={weightUnit}
+                  value={draft.weightUnit}
                 />
               }
               keyboardType="numeric"
               label="Current Weight"
-              onChangeText={setWeight}
-              placeholder="85.5"
-              value={weight}
+              onChangeText={(value) => setField('weight', value)}
+              placeholder={draft.weightUnit === 'kg' ? '85.5' : '188.5'}
+              value={draft.weight}
             />
           </View>
 
@@ -102,32 +101,42 @@ export function ProfileSetupScreen() {
           <View style={styles.unitStack}>
             <UnitCard
               label="Preferred Speed Unit"
-              onChange={setSpeedUnit}
+              onChange={(value) => setField('speedUnit', value)}
               options={[
-                { label: 'km/h', value: 'km/h' },
+                { label: 'km/h', value: 'kmh' },
                 { label: 'mph', value: 'mph' },
               ]}
-              value={speedUnit}
+              value={draft.speedUnit}
             />
             <UnitCard
               label="Preferred Distance Unit"
-              onChange={setDistanceUnit}
+              onChange={(value) => setField('distanceUnit', value)}
               options={[
                 { label: 'km', value: 'km' },
                 { label: 'mi', value: 'mi' },
               ]}
-              value={distanceUnit}
+              value={draft.distanceUnit}
             />
           </View>
 
           <ProfileLaunchCard />
 
+          {isLoading ? <ActivityIndicator color="#ff5f1f" /> : null}
+          {error ? <Text selectable style={styles.feedbackError}>{error}</Text> : null}
+          {success ? <Text accessibilityRole="alert" style={styles.feedbackSuccess}>{success}</Text> : null}
+
           <Pressable
             accessibilityLabel="Save Profile"
             accessibilityRole="button"
-            onPress={saveProfile}
-            style={({ pressed }) => [styles.saveButton, pressed && styles.saveButtonPressed]}>
-            <Text style={styles.saveButtonText}>Save Profile</Text>
+            accessibilityState={{ disabled: isLoading || isSaving }}
+            disabled={isLoading || isSaving}
+            onPress={save}
+            style={({ pressed }) => [
+              styles.saveButton,
+              (isLoading || isSaving) && styles.saveButtonDisabled,
+              pressed && !isLoading && !isSaving && styles.saveButtonPressed,
+            ]}>
+            <Text style={styles.saveButtonText}>{isSaving ? 'Saving…' : 'Save Profile'}</Text>
             <Text style={styles.saveArrow}>-&gt;</Text>
           </Pressable>
         </View>

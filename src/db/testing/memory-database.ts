@@ -34,6 +34,13 @@ export class MemoryDb implements LocalDatabase {
 
     if (versionMatch) {
       this.userVersion = Number(versionMatch[1]);
+      return;
+    }
+
+    if (normalized === 'alter table workout_sets add column completed_at text') {
+      this.ensureTable('workout_sets').forEach((row) => {
+        row.completed_at = null;
+      });
     }
   }
 
@@ -120,6 +127,16 @@ export class MemoryDb implements LocalDatabase {
 
     if (normalized === 'select * from workout_sessions where workout_session_id = ?') {
       return this.selectBy('workout_sessions', 'workout_session_id', params[0]) as T[];
+    }
+
+    if (
+      normalized ===
+      "select * from workout_sessions where user_id_fk = ? and status = 'in_progress' order by started_at desc, created_at desc limit 1"
+    ) {
+      return this.selectBy('workout_sessions', 'user_id_fk', params[0])
+        .filter((row) => row.status === 'in_progress')
+        .sort((left, right) => compareNullableDates(right.started_at, left.started_at))
+        .slice(0, 1) as T[];
     }
 
     if (normalized === 'select * from workout_sets where workout_set_id = ?') {
@@ -230,6 +247,30 @@ export class MemoryDb implements LocalDatabase {
       });
     }
 
+    if (normalized.startsWith('update users set username')) {
+      return this.updateById('users', 'user_id', params[8], {
+        username: params[0],
+        dob: params[1],
+        height: params[2],
+        height_unit: params[3],
+        weight_unit: params[4],
+        speed_unit: params[5],
+        distance_unit: params[6],
+        updated_at: params[7],
+      });
+    }
+
+    if (normalized === "update users set distance_unit = 'km' where distance_unit = 'm'") {
+      let changes = 0;
+      this.ensureTable('users').forEach((row) => {
+        if (row.distance_unit === 'm') {
+          row.distance_unit = 'km';
+          changes += 1;
+        }
+      });
+      return { changes };
+    }
+
     if (normalized.startsWith('update exercises')) {
       return this.updateById('exercises', 'exercise_id', params[7], {
         name: params[0],
@@ -254,7 +295,7 @@ export class MemoryDb implements LocalDatabase {
     }
 
     if (normalized.startsWith('update workout_sets')) {
-      return this.updateById('workout_sets', 'workout_set_id', params[7], {
+      return this.updateById('workout_sets', 'workout_set_id', params[8], {
         reps: params[0],
         weight: params[1],
         speed: params[2],
@@ -262,6 +303,7 @@ export class MemoryDb implements LocalDatabase {
         distance: params[4],
         rest_time_seconds: params[5],
         completed: params[6],
+        completed_at: params[7],
       });
     }
 

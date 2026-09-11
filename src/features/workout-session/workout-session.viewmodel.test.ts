@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import type { WorkoutSessionDetail } from '@/db';
+import type { UserRow, WorkoutSessionDetail } from '@/db';
 
 import { mapWorkoutSessionToViewModel } from './workout-session.viewmodel';
 
@@ -41,25 +41,45 @@ const session: WorkoutSessionDetail = {
   ],
 };
 
+const user: UserRow = {
+  user_id: 'local-user', username: 'Local Athlete', email: null, dob: null, height: null,
+  height_unit: 'cm', weight_unit: 'kg', speed_unit: 'kmh', distance_unit: 'km',
+  created_at: '2026-07-06T12:00:00.000Z', updated_at: '2026-07-06T12:00:00.000Z',
+};
+
 describe('workout session view model', () => {
   it('maps a local workout session into the active workout shape', () => {
-    const workout = mapWorkoutSessionToViewModel(session);
+    const workout = mapWorkoutSessionToViewModel(session, user);
 
     expect(workout).toEqual(
       expect.objectContaining({
+        completedAt: null,
+        createdAt: '2026-07-06T13:00:00.000Z',
         id: 'session-1',
+        scheduledFor: null,
         title: 'Push Day',
-        intensity: 'In Progress',
+        status: 'in_progress',
       })
     );
     expect(workout.exercises).toEqual([
       expect.objectContaining({
         id: 'workout-exercise-1',
         name: 'Bench Press',
-        sets: 2,
-        reps: '8-10 reps',
+        sets: expect.arrayContaining([expect.objectContaining({
+          fields: ['reps', 'weight'],
+          id: 'workout-set-1',
+          reps: '8',
+          weight: '60',
+        })]),
       }),
     ]);
+  });
+
+  it('formats canonical set values using the saved user units', () => {
+    const workout = mapWorkoutSessionToViewModel(session, { ...user, weight_unit: 'lb' });
+
+    expect(workout.weightUnit).toBe('lb');
+    expect(workout.exercises[0].sets[0].weight).toBe('132.28');
   });
 });
 
@@ -75,6 +95,7 @@ function createSet(id: string, setNumber: number, reps: number, weight: number) 
     distance: null,
     rest_time_seconds: 90,
     completed: 0,
+    completed_at: null,
     created_at: '2026-07-06T13:00:00.000Z',
   };
 }

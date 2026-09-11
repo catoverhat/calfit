@@ -71,5 +71,5 @@ function createSession(status: WorkoutHistoryItem['status']): WorkoutHistoryItem
 }
 
 function createSet(id: string, reps: number, weight: number, completed: number) {
-  return { workout_set_id: id, workout_exercise_id_fk: 'workout-exercise-1', set_number: Number(id.at(-1)), reps, weight, speed: null, duration_seconds: null, distance: null, rest_time_seconds: 90, completed, created_at: '2026-07-06T13:00:00.000Z' };
+  return { workout_set_id: id, workout_exercise_id_fk: 'workout-exercise-1', set_number: Number(id.at(-1)), reps, weight, speed: null, duration_seconds: null, distance: null, rest_time_seconds: 90, completed, completed_at: completed ? '2026-07-06T13:05:00.000Z' : null, created_at: '2026-07-06T13:00:00.000Z' };
 }

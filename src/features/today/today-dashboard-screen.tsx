@@ -37,11 +37,13 @@ export function TodayDashboardScreen() {
           <View style={styles.greetingBlock}>
             <Text style={styles.dateLabel}>{todayDashboard.dateLabel}</Text>
             <Text style={styles.greeting}>
-              Good morning, {todayDashboard.name}!
+              {todayDashboard.greeting}, {todayDashboard.name}!
             </Text>
           </View>
 
           <TodayRoutineCard
+            actionLabel={todayDashboard.actionLabel}
+            canStart={Boolean(todayDashboard.routine || todayDashboard.activeSessionId)}
             error={error}
             isLoading={isLoading}
             isStarting={isStarting}

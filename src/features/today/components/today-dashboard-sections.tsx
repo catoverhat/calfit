@@ -45,19 +45,23 @@ export function TodayHeader({
 }
 
 export function TodayRoutineCard({
+  actionLabel,
+  canStart,
   error,
   isLoading,
   isStarting,
   onStart,
   routine,
 }: {
+  actionLabel: string;
+  canStart: boolean;
   error: string | null;
   isLoading: boolean;
   isStarting: boolean;
   onStart: () => void;
   routine: TodayDashboardRoutine | null;
 }) {
-  const startDisabled = isLoading || isStarting || !routine;
+  const startDisabled = isLoading || isStarting || !canStart;
 
   return (
     <View style={styles.workoutCard}>
@@ -94,13 +98,15 @@ export function TodayRoutineCard({
           body={
             isLoading
               ? "Preparing your local routine data."
-              : "Create a routine to see it here."
+              : canStart
+                ? "Your active workout is ready to continue."
+                : "Create a routine to see it here."
           }
-          title={isLoading ? "Loading local routine" : "No routine ready"}
+          title={isLoading ? "Loading local routine" : canStart ? "Workout in progress" : "No routine ready"}
         />
       )}
       <Pressable
-        accessibilityLabel={isStarting ? "Starting workout" : "Start Workout"}
+        accessibilityLabel={isStarting ? "Opening workout" : actionLabel}
         accessibilityRole="button"
         accessibilityState={{ disabled: startDisabled }}
         disabled={startDisabled}
@@ -117,7 +123,7 @@ export function TodayRoutineCard({
             ? "Starting..."
             : isLoading
               ? "Loading..."
-              : "Start Workout"}
+              : actionLabel}
         </Text>
       </Pressable>
     </View>

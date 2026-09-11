@@ -12,7 +12,7 @@ type SegmentOption<T extends string> = {
 
 type SetupFieldProps = {
   accessory?: ReactNode;
-  keyboardType?: 'default' | 'numeric';
+  keyboardType?: 'decimal-pad' | 'default' | 'numeric';
   label: string;
   onChangeText: (value: string) => void;
   placeholder: string;

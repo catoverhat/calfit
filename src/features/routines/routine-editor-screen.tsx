@@ -26,6 +26,7 @@ export function RoutineEditorScreen({ mode, routineId }: { mode: 'create' | 'edi
             onAdd={() => router.push('/routines/add-exercise')}
             removeExercise={editor.removeExercise}
             removeTarget={editor.removeTarget}
+            units={editor.units}
             updateTarget={editor.updateTarget}
           />
           {editor.error ? <View style={styles.errorBanner}><ThemedText style={styles.errorText}>{editor.error}</ThemedText></View> : null}

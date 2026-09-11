@@ -1,3 +1,5 @@
+import type { DistanceUnit, HeightUnit, SpeedUnit, WeightUnit } from './units';
+
 export type SqlValue = string | number | boolean | null;
 
 export interface SqlRunResult {
@@ -21,10 +23,10 @@ export interface UserRow {
   email: string | null;
   dob: string | null;
   height: number | null;
-  height_unit: string;
-  weight_unit: string;
-  speed_unit: string;
-  distance_unit: string;
+  height_unit: HeightUnit;
+  weight_unit: WeightUnit;
+  speed_unit: SpeedUnit;
+  distance_unit: DistanceUnit | 'm';
   created_at: string;
   updated_at: string;
 }
@@ -121,6 +123,7 @@ export interface WorkoutSetRow {
   distance: number | null;
   rest_time_seconds: number | null;
   completed: number;
+  completed_at: string | null;
   created_at: string;
 }
 
@@ -159,6 +162,7 @@ export interface WorkoutSessionDetail extends WorkoutSessionRow {
 }
 
 export interface DashboardSnapshot {
+  activeSession: WorkoutSessionRow | null;
   user: UserRow;
   routine: RoutineDetail | null;
   latestBodyMeasurement: BodyMeasurementRow | null;

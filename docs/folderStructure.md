@@ -72,6 +72,8 @@ src/
 │   ├── schema.ts
 │   ├── schema.test.ts
 │   ├── types.ts
+│   ├── units.ts                    # Canonical measurement conversions and unit types
+│   ├── units.test.ts
 │   ├── repositories/           # Repositories split by domain
 │   │   ├── body-measurements.ts
 │   │   ├── body-measurements.test.ts
@@ -99,9 +101,6 @@ src/
 │   ├── use-app-fonts.web.ts
 │   ├── use-color-scheme.ts
 │   └── use-color-scheme.web.ts
-│
-├── fixtures/                   # Development and test fixtures; not production constants
-│   └── mock-data.ts
 │
 └── global.css
 ```
@@ -209,10 +208,6 @@ All design tokens and theme utilities live here. Colors, spacing, typography, fo
 
 Only hooks used across the entire application belong here, such as app font initialization or platform color-scheme access. Feature-specific hooks belong in their feature even when their names begin with `use`.
 
-### `src/fixtures`
-
-Mock users, workouts, routines, and other sample records belong here when multiple features or tests use them. Static production catalogs should live with the feature or persistence layer that owns them, not in a generic `constants` folder.
-
 ## Naming and Imports
 
 - Use `kebab-case` filenames.
@@ -263,5 +258,5 @@ Before creating a source file, ask:
 1. Is it an Expo Router route or layout? Put it in `src/app`.
 2. Does one product feature own it? Put it in `src/features/<feature>`.
 3. Is it reusable UI with no feature knowledge? Put it in `src/components/ui` or `src/components/layout`.
-4. Is it shared navigation, persistence, theme, an app-wide hook, or fixture data? Use the dedicated folder.
+4. Is it shared navigation, persistence, theme, or an app-wide hook? Use the dedicated folder.
 5. Is the proposed folder generic because ownership is unclear? Resolve ownership before adding the file.

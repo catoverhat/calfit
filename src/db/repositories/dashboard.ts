@@ -1,8 +1,9 @@
 import { LOCAL_USER_ID } from '../schema';
 import type { DashboardSnapshot, LocalDatabase } from '../types';
 import { getRecentBodyMeasurements } from './body-measurements';
-import { getTodayRoutine } from './routines';
+import { getRoutineDetail, getTodayRoutine } from './routines';
 import { getLocalUserProfile } from './users';
+import { getInProgressWorkoutSession } from './workout-sessions';
 
 export async function getWorkoutStreak(
   db: LocalDatabase,
@@ -35,7 +36,10 @@ export async function getTodayDashboardSnapshot(
   asOf = new Date()
 ): Promise<DashboardSnapshot> {
   const user = await getLocalUserProfile(db, userId);
-  const routine = await getTodayRoutine(db, userId);
+  const activeSession = await getInProgressWorkoutSession(db, userId);
+  const routine = activeSession?.routine_id_fk
+    ? await getRoutineDetail(db, activeSession.routine_id_fk)
+    : await getTodayRoutine(db, userId, asOf);
   const measurements = await getRecentBodyMeasurements(db, userId, 2);
   const workoutStreak = await getWorkoutStreak(db, userId, asOf);
   const completedWorkoutRow = await db.getFirstAsync<{ completed_count: number }>(
@@ -47,6 +51,7 @@ export async function getTodayDashboardSnapshot(
   );
 
   return {
+    activeSession,
     user,
     routine,
     latestBodyMeasurement: measurements[0] ?? null,
@@ -68,4 +73,3 @@ function toLocalDateKey(date: Date): string {
 
   return `${year}-${month}-${day}`;
 }
-

@@ -5,7 +5,7 @@ import { SemanticColors } from '@/theme/tokens';
 
 import { styles } from '../active-workout-session-screen.styles';
 
-export function SessionOverview({ title }: { title: string }) {
+export function SessionOverview({ elapsed, isSaving, title }: { elapsed: string; isSaving: boolean; title: string }) {
   return (
     <>
       <View style={styles.sessionHeader}>
@@ -22,7 +22,7 @@ export function SessionOverview({ title }: { title: string }) {
         <View style={styles.headerActions}>
           <View style={styles.offlineStatus}>
             <AppIcon color={SemanticColors.textPrimary} name="offline" size={13} />
-            <Text style={styles.offlineText}>Saved Offline</Text>
+            <Text style={styles.offlineText}>{isSaving ? 'Saving…' : 'Saved Locally'}</Text>
           </View>
           <View style={styles.timerButton}>
             <AppIcon color={SemanticColors.action} name="timer" size={20} />
@@ -33,7 +33,7 @@ export function SessionOverview({ title }: { title: string }) {
       <View style={styles.timeCard}>
         <View>
           <Text style={styles.smallLabel}>Session Time</Text>
-          <Text style={styles.timeValue}>14:22</Text>
+          <Text style={styles.timeValue}>{elapsed}</Text>
         </View>
         <View style={styles.activePill}>
           <View style={styles.activeDot} />

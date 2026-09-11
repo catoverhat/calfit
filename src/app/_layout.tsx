@@ -9,7 +9,7 @@ import { AnimatedSplashOverlay } from '@/components/layout/animated-splash-overl
 import { useAppFonts } from '@/hooks/use-app-fonts';
 
 export const unstable_settings = {
-  anchor: 'login',
+  initialRouteName: '(tabs)',
 };
 
 export default function RootLayout() {
@@ -24,9 +24,9 @@ export default function RootLayout() {
       <StatusBar style="auto" />
       <AnimatedSplashOverlay />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="login" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="workout-session/[id]" />
+        <Stack.Screen name="login" />
       </Stack>
     </ThemeProvider>
   );

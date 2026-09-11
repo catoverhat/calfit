@@ -1,46 +1,113 @@
-import type { WorkoutSessionDetail } from '@/db';
+import {
+  distanceFromCanonical,
+  normalizeDistanceUnit,
+  normalizeSpeedUnit,
+  normalizeWeightUnit,
+  speedFromCanonical,
+  weightFromCanonical,
+  type DistanceUnit,
+  type SpeedUnit,
+  type UserRow,
+  type WeightUnit,
+  type WorkoutSessionDetail,
+  type WorkoutSessionStatus,
+} from '@/db';
 
-export interface WorkoutSessionViewModel {
-  id: string;
-  title: string;
+export type WorkoutMetricField = 'reps' | 'weight' | 'speed' | 'duration' | 'distance';
+
+export interface WorkoutSessionSetViewModel {
+  completed: boolean;
+  completedAt: string | null;
+  distance: string;
   duration: string;
-  intensity: string;
-  imageUrl: string | null;
-  description: string;
-  exercises: { id: string; name: string; sets: number; reps: string }[];
+  fields: WorkoutMetricField[];
+  id: string;
+  reps: string;
+  restTimeSeconds: number;
+  setNumber: number;
+  speed: string;
+  weight: string;
 }
 
-export function mapWorkoutSessionToViewModel(session: WorkoutSessionDetail): WorkoutSessionViewModel {
-  const exercises = session.exercises.map((exercise) => ({
-    id: exercise.workout_exercise_id,
-    name: exercise.exercise.name,
-    sets: exercise.sets.length,
-    reps: formatSetTargets(exercise.sets),
-  }));
+export interface WorkoutSessionExerciseViewModel {
+  description: string | null;
+  id: string;
+  imageUrl: string | null;
+  name: string;
+  sets: WorkoutSessionSetViewModel[];
+  videoUrl: string | null;
+}
+
+export interface WorkoutSessionViewModel {
+  completedAt: string | null;
+  createdAt: string;
+  distanceUnit: DistanceUnit;
+  exercises: WorkoutSessionExerciseViewModel[];
+  id: string;
+  scheduledFor: string | null;
+  startedAt: string | null;
+  status: WorkoutSessionStatus;
+  title: string;
+  speedUnit: SpeedUnit;
+  weightUnit: WeightUnit;
+}
+
+export function mapWorkoutSessionToViewModel(
+  session: WorkoutSessionDetail,
+  user: UserRow
+): WorkoutSessionViewModel {
+  const weightUnit = normalizeWeightUnit(user.weight_unit);
+  const speedUnit = normalizeSpeedUnit(user.speed_unit);
+  const distanceUnit = normalizeDistanceUnit(user.distance_unit);
+
   return {
+    completedAt: session.completed_at,
+    createdAt: session.created_at,
+    distanceUnit,
+    exercises: session.exercises.map((item) => ({
+      description: item.exercise.description,
+      id: item.workout_exercise_id,
+      imageUrl: item.exercise.image_url,
+      name: item.exercise.name,
+      sets: item.sets.map((set) => ({
+        completed: set.completed === 1,
+        completedAt: set.completed_at,
+        distance: displayValue(set.distance, (value) => distanceFromCanonical(value, distanceUnit)),
+        duration: displayValue(set.duration_seconds),
+        fields: relevantFields(set),
+        id: set.workout_set_id,
+        reps: displayValue(set.reps),
+        restTimeSeconds: set.rest_time_seconds ?? 0,
+        setNumber: set.set_number,
+        speed: displayValue(set.speed, (value) => speedFromCanonical(value, speedUnit)),
+        weight: displayValue(set.weight, (value) => weightFromCanonical(value, weightUnit)),
+      })),
+      videoUrl: item.exercise.video_url,
+    })),
     id: session.workout_session_id,
+    scheduledFor: session.scheduled_for,
+    startedAt: session.started_at,
+    status: session.status,
     title: session.routine_name ?? 'Local Workout',
-    duration: estimateSessionDuration(session),
-    intensity: session.status === 'completed' ? 'Completed' : 'In Progress',
-    imageUrl: session.exercises.find((exercise) => exercise.exercise.image_url)?.exercise.image_url ?? null,
-    description: `Local workout session with ${exercises.length} exercises.`,
-    exercises,
+    speedUnit,
+    weightUnit,
   };
 }
 
-function estimateSessionDuration(session: WorkoutSessionDetail): string {
-  if (session.started_at && session.completed_at) {
-    const elapsedMinutes = Math.round((new Date(session.completed_at).getTime() - new Date(session.started_at).getTime()) / 60000);
-    if (elapsedMinutes > 0) return `${elapsedMinutes} min`;
-  }
-  const setCount = session.exercises.reduce((count, exercise) => count + exercise.sets.length, 0);
-  return `${Math.max(20, Math.round(setCount * 4.5))} min`;
+function relevantFields(
+  set: WorkoutSessionDetail['exercises'][number]['sets'][number]
+): WorkoutMetricField[] {
+  const fields: WorkoutMetricField[] = [];
+  if (set.reps !== null) fields.push('reps');
+  if (set.weight !== null) fields.push('weight');
+  if (set.speed !== null) fields.push('speed');
+  if (set.duration_seconds !== null) fields.push('duration');
+  if (set.distance !== null) fields.push('distance');
+  return fields.length > 0 ? fields : ['reps', 'weight'];
 }
 
-function formatSetTargets(sets: WorkoutSessionDetail['exercises'][number]['sets']): string {
-  const reps = sets.map((set) => set.reps).filter((value): value is number => typeof value === 'number');
-  if (reps.length === 0) return 'Target sets';
-  const min = Math.min(...reps);
-  const max = Math.max(...reps);
-  return min === max ? `${min} reps` : `${min}-${max} reps`;
+function displayValue(value: number | null, convert: (value: number) => number = (item) => item): string {
+  if (value === null) return '';
+  const converted = convert(value);
+  return String(Math.round(converted * 100) / 100);
 }

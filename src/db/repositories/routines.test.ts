@@ -21,9 +21,9 @@ describe('routine repository', () => {
 
     await initializeLocalDatabase(db);
 
-    const seededRoutine = await seedStarterRoutineIfEmpty(db);
-    const seededAgain = await seedStarterRoutineIfEmpty(db);
-    const todayRoutine = await getTodayRoutine(db);
+    const seededRoutine = await seedStarterRoutineIfEmpty(db, undefined, '2026-07-06T12:00:00.000Z');
+    const seededAgain = await seedStarterRoutineIfEmpty(db, undefined, '2026-07-06T12:00:00.000Z');
+    const todayRoutine = await getTodayRoutine(db, undefined, new Date('2026-07-06T12:00:00.000Z'));
 
     expect(seededRoutine.routine_id).toBe(seededAgain.routine_id);
     expect(db.tables.get('routines')).toHaveLength(4);
@@ -118,6 +118,24 @@ describe('routine repository', () => {
 
     expect(result.routine_id).toBe('my-routine');
     expect(db.tables.get('routines')).toHaveLength(1);
+  });
+
+  it('prioritizes a due routine that has not been completed', async () => {
+    const db = new MemoryDb();
+    const friday = new Date('2026-07-10T12:00:00.000Z');
+    await initializeLocalDatabase(db);
+    await seedDemoRoutinesIfEmpty(db, undefined, friday.toISOString());
+
+    const first = await getTodayRoutine(db, undefined, friday);
+    expect(first?.routine_id).toBe('full-body-power');
+    const session = await startWorkoutFromRoutine(db, {
+      routineId: 'full-body-power', now: '2026-07-10T13:00:00.000Z',
+    });
+    await completeWorkoutSession(db, session.workout_session_id, '2026-07-10T14:00:00.000Z');
+
+    await expect(getTodayRoutine(db, undefined, friday)).resolves.toEqual(
+      expect.objectContaining({ routine_id: 'push-day' })
+    );
   });
 
 });

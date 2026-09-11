@@ -24,7 +24,8 @@ export type {
   ExerciseDetail,
   UpdateExerciseInput,
 } from './repositories/exercises';
-export { getLocalUserProfile } from './repositories/users';
+export { getLocalUserProfile, saveLocalProfile } from './repositories/users';
+export type { SaveLocalProfileInput } from './repositories/users';
 export {
   createBodyMeasurement,
   getLatestBodyMeasurement,
@@ -52,15 +53,34 @@ export type {
 } from './repositories/routines';
 export {
   completeWorkoutSession,
+  getInProgressWorkoutSession,
   getWorkoutHistory,
   getWorkoutSessionDetail,
   logWorkoutSet,
+  startOrResumeWorkoutFromRoutine,
   startWorkoutFromRoutine,
 } from './repositories/workout-sessions';
 export type {
   LogWorkoutSetInput,
+  StartOrResumeWorkoutResult,
   StartWorkoutFromRoutineInput,
 } from './repositories/workout-sessions';
+export {
+  distanceFromCanonical,
+  distanceToCanonical,
+  formatUnitNumber,
+  heightFromCanonical,
+  heightToCanonical,
+  normalizeDistanceUnit,
+  normalizeHeightUnit,
+  normalizeSpeedUnit,
+  normalizeWeightUnit,
+  speedFromCanonical,
+  speedToCanonical,
+  weightFromCanonical,
+  weightToCanonical,
+} from './units';
+export type { DistanceUnit, HeightUnit, SpeedUnit, WeightUnit } from './units';
 export type {
   BodyMeasurementRow,
   CategoryRow,

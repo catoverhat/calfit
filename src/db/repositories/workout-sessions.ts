@@ -33,6 +33,12 @@ export interface LogWorkoutSetInput {
   distance?: number | null;
   restTimeSeconds?: number | null;
   completed?: boolean;
+  completedAt?: string | null;
+}
+
+export interface StartOrResumeWorkoutResult {
+  resumed: boolean;
+  session: WorkoutSessionRow;
 }
 
 
@@ -135,10 +141,11 @@ export async function startWorkoutFromRoutine(
             speed,
             duration_seconds,
             distance,
-            rest_time_seconds,
-            completed,
-            created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          rest_time_seconds,
+          completed,
+          completed_at,
+          created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           createLocalId('workout_set'),
           workoutExerciseId,
           target.set_number,
@@ -149,6 +156,7 @@ export async function startWorkoutFromRoutine(
           target.target_distance,
           target.rest_time_seconds,
           0,
+          null,
           now
         );
       }
@@ -165,6 +173,29 @@ export async function startWorkoutFromRoutine(
   }
 
   return session;
+}
+
+export async function getInProgressWorkoutSession(
+  db: LocalDatabase,
+  userId = LOCAL_USER_ID
+): Promise<WorkoutSessionRow | null> {
+  return db.getFirstAsync<WorkoutSessionRow>(
+    `SELECT * FROM workout_sessions
+    WHERE user_id_fk = ? AND status = 'in_progress'
+    ORDER BY started_at DESC, created_at DESC
+    LIMIT 1`,
+    userId
+  );
+}
+
+export async function startOrResumeWorkoutFromRoutine(
+  db: LocalDatabase,
+  input: StartWorkoutFromRoutineInput
+): Promise<StartOrResumeWorkoutResult> {
+  const active = await getInProgressWorkoutSession(db, input.userId ?? LOCAL_USER_ID);
+  if (active) return { resumed: true, session: active };
+
+  return { resumed: false, session: await startWorkoutFromRoutine(db, input) };
 }
 
 export async function logWorkoutSet(
@@ -189,7 +220,8 @@ export async function logWorkoutSet(
       duration_seconds = ?,
       distance = ?,
       rest_time_seconds = ?,
-      completed = ?
+      completed = ?,
+      completed_at = ?
     WHERE workout_set_id = ?`,
     coalesceSql(input.reps, current.reps),
     coalesceSql(input.weight, current.weight),
@@ -198,6 +230,11 @@ export async function logWorkoutSet(
     coalesceSql(input.distance, current.distance),
     coalesceSql(input.restTimeSeconds, current.rest_time_seconds),
     input.completed === undefined ? current.completed : input.completed ? 1 : 0,
+    input.completed === undefined
+      ? current.completed_at
+      : input.completed
+        ? input.completedAt ?? current.completed_at ?? new Date().toISOString()
+        : null,
     workoutSetId
   );
 }

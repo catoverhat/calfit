@@ -4,14 +4,14 @@ import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
 import { ThemedText } from '@/components/ui/themed-text';
-import type { RoutineExerciseTargetRow } from '@/db';
+import { distanceFromCanonical, formatUnitNumber, speedFromCanonical, weightFromCanonical, type RoutineExerciseTargetRow } from '@/db';
 import { DesignColors, SemanticColors } from '@/theme/tokens';
 import { getRoutineTotals, WEEKDAYS } from './routine.viewmodel';
 import { styles } from './routine-detail-screen.styles';
 import { useRoutineDetail } from './use-routine-detail';
 
 export function RoutineDetailScreen({ routineId }: { routineId?: string }) {
-  const { error, isLoading, isStarting, reload, routine, startWorkout } = useRoutineDetail(routineId);
+  const { activeSessionId, error, isLoading, isStarting, reload, routine, startWorkout, units } = useRoutineDetail(routineId);
 
   if (isLoading) {
     return <StateScreen loading message="Loading routine…" />;
@@ -45,9 +45,9 @@ export function RoutineDetailScreen({ routineId }: { routineId?: string }) {
           <View style={styles.statsRow}><Stat label="Exercises" value={String(totals.exerciseCount)} /><Stat label="Target sets" value={String(totals.setCount)} /><Stat label="Training days" value={String(routine.schedules.length)} /></View>
           <View style={styles.scheduleRow}>{routine.schedules.length ? routine.schedules.map((schedule) => <View key={schedule.routine_schedule_id} style={styles.scheduleChip}><ThemedText style={styles.scheduleText}>{WEEKDAYS[schedule.day_of_week]?.longLabel}</ThemedText></View>) : <ThemedText style={styles.flexibleText}>Flexible schedule</ThemedText>}</View>
           {error ? <ThemedText style={styles.inlineError}>{error}</ThemedText> : null}
-          <Pressable accessibilityLabel={`Start ${routine.name}`} accessibilityRole="button" disabled={isStarting || !routine.active} onPress={startWorkout} style={({ pressed }) => [styles.startButton, (!routine.active || isStarting) && styles.buttonDisabled, pressed && styles.pressed]}>
+          <Pressable accessibilityLabel={activeSessionId ? 'Resume active workout' : `Start ${routine.name}`} accessibilityRole="button" disabled={isStarting || (!activeSessionId && !routine.active)} onPress={startWorkout} style={({ pressed }) => [styles.startButton, ((!activeSessionId && !routine.active) || isStarting) && styles.buttonDisabled, pressed && styles.pressed]}>
             {isStarting ? <ActivityIndicator color={DesignColors.onPrimaryContainer} /> : <AppIcon color={DesignColors.onPrimaryContainer} name="play" size={20} />}
-            <ThemedText style={styles.startButtonText}>{isStarting ? 'Starting…' : 'Start workout'}</ThemedText>
+            <ThemedText style={styles.startButtonText}>{isStarting ? 'Opening…' : activeSessionId ? 'Resume active workout' : 'Start workout'}</ThemedText>
           </Pressable>
         </View>
         <View style={styles.exerciseSection}>
@@ -55,7 +55,7 @@ export function RoutineDetailScreen({ routineId }: { routineId?: string }) {
           {routine.exercises.map((item, index) => (
             <View key={item.routine_exercise_id} style={styles.exerciseCard}>
               <View style={styles.exerciseHeader}><View style={styles.exerciseIndex}><ThemedText style={styles.exerciseIndexText}>{index + 1}</ThemedText></View><View style={styles.exerciseCopy}><ThemedText style={styles.exerciseName}>{item.exercise.name}</ThemedText><ThemedText style={styles.exerciseDescription}>{item.exercise.description ?? `${item.targets.length} target sets`}</ThemedText></View></View>
-              <View style={styles.targetList}>{item.targets.map((target) => <TargetRow key={target.routine_exercise_target_id} target={target} />)}</View>
+              <View style={styles.targetList}>{item.targets.map((target) => <TargetRow key={target.routine_exercise_target_id} target={target} units={units} />)}</View>
             </View>
           ))}
         </View>
@@ -72,10 +72,9 @@ function Stat({ label, value }: { label: string; value: string }) {
   return <View style={styles.stat}><ThemedText style={styles.statValue}>{value}</ThemedText><ThemedText style={styles.statLabel}>{label}</ThemedText></View>;
 }
 
-function TargetRow({ target }: { target: RoutineExerciseTargetRow }) {
-  const values = [target.target_reps !== null ? `${target.target_reps} reps` : null, target.target_weight !== null ? `${target.target_weight} kg` : null, target.target_speed !== null ? `${target.target_speed} km/h` : null, target.target_duration_seconds !== null ? formatDuration(target.target_duration_seconds) : null, target.target_distance !== null ? formatDistance(target.target_distance) : null, target.rest_time_seconds !== null ? `${target.rest_time_seconds}s rest` : null].filter(Boolean);
+function TargetRow({ target, units }: { target: RoutineExerciseTargetRow; units: { distanceUnit: 'km' | 'mi'; speedUnit: 'kmh' | 'mph'; weightUnit: 'kg' | 'lb' } }) {
+  const values = [target.target_reps !== null ? `${target.target_reps} reps` : null, target.target_weight !== null ? `${formatUnitNumber(weightFromCanonical(target.target_weight, units.weightUnit))} ${units.weightUnit}` : null, target.target_speed !== null ? `${formatUnitNumber(speedFromCanonical(target.target_speed, units.speedUnit))} ${units.speedUnit === 'kmh' ? 'km/h' : 'mph'}` : null, target.target_duration_seconds !== null ? formatDuration(target.target_duration_seconds) : null, target.target_distance !== null ? `${formatUnitNumber(distanceFromCanonical(target.target_distance, units.distanceUnit), 2)} ${units.distanceUnit}` : null, target.rest_time_seconds !== null ? `${target.rest_time_seconds}s rest` : null].filter(Boolean);
   return <View style={styles.targetRow}><ThemedText style={styles.setNumber}>SET {target.set_number}</ThemedText><ThemedText style={styles.targetText}>{values.join('  ·  ') || 'Open target'}</ThemedText></View>;
 }
 
 function formatDuration(seconds: number): string { return seconds >= 60 ? `${Math.round(seconds / 60)} min` : `${seconds} sec`; }
-function formatDistance(metres: number): string { return metres >= 1000 ? `${metres / 1000} km` : `${metres} m`; }

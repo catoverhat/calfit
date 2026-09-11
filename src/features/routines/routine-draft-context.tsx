@@ -1,6 +1,17 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 
-import type { ExerciseCatalogRow, RoutineDetail } from '@/db';
+import {
+  distanceFromCanonical,
+  speedFromCanonical,
+  weightFromCanonical,
+  type DistanceUnit,
+  type ExerciseCatalogRow,
+  type RoutineDetail,
+  type SpeedUnit,
+  type WeightUnit,
+} from '@/db';
+
+export type RoutineUnits = { distanceUnit: DistanceUnit; speedUnit: SpeedUnit; weightUnit: WeightUnit };
 
 export interface RoutineTargetDraft {
   id: string;
@@ -34,7 +45,7 @@ interface RoutineDraftContextValue {
   draft: RoutineDraft | null;
   clearDraft: () => void;
   initializeCreate: () => void;
-  initializeEdit: (routine: RoutineDetail) => void;
+  initializeEdit: (routine: RoutineDetail, units: RoutineUnits) => void;
   moveExercise: (id: string, direction: -1 | 1) => void;
   removeExercise: (id: string) => void;
   removeTarget: (exerciseId: string, targetId: string) => void;
@@ -74,11 +85,11 @@ export function RoutineDraftProvider({ children }: { children: ReactNode }) {
                 sourceKey: 'create',
               }
         ),
-      initializeEdit: (routine) =>
+      initializeEdit: (routine, units) =>
         setDraft((current) =>
           current?.sourceKey === `edit:${routine.routine_id}`
             ? current
-            : mapRoutineToDraft(routine)
+            : mapRoutineToDraft(routine, units)
         ),
       setDraftField: (key, fieldValue) =>
         setDraft((current) => (current ? { ...current, [key]: fieldValue } : current)),
@@ -169,7 +180,7 @@ export function useRoutineDraft(): RoutineDraftContextValue {
   return value;
 }
 
-function mapRoutineToDraft(routine: RoutineDetail): RoutineDraft {
+function mapRoutineToDraft(routine: RoutineDetail, units: RoutineUnits): RoutineDraft {
   return {
     active: routine.active === 1,
     description: routine.description ?? '',
@@ -181,10 +192,10 @@ function mapRoutineToDraft(routine: RoutineDetail): RoutineDraft {
       targets: exercise.targets.map((target) => ({
         id: target.routine_exercise_target_id,
         reps: toDraftValue(target.target_reps),
-        weight: toDraftValue(target.target_weight),
-        speed: toDraftValue(target.target_speed),
+        weight: toDraftValue(target.target_weight === null ? null : weightFromCanonical(target.target_weight, units.weightUnit)),
+        speed: toDraftValue(target.target_speed === null ? null : speedFromCanonical(target.target_speed, units.speedUnit)),
         duration: toDraftValue(target.target_duration_seconds),
-        distance: toDraftValue(target.target_distance),
+        distance: toDraftValue(target.target_distance === null ? null : distanceFromCanonical(target.target_distance, units.distanceUnit)),
         rest: toDraftValue(target.rest_time_seconds),
       })),
     })),

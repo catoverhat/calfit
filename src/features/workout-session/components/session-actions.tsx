@@ -4,7 +4,7 @@ import { AppIcon } from '@/components/ui/app-icon';
 import { DesignColors } from '@/theme/tokens';
 import { styles } from '../active-workout-session-screen.styles';
 
-export function SessionActions({ disabled, onFinish }: { disabled: boolean; onFinish: () => void }) {
+export function SessionActions({ busy, disabled, onFinish }: { busy: boolean; disabled: boolean; onFinish: () => void }) {
   return (
     <View style={styles.bottomActions}>
       <Pressable
@@ -15,7 +15,7 @@ export function SessionActions({ disabled, onFinish }: { disabled: boolean; onFi
         onPress={onFinish}
         style={({ pressed }) => [styles.finishButton, disabled && styles.disabled, pressed && !disabled && styles.finishButtonPressed]}>
         <AppIcon color={DesignColors.onPrimaryContainer} name="check" size={18} />
-        <Text style={styles.finishButtonText}>{disabled ? 'Finishing...' : 'Finish Workout'}</Text>
+        <Text style={styles.finishButtonText}>{busy ? 'Finishing...' : 'Finish Workout'}</Text>
       </Pressable>
     </View>
   );

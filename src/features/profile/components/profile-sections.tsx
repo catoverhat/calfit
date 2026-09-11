@@ -1,21 +1,17 @@
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
-
-import { MOCK_USER } from '@/fixtures/mock-data';
 import { styles } from '../profile-setup-screen.styles';
 
 const launchImage = require('@/assets/images/login-runner-bg.png');
 
-export function ProfileHeader() {
+export function ProfileHeader({ name }: { name: string }) {
+  const initials = (name.trim() || 'Local Athlete').slice(0, 2).toUpperCase();
   return (
     <View style={styles.brandBar}>
       <View style={styles.brandLeft}>
-        <Image
-          accessibilityLabel={`${MOCK_USER.name}'s profile photo`}
-          contentFit="cover"
-          source={MOCK_USER.avatarUrl}
-          style={styles.avatar}
-        />
+        <View accessibilityLabel={`${name || 'Local Athlete'}'s profile initials`} style={styles.avatarFallback}>
+          <Text style={styles.avatarInitials}>{initials}</Text>
+        </View>
         <Text style={styles.brandName}>Kinetic Pulse</Text>
       </View>
       <View accessibilityElementsHidden style={styles.cloudIcon}>

@@ -9,6 +9,7 @@ import {
   getWorkoutSessionDetail,
   initializeLocalDatabase,
   logWorkoutSet,
+  startOrResumeWorkoutFromRoutine,
   startWorkoutFromRoutine,
   updateRoutine,
   updateRoutineExerciseTarget,
@@ -130,6 +131,39 @@ describe('workout session repository', () => {
     expect(await getWorkoutSessionDetail(db, 'session-scheduled')).toEqual(
       expect.objectContaining({ started_at: null, status: 'scheduled' })
     );
+  });
+
+  it('resumes an active session and timestamps completed sets', async () => {
+    const db = new MemoryDb();
+    await initializeLocalDatabase(db);
+    const exercise = await createExercise(db, {
+      id: 'resume-exercise', name: 'Row', categoryId: 'cat-back',
+    });
+    const routine = await createRoutine(db, {
+      id: 'resume-routine', name: 'Resume',
+      exercises: [{ exerciseId: exercise.exercise_id, targets: [{ targetReps: 8 }] }],
+    });
+    const created = await startOrResumeWorkoutFromRoutine(db, {
+      id: 'active-session', routineId: routine.routine_id, now: '2026-09-10T10:00:00.000Z',
+    });
+    const resumed = await startOrResumeWorkoutFromRoutine(db, {
+      id: 'should-not-exist', routineId: routine.routine_id, now: '2026-09-10T11:00:00.000Z',
+    });
+    expect(created.resumed).toBe(false);
+    expect(resumed.resumed).toBe(true);
+    expect(resumed.session.workout_session_id).toBe('active-session');
+    expect(db.tables.get('workout_sessions')).toHaveLength(1);
+
+    const detail = await getWorkoutSessionDetail(db, 'active-session');
+    const setId = detail?.exercises[0].sets[0].workout_set_id;
+    if (!setId) throw new Error('Expected workout set');
+    await logWorkoutSet(db, setId, {
+      completed: true, completedAt: '2026-09-10T10:05:00.000Z',
+    });
+    const updated = await getWorkoutSessionDetail(db, 'active-session');
+    expect(updated?.exercises[0].sets[0]).toEqual(expect.objectContaining({
+      completed: 1, completed_at: '2026-09-10T10:05:00.000Z',
+    }));
   });
 
 });

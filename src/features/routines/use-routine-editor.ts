@@ -1,45 +1,64 @@
 import { router } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   createRoutine,
+  distanceToCanonical,
+  getLocalUserProfile,
   getRoutineDetail,
   initializeLocalDatabase,
+  normalizeDistanceUnit,
+  normalizeSpeedUnit,
+  normalizeWeightUnit,
+  speedToCanonical,
   updateRoutine,
+  weightToCanonical,
   type CreateRoutineExerciseInput,
 } from '@/db';
-import { useRoutineDraft, type RoutineDraft } from './routine-draft-context';
+import { useRoutineDraft, type RoutineDraft, type RoutineUnits } from './routine-draft-context';
 
 export function useRoutineEditor({ mode, routineId }: { mode: 'create' | 'edit'; routineId?: string }) {
   const draftState = useRoutineDraft();
+  const draftStateRef = useRef(draftState);
   const [isLoading, setIsLoading] = useState(mode === 'edit');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [units, setUnits] = useState<RoutineUnits>({ distanceUnit: 'km', speedUnit: 'kmh', weightUnit: 'kg' });
+
+  useEffect(() => {
+    draftStateRef.current = draftState;
+  }, [draftState]);
 
   useEffect(() => {
     let active = true;
     async function initialize() {
+      const currentDraftState = draftStateRef.current;
       setError(null);
-      if (mode === 'create') {
-        draftState.initializeCreate();
-        setIsLoading(false);
-        return;
-      }
       if (!routineId) {
-        setError('Routine id is missing.');
-        setIsLoading(false);
-        return;
-      }
-      if (draftState.draft?.sourceKey === `edit:${routineId}`) {
-        setIsLoading(false);
-        return;
+        if (mode === 'edit') {
+          setError('Routine id is missing.');
+          setIsLoading(false);
+          return;
+        }
       }
       setIsLoading(true);
       try {
         const db = await initializeLocalDatabase();
-        const routine = await getRoutineDetail(db, routineId);
+        const user = await getLocalUserProfile(db);
+        const nextUnits = {
+          distanceUnit: normalizeDistanceUnit(user.distance_unit),
+          speedUnit: normalizeSpeedUnit(user.speed_unit),
+          weightUnit: normalizeWeightUnit(user.weight_unit),
+        };
+        setUnits(nextUnits);
+        if (mode === 'create') {
+          currentDraftState.initializeCreate();
+          return;
+        }
+        if (currentDraftState.draft?.sourceKey === `edit:${routineId}`) return;
+        const routine = await getRoutineDetail(db, routineId as string);
         if (!routine) throw new Error('Routine could not be found.');
-        if (active) draftState.initializeEdit(routine);
+        if (active) currentDraftState.initializeEdit(routine, nextUnits);
       } catch (loadError) {
         if (active) {
           setError(loadError instanceof Error ? loadError.message : 'Routine could not be loaded.');
@@ -52,7 +71,7 @@ export function useRoutineEditor({ mode, routineId }: { mode: 'create' | 'edit';
     return () => {
       active = false;
     };
-  }, [draftState, mode, routineId]);
+  }, [mode, routineId]);
 
   const save = useCallback(async () => {
     const draft = draftState.draft;
@@ -70,7 +89,7 @@ export function useRoutineEditor({ mode, routineId }: { mode: 'create' | 'edit';
         name: draft.name.trim(),
         description: draft.description.trim() || null,
         active: draft.active,
-        exercises: mapDraftExercises(draft),
+        exercises: mapDraftExercises(draft, units),
         scheduleDays: draft.scheduleDays,
       };
       if (mode === 'edit') {
@@ -85,9 +104,9 @@ export function useRoutineEditor({ mode, routineId }: { mode: 'create' | 'edit';
       setError(saveError instanceof Error ? saveError.message : 'Routine could not be saved.');
       setIsSaving(false);
     }
-  }, [draftState, isSaving, mode, routineId]);
+  }, [draftState, isSaving, mode, routineId, units]);
 
-  return { ...draftState, error, isLoading, isSaving, save };
+  return { ...draftState, error, isLoading, isSaving, save, units };
 }
 
 export function validateRoutineDraft(draft: RoutineDraft): string | null {
@@ -99,19 +118,24 @@ export function validateRoutineDraft(draft: RoutineDraft): string | null {
   return null;
 }
 
-function mapDraftExercises(draft: RoutineDraft): CreateRoutineExerciseInput[] {
+function mapDraftExercises(draft: RoutineDraft, units: RoutineUnits): CreateRoutineExerciseInput[] {
   return draft.exercises.map((exercise) => ({
     exerciseId: exercise.exerciseId,
     targets: exercise.targets.map((target, index) => ({
       setNumber: index + 1,
       targetReps: parseOptionalNumber(target.reps),
-      targetWeight: parseOptionalNumber(target.weight),
-      targetSpeed: parseOptionalNumber(target.speed),
+      targetWeight: convertOptional(target.weight, (value) => weightToCanonical(value, units.weightUnit)),
+      targetSpeed: convertOptional(target.speed, (value) => speedToCanonical(value, units.speedUnit)),
       targetDurationSeconds: parseOptionalNumber(target.duration),
-      targetDistance: parseOptionalNumber(target.distance),
+      targetDistance: convertOptional(target.distance, (value) => distanceToCanonical(value, units.distanceUnit)),
       restTimeSeconds: parseOptionalNumber(target.rest),
     })),
   }));
+}
+
+function convertOptional(value: string, convert: (parsed: number) => number): number | null {
+  const parsed = parseOptionalNumber(value);
+  return parsed === null ? null : convert(parsed);
 }
 
 function parseOptionalNumber(value: string): number | null {

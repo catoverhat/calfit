@@ -1,7 +1,7 @@
 import type { LocalDatabase } from './types';
 
 export const DATABASE_NAME = 'calfit.db';
-export const DATABASE_VERSION = 3;
+export const DATABASE_VERSION = 4;
 export const LOCAL_USER_ID = 'local-user';
 
 export const STARTER_CATEGORIES = [
@@ -37,7 +37,7 @@ export const CREATE_TABLE_STATEMENTS = [
     height_unit TEXT NOT NULL DEFAULT 'cm',
     weight_unit TEXT NOT NULL DEFAULT 'kg',
     speed_unit TEXT NOT NULL DEFAULT 'kmh',
-    distance_unit TEXT NOT NULL DEFAULT 'm',
+    distance_unit TEXT NOT NULL DEFAULT 'km',
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
   )`,
@@ -141,6 +141,7 @@ export const CREATE_TABLE_STATEMENTS = [
     distance REAL,
     rest_time_seconds INTEGER,
     completed INTEGER NOT NULL DEFAULT 0,
+    completed_at TEXT,
     created_at TEXT NOT NULL,
     FOREIGN KEY (workout_exercise_id_fk) REFERENCES workout_exercises(workout_exercise_id) ON DELETE CASCADE,
     UNIQUE (workout_exercise_id_fk, set_number)
@@ -211,6 +212,11 @@ export async function migrateDbIfNeeded(db: LocalDatabase): Promise<void> {
     }
   }
 
+  if (currentVersion > 0 && currentVersion < 4) {
+    await db.execAsync('ALTER TABLE workout_sets ADD COLUMN completed_at TEXT');
+    await db.runAsync("UPDATE users SET distance_unit = 'km' WHERE distance_unit = 'm'");
+  }
+
   for (const statement of CREATE_INDEX_STATEMENTS) {
     await db.execAsync(statement);
   }
@@ -241,7 +247,7 @@ export async function seedStarterData(db: LocalDatabase, now = new Date().toISOS
     'cm',
     'kg',
     'kmh',
-    'm',
+    'km',
     now,
     now
   );

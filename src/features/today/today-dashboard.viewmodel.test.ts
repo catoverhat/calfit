@@ -66,6 +66,7 @@ const routine: RoutineDetail = {
 };
 
 const baseSnapshot: DashboardSnapshot = {
+  activeSession: null,
   user,
   routine,
   latestBodyMeasurement: null,
@@ -149,5 +150,24 @@ describe('today dashboard view models', () => {
     expect(data.progress.bodyWeightDelta).toBe('-0.7 kg vs previous');
     expect(data.progress.streak).toBe('2 days');
     expect(data.progress.streakProgress).toBeCloseTo(2 / 7);
+  });
+
+  it('exposes the newest active session as a resume action', () => {
+    const data = createTodayDashboardData({
+      ...baseSnapshot,
+      activeSession: {
+        workout_session_id: 'session-active',
+        user_id_fk: 'local-user',
+        routine_id_fk: 'routine-1',
+        scheduled_for: null,
+        started_at: '2026-07-06T13:00:00.000Z',
+        completed_at: null,
+        status: 'in_progress',
+        created_at: '2026-07-06T13:00:00.000Z',
+      },
+    });
+
+    expect(data.actionLabel).toBe('Resume Workout');
+    expect(data.activeSessionId).toBe('session-active');
   });
 });

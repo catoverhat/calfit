@@ -47,6 +47,21 @@ export const styles = StyleSheet.create({
     height: 38,
     width: 38,
   },
+  avatarFallback: {
+    alignItems: 'center',
+    backgroundColor: Palette.primary[800],
+    borderColor: Palette.primary[500],
+    borderRadius: 19,
+    borderWidth: 1,
+    height: 38,
+    justifyContent: 'center',
+    width: 38,
+  },
+  avatarInitials: {
+    color: Palette.white,
+    fontFamily: Fonts.bodyBold,
+    fontSize: 12,
+  },
   brandName: {
     ...Typography.lg,
     color: Palette.white,
@@ -308,6 +323,19 @@ export const styles = StyleSheet.create({
   saveButtonPressed: {
     backgroundColor: Palette.primary[600],
     transform: [{ scale: 0.99 }],
+  },
+  saveButtonDisabled: {
+    opacity: 0.54,
+  },
+  feedbackError: {
+    color: '#FFB4AB',
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 13,
+  },
+  feedbackSuccess: {
+    color: '#8ED69B',
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 13,
   },
   saveButtonText: {
     color: Palette.secondary[950],

@@ -2,17 +2,27 @@ import { router, type Href, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 
 import {
+  getInProgressWorkoutSession,
+  getLocalUserProfile,
   getRoutineDetail,
   initializeLocalDatabase,
-  startWorkoutFromRoutine,
+  startOrResumeWorkoutFromRoutine,
+  normalizeDistanceUnit,
+  normalizeSpeedUnit,
+  normalizeWeightUnit,
+  type DistanceUnit,
   type RoutineDetail,
+  type SpeedUnit,
+  type WeightUnit,
 } from '@/db';
 
 interface RoutineDetailState {
+  activeSessionId: string | null;
   error: string | null;
   isLoading: boolean;
   isStarting: boolean;
   routine: RoutineDetail | null;
+  units: { distanceUnit: DistanceUnit; speedUnit: SpeedUnit; weightUnit: WeightUnit };
 }
 
 export function useRoutineDetail(routineId?: string): RoutineDetailState & {
@@ -21,10 +31,12 @@ export function useRoutineDetail(routineId?: string): RoutineDetailState & {
 } {
   const [reloadKey, setReloadKey] = useState(0);
   const [state, setState] = useState<RoutineDetailState>({
+    activeSessionId: null,
     error: null,
     isLoading: true,
     isStarting: false,
     routine: null,
+    units: { distanceUnit: 'km', speedUnit: 'kmh', weightUnit: 'kg' },
   });
 
   useFocusEffect(
@@ -32,7 +44,7 @@ export function useRoutineDetail(routineId?: string): RoutineDetailState & {
       let active = true;
       async function load() {
         if (!routineId) {
-          setState({ error: 'Routine id is missing.', isLoading: false, isStarting: false, routine: null });
+          setState((current) => ({ ...current, activeSessionId: null, error: 'Routine id is missing.', isLoading: false, isStarting: false, routine: null }));
           return;
         }
         setState((current) => ({
@@ -43,15 +55,21 @@ export function useRoutineDetail(routineId?: string): RoutineDetailState & {
         }));
         try {
           const db = await initializeLocalDatabase();
-          const routine = await getRoutineDetail(db, routineId);
-          if (active) setState({ error: null, isLoading: false, isStarting: false, routine });
+          const [routine, activeSession, user] = await Promise.all([
+            getRoutineDetail(db, routineId),
+            getInProgressWorkoutSession(db),
+            getLocalUserProfile(db),
+          ]);
+          if (active) setState({ activeSessionId: activeSession?.workout_session_id ?? null, error: null, isLoading: false, isStarting: false, routine, units: { distanceUnit: normalizeDistanceUnit(user.distance_unit), speedUnit: normalizeSpeedUnit(user.speed_unit), weightUnit: normalizeWeightUnit(user.weight_unit) } });
         } catch (error) {
           if (active) {
             setState({
+              activeSessionId: null,
               error: error instanceof Error ? error.message : 'Routine could not be loaded.',
               isLoading: false,
               isStarting: false,
               routine: null,
+              units: { distanceUnit: 'km', speedUnit: 'kmh', weightUnit: 'kg' },
             });
           }
         }
@@ -68,10 +86,10 @@ export function useRoutineDetail(routineId?: string): RoutineDetailState & {
     setState((current) => ({ ...current, error: null, isStarting: true }));
     try {
       const db = await initializeLocalDatabase();
-      const session = await startWorkoutFromRoutine(db, { routineId: state.routine.routine_id });
+      const result = await startOrResumeWorkoutFromRoutine(db, { routineId: state.routine.routine_id });
       router.push({
         pathname: '/workout-session/[id]',
-        params: { id: session.workout_session_id },
+        params: { id: result.session.workout_session_id },
       } as unknown as Href);
     } catch (error) {
       setState((current) => ({

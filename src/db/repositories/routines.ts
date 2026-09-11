@@ -324,16 +324,15 @@ export async function getRoutineDetail(
 
 export async function getTodayRoutine(
   db: LocalDatabase,
-  userId = LOCAL_USER_ID
+  userId = LOCAL_USER_ID,
+  asOf = new Date()
 ): Promise<RoutineDetail | null> {
-  const routine = await db.getFirstAsync<RoutineRow>(
-    `SELECT * FROM routines
-    WHERE user_id_fk = ? AND active = 1
-    ORDER BY updated_at DESC, created_at DESC
-    LIMIT 1`,
-    userId
-  );
-  return routine ? getRoutineDetail(db, routine.routine_id) : null;
+  const active = (await getRoutineSummaries(db, userId)).filter((routine) => routine.active === 1);
+  const weekday = asOf.getDay();
+  const due = active.filter((routine) => routine.schedule_days.includes(weekday));
+  const selected = due.sort(compareDueRoutines)[0] ?? active.sort(compareFallbackRoutines)[0];
+
+  return selected ? getRoutineDetail(db, selected.routine_id) : null;
 }
 
 export async function seedDemoRoutinesIfEmpty(
@@ -352,7 +351,7 @@ export async function seedDemoRoutinesIfEmpty(
     }
   }
 
-  const activeRoutine = await getTodayRoutine(db, userId);
+  const activeRoutine = await getTodayRoutine(db, userId, new Date(now));
   if (activeRoutine) return activeRoutine;
 
   const [existingRoutine] = await getRoutineSummaries(db, userId);
@@ -456,6 +455,20 @@ function mapExerciseFromRoutineJoin(row: RoutineExerciseQueryRow): ExerciseRow {
     created_at: row.exercise_created_at,
     updated_at: row.exercise_updated_at,
   };
+}
+
+function compareDueRoutines(left: RoutineSummary, right: RoutineSummary): number {
+  if (left.last_completed_at === null && right.last_completed_at !== null) return -1;
+  if (left.last_completed_at !== null && right.last_completed_at === null) return 1;
+  const completionCompare = String(left.last_completed_at ?? '').localeCompare(
+    String(right.last_completed_at ?? '')
+  );
+  return completionCompare !== 0 ? completionCompare : compareFallbackRoutines(left, right);
+}
+
+function compareFallbackRoutines(left: RoutineSummary, right: RoutineSummary): number {
+  const updatedCompare = right.updated_at.localeCompare(left.updated_at);
+  return updatedCompare !== 0 ? updatedCompare : left.routine_id.localeCompare(right.routine_id);
 }
 
 function strengthExercise(

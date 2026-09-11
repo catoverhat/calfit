@@ -5,6 +5,7 @@ import type {
   WorkoutSessionDetail,
   WorkoutSessionStatus,
 } from '@/db';
+import { normalizeWeightUnit, weightFromCanonical, weightToCanonical } from '@/db';
 import type { LineSegment } from './components/line-plot';
 
 export type ProgressMetric = { helper: string; label: string; value: string };
@@ -72,11 +73,12 @@ export function createProgressDashboardData(input: {
 }): ProgressDashboardData {
   const { history, measurements, user } = input;
   const now = input.now ?? new Date();
+  const weightUnit = normalizeWeightUnit(user.weight_unit);
   const latest = measurements[0] ?? null;
   const completed = history.filter((session) => session.status === 'completed');
   const weightValues = [...measurements]
     .reverse()
-    .map((measurement) => measurement.weight)
+    .map((measurement) => measurement.weight === null ? null : weightFromCanonical(measurement.weight, weightUnit))
     .filter((value): value is number => value !== null)
     .slice(-6);
   const volumes = [...completed]
@@ -88,7 +90,7 @@ export function createProgressDashboardData(input: {
   return {
     avatarUrl: null,
     consistencyRows: createConsistencyRows(completed, now),
-    latestWeight: latest?.weight === null || latest?.weight === undefined ? '—' : formatNumber(latest.weight),
+    latestWeight: latest?.weight === null || latest?.weight === undefined ? '—' : formatNumber(weightFromCanonical(latest.weight, weightUnit)),
     metrics: [
       {
         helper: latest ? formatDate(latest.created_at) : 'No measurements yet',
@@ -106,10 +108,10 @@ export function createProgressDashboardData(input: {
     ],
     profileName: user.username,
     volumeSegments: createLineSegments(volumes),
-    volumeTotal: formatVolume(volumes.reduce((total, value) => total + value, 0), user.weight_unit),
+    volumeTotal: formatVolume(volumes.reduce((total, value) => total + value, 0), weightUnit),
     weeklySessions: createWeeklySessionBars(completed, now),
     weightSegments: createLineSegments(weightValues),
-    weightUnit: user.weight_unit,
+    weightUnit,
   };
 }
 
@@ -117,6 +119,7 @@ export function createMeasurementViewItems(
   measurements: BodyMeasurementRow[],
   weightUnit: string
 ): MeasurementViewItem[] {
+  const unit = normalizeWeightUnit(weightUnit);
   return measurements.map((measurement) => ({
     bmi: measurement.bmi === null ? '—' : formatNumber(measurement.bmi),
     bodyFat:
@@ -125,14 +128,15 @@ export function createMeasurementViewItems(
         : `${formatNumber(measurement.body_fat_percentage)}%`,
     date: formatDate(measurement.created_at),
     id: measurement.body_measurement_id,
-    weight: measurement.weight === null ? '—' : `${formatNumber(measurement.weight)} ${weightUnit}`,
+    weight: measurement.weight === null ? '—' : `${formatNumber(weightFromCanonical(measurement.weight, unit))} ${unit}`,
   }));
 }
 
-export function createMeasurementTrendSegments(measurements: BodyMeasurementRow[]): LineSegment[] {
+export function createMeasurementTrendSegments(measurements: BodyMeasurementRow[], weightUnit = 'kg'): LineSegment[] {
+  const unit = normalizeWeightUnit(weightUnit);
   const weights = [...measurements]
     .reverse()
-    .map((measurement) => measurement.weight)
+    .map((measurement) => measurement.weight === null ? null : weightFromCanonical(measurement.weight, unit))
     .filter((value): value is number => value !== null)
     .slice(-6);
   return createLineSegments(weights);
@@ -180,7 +184,7 @@ export function validateMeasurementValues(input: {
   bodyFat: string;
   date: string;
   weight: string;
-}): { error: string; values: null } | { error: null; values: MeasurementSaveValues } {
+}, weightUnit = 'kg'): { error: string; values: null } | { error: null; values: MeasurementSaveValues } {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) {
     return { error: 'Use YYYY-MM-DD for the measurement date.', values: null };
   }
@@ -206,7 +210,7 @@ export function validateMeasurementValues(input: {
 
   return {
     error: null,
-    values: { bmi, bodyFatPercentage, createdAt: date.toISOString(), weight },
+    values: { bmi, bodyFatPercentage, createdAt: date.toISOString(), weight: weight === null ? null : weightToCanonical(weight, normalizeWeightUnit(weightUnit)) },
   };
 }
 
@@ -316,7 +320,9 @@ function formatNumber(value: number): string {
 }
 
 function formatVolume(value: number, unit: string): string {
-  return value === 0 ? '—' : `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)} ${unit}`;
+  const normalized = normalizeWeightUnit(unit);
+  const displayValue = weightFromCanonical(value, normalized);
+  return value === 0 ? '—' : `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(displayValue)} ${normalized}`;
 }
 
 function formatDate(value: string): string {

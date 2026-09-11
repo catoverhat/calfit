@@ -6,6 +6,7 @@ import { DesignColors, SemanticColors } from "@/theme/tokens";
 import type {
   RoutineExerciseDraft,
   RoutineTargetDraft,
+  RoutineUnits,
 } from "../routine-draft-context";
 import { styles } from "../routine-editor-screen.styles";
 
@@ -18,6 +19,7 @@ export function RoutineExerciseCard({
   moveUp,
   onDelete,
   removeTarget,
+  units,
   updateTarget,
 }: {
   addTarget: () => void;
@@ -28,6 +30,7 @@ export function RoutineExerciseCard({
   moveUp: () => void;
   onDelete: () => void;
   removeTarget: (targetId: string) => void;
+  units: RoutineUnits;
   updateTarget: (
     targetId: string,
     field: keyof Omit<RoutineTargetDraft, "id">,
@@ -95,14 +98,14 @@ export function RoutineExerciseCard({
               <TargetInput
                 decimal
                 field="weight"
-                label="Weight kg"
+                label={`Weight ${units.weightUnit}`}
                 target={target}
                 updateTarget={updateTarget}
               />
               <TargetInput
                 decimal
                 field="speed"
-                label="Speed km/h"
+                label={`Speed ${units.speedUnit === 'kmh' ? 'km/h' : 'mph'}`}
                 target={target}
                 updateTarget={updateTarget}
               />
@@ -115,7 +118,7 @@ export function RoutineExerciseCard({
               <TargetInput
                 decimal
                 field="distance"
-                label="Distance m"
+                label={`Distance ${units.distanceUnit}`}
                 target={target}
                 updateTarget={updateTarget}
               />

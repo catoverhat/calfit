@@ -1,7 +1,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 
-import { createBodyMeasurement, getLocalUserProfile, getRecentBodyMeasurements, initializeLocalDatabase } from '@/db';
+import { createBodyMeasurement, getLocalUserProfile, getRecentBodyMeasurements, initializeLocalDatabase, normalizeWeightUnit, weightFromCanonical } from '@/db';
 import { createMeasurementTrendSegments, createMeasurementViewItems, validateMeasurementValues, type MeasurementViewItem } from './progress.viewmodel';
 import type { LineSegment } from './components/line-plot';
 
@@ -19,15 +19,16 @@ export function useBodyMeasurements(): State & { addMeasurement: (input: Input) 
       try {
         const db = await initializeLocalDatabase();
         const [user, measurements] = await Promise.all([getLocalUserProfile(db), getRecentBodyMeasurements(db, undefined, 30)]);
+        const weightUnit = normalizeWeightUnit(user.weight_unit);
         if (active) setState({
           error: null,
           history: createMeasurementViewItems(measurements, user.weight_unit),
           isLoading: false,
           isSaving: false,
-          latestWeight: measurements[0]?.weight === null || measurements[0]?.weight === undefined ? '—' : `${measurements[0].weight}`,
+          latestWeight: measurements[0]?.weight === null || measurements[0]?.weight === undefined ? '—' : `${Math.round(weightFromCanonical(measurements[0].weight, weightUnit) * 10) / 10}`,
           profileName: user.username,
-          trendSegments: createMeasurementTrendSegments(measurements),
-          weightUnit: user.weight_unit,
+          trendSegments: createMeasurementTrendSegments(measurements, weightUnit),
+          weightUnit,
         });
       } catch (error) {
         if (active) setState((current) => ({ ...current, error: error instanceof Error ? error.message : 'Measurements could not be loaded.', isLoading: false, isSaving: false }));
@@ -38,7 +39,7 @@ export function useBodyMeasurements(): State & { addMeasurement: (input: Input) 
   }, [reloadKey]));
 
   const addMeasurement = useCallback(async (input: Input) => {
-    const validated = validateMeasurementValues(input);
+    const validated = validateMeasurementValues(input, state.weightUnit);
     if (!validated.values) {
       setState((current) => ({ ...current, error: validated.error }));
       return false;
@@ -53,7 +54,7 @@ export function useBodyMeasurements(): State & { addMeasurement: (input: Input) 
       setState((current) => ({ ...current, error: error instanceof Error ? error.message : 'Measurement could not be saved.', isSaving: false }));
       return false;
     }
-  }, []);
+  }, [state.weightUnit]);
 
   return { ...state, addMeasurement };
 }
