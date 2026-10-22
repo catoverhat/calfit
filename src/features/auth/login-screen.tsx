@@ -1,10 +1,10 @@
 import { styles } from './login-screen.styles';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Spacing } from '@/theme/tokens';
+import { useAppLock } from './app-lock-context';
 import {
   LoginActionsSection,
   LoginBrandSection,
@@ -14,14 +14,11 @@ import {
 const backgroundImage = require('@/assets/images/login-runner-bg.png');
 
 export function LoginScreen() {
+  const { capability, feedback, status, unlock } = useAppLock();
   const insets = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();
   const isCompact = width < 360;
   const contentWidth = Math.min(width - Spacing.three * 2, 360);
-
-  const enterApp = () => {
-    router.replace('/(tabs)');
-  };
 
   return (
     <ScrollView
@@ -51,7 +48,12 @@ export function LoginScreen() {
         <View style={[styles.content, { width: contentWidth }]}>
           <LoginBrandSection />
           <LoginMessageSection compact={isCompact} />
-          <LoginActionsSection onEnter={enterApp} />
+          <LoginActionsSection
+            capability={capability}
+            feedback={feedback}
+            onUnlock={() => void unlock()}
+            status={status}
+          />
         </View>
       </View>
     </ScrollView>

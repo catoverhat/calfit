@@ -1,6 +1,7 @@
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useAppLock } from '@/features/auth/app-lock-context';
 import {
   CalendarIcon,
   GearIcon,
@@ -8,11 +9,16 @@ import {
   SetupField,
   UnitCard,
 } from './components/profile-form-controls';
-import { ProfileHeader, ProfileLaunchCard } from './components/profile-sections';
+import {
+  ProfileHeader,
+  ProfileLaunchCard,
+  ProfileSecuritySection,
+} from './components/profile-sections';
 import { styles } from './profile-setup-screen.styles';
 import { useProfile } from './use-profile';
 
 export function ProfileSetupScreen() {
+  const { capability, lock } = useAppLock();
   const {
     changeHeightUnit,
     changeWeightUnit,
@@ -139,6 +145,8 @@ export function ProfileSetupScreen() {
             <Text style={styles.saveButtonText}>{isSaving ? 'Saving…' : 'Save Profile'}</Text>
             <Text style={styles.saveArrow}>-&gt;</Text>
           </Pressable>
+
+          <ProfileSecuritySection isWebSession={capability.kind === 'web'} onLock={lock} />
         </View>
       </ScrollView>
     </SafeAreaView>

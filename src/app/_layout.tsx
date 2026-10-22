@@ -6,10 +6,12 @@ import { useColorScheme } from 'react-native';
 import '@/global.css';
 
 import { AnimatedSplashOverlay } from '@/components/layout/animated-splash-overlay';
+import { AppLockProvider, useAppLock } from '@/features/auth/app-lock-context';
+import { getAppLockRouteAccess } from '@/features/auth/app-lock.viewmodel';
 import { useAppFonts } from '@/hooks/use-app-fonts';
 
 export const unstable_settings = {
-  initialRouteName: '(tabs)',
+  initialRouteName: 'login',
 };
 
 export default function RootLayout() {
@@ -20,14 +22,29 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <StatusBar style="auto" />
-      <AnimatedSplashOverlay />
-      <Stack screenOptions={{ headerShown: false }}>
+    <AppLockProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <StatusBar style="auto" />
+        <AnimatedSplashOverlay />
+        <RootNavigator />
+      </ThemeProvider>
+    </AppLockProvider>
+  );
+}
+
+function RootNavigator() {
+  const { status } = useAppLock();
+  const access = getAppLockRouteAccess(status);
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={access.canAccessLogin}>
+        <Stack.Screen name="login" />
+      </Stack.Protected>
+      <Stack.Protected guard={access.canAccessProtectedRoutes}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="workout-session/[id]" />
-        <Stack.Screen name="login" />
-      </Stack>
-    </ThemeProvider>
+      </Stack.Protected>
+    </Stack>
   );
 }

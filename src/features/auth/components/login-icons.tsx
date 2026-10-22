@@ -10,12 +10,3 @@ export function LightningMark() {
     </View>
   );
 }
-
-export function EnvelopeIcon() {
-  return (
-    <View accessibilityElementsHidden style={styles.envelope}>
-      <View style={styles.envelopeFlapLeft} />
-      <View style={styles.envelopeFlapRight} />
-    </View>
-  );
-}

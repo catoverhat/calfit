@@ -51,6 +51,9 @@ export type AppIconName =
   | "workouts"
   | "progress"
   | "profile"
+  | "faceScan"
+  | "fingerprint"
+  | "shield"
   | "trash"
   | "arrowUp"
   | "arrowDown";
@@ -103,6 +106,9 @@ const icons: Record<AppIconName, LucideIconName> = {
   workouts: "dumbbell",
   progress: "chart-bar",
   profile: "user",
+  faceScan: "scan-face",
+  fingerprint: "fingerprint",
+  shield: "shield-check",
   trash: "trash-2",
   arrowUp: "arrow-up",
   arrowDown: "arrow-down",

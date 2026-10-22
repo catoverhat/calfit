@@ -1,7 +1,15 @@
-import { Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
+import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
+import { Palette } from '@/theme/tokens';
+import type {
+  AppLockFeedback,
+  AppLockStatus,
+  AuthenticationKind,
+  DeviceAuthenticationCapability,
+} from '../app-lock.types';
 import { styles } from '../login-screen.styles';
-import { EnvelopeIcon, LightningMark } from './login-icons';
+import { LightningMark } from './login-icons';
 
 export function LoginBrandSection() {
   return (
@@ -35,38 +43,77 @@ export function LoginMessageSection({ compact }: { compact: boolean }) {
   );
 }
 
-export function LoginActionsSection({ onEnter }: { onEnter: () => void }) {
+interface LoginActionsSectionProps {
+  capability: DeviceAuthenticationCapability;
+  feedback: AppLockFeedback | null;
+  onUnlock: () => void;
+  status: AppLockStatus;
+}
+
+export function LoginActionsSection({
+  capability,
+  feedback,
+  onUnlock,
+  status,
+}: LoginActionsSectionProps) {
+  const isBusy = status === 'authenticating' || capability.availability === 'checking';
+  const buttonLabel = status === 'authenticating'
+    ? 'Authenticating…'
+    : capability.label;
+  const supportingMessage = feedback?.message ?? capability.description;
+
   return (
-    <>
-      <View style={styles.actions}>
-        <Pressable
-          accessibilityLabel="Sign in with Email"
-          accessibilityRole="button"
-          onPress={onEnter}
-          style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}>
-          <EnvelopeIcon />
-          <Text style={styles.primaryButtonText}>Sign in with Email</Text>
-        </Pressable>
-        <Pressable
-          accessibilityLabel="Continue with Google"
-          accessibilityRole="button"
-          onPress={onEnter}
-          style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryButtonPressed]}>
-          <Text style={styles.googleIcon}>G</Text>
-          <Text style={styles.secondaryButtonText}>Continue with Google</Text>
-        </Pressable>
+    <View style={styles.actions}>
+      <View style={styles.securitySummary}>
+        <View style={styles.securityHeading}>
+          <AppIcon
+            color={Palette.primary[500]}
+            name={iconForAuthentication(capability.kind)}
+            size={20}
+          />
+          <Text style={styles.securityTitle}>
+            {capability.kind === 'web' ? 'Browser Access' : 'Protected Access'}
+          </Text>
+        </View>
+        <Text
+          accessibilityLiveRegion="polite"
+          style={[
+            styles.securityDescription,
+            feedback?.tone === 'error' && styles.securityDescriptionError,
+          ]}>
+          {supportingMessage}
+        </Text>
       </View>
-      <View style={styles.createAccountRow}>
-        <Text style={styles.createAccountText}>Don&apos;t have an account?</Text>
-        <Pressable
-          accessibilityLabel="Create a new account"
-          accessibilityRole="button"
-          hitSlop={8}
-          onPress={onEnter}
-          style={({ pressed }) => pressed && styles.linkPressed}>
-          <Text style={styles.createAccountLink}>Create one</Text>
-        </Pressable>
-      </View>
-    </>
+
+      <Pressable
+        accessibilityLabel={buttonLabel}
+        accessibilityRole="button"
+        accessibilityState={{ busy: status === 'authenticating', disabled: isBusy }}
+        disabled={isBusy}
+        onPress={onUnlock}
+        style={({ pressed }) => [
+          styles.primaryButton,
+          isBusy && styles.primaryButtonDisabled,
+          pressed && !isBusy && styles.primaryButtonPressed,
+        ]}>
+        {isBusy ? (
+          <ActivityIndicator color={Palette.secondary[950]} size="small" />
+        ) : (
+          <AppIcon
+            color={Palette.secondary[950]}
+            name={iconForAuthentication(capability.kind)}
+            size={20}
+          />
+        )}
+        <Text style={styles.primaryButtonText}>{buttonLabel}</Text>
+      </Pressable>
+    </View>
   );
+}
+
+function iconForAuthentication(kind: AuthenticationKind): AppIconName {
+  if (kind === 'face') return 'faceScan';
+  if (kind === 'fingerprint' || kind === 'biometric') return 'fingerprint';
+  if (kind === 'web') return 'open';
+  return 'shield';
 }
