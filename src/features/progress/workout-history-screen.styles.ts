@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
     borderCurve: 'continuous',
     borderRadius: Radius.full,
     borderWidth: 1,
-    minHeight: 34,
+    minHeight: 48,
     paddingHorizontal: Spacing.three,
   },
   filterChipSelected: {
@@ -56,7 +56,7 @@ export const styles = StyleSheet.create({
     color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
     fontSize: 11,
-    lineHeight: 32,
+    lineHeight: 16,
   },
   filterTextSelected: {
     color: DesignColors.onPrimaryContainer,

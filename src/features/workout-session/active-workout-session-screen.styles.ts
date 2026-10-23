@@ -140,6 +140,35 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
   },
+  sessionProgressCard: {
+    backgroundColor: DesignColors.surfaceContainerLow,
+    borderColor: SemanticColors.border,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    gap: Spacing.two,
+    padding: Spacing.three,
+  },
+  sessionProgressCopy: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  sessionProgressValue: {
+    ...Typography.sm,
+    color: SemanticColors.textPrimary,
+    fontFamily: Fonts.bodyBold,
+  },
+  sessionProgressTrack: {
+    backgroundColor: DesignColors.surfaceContainerHighest,
+    borderRadius: Radius.full,
+    height: 8,
+    overflow: 'hidden',
+  },
+  sessionProgressFill: {
+    backgroundColor: SemanticColors.action,
+    borderRadius: Radius.full,
+    height: '100%',
+  },
   exerciseCard: {
     backgroundColor: DesignColors.surfaceContainerLow,
     borderColor: SemanticColors.border,
@@ -157,10 +186,18 @@ export const styles = StyleSheet.create({
   },
   exerciseTitleBlock: {
     flex: 1,
+    justifyContent: 'center',
+    minHeight: TouchTarget.min,
+  },
+  exerciseTitleLine: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: Spacing.one,
   },
   exerciseTitle: {
     ...TypeScale.headlineSm,
     color: SemanticColors.textPrimary,
+    flex: 1,
   },
   exerciseMeta: {
     color: SemanticColors.textSecondary,

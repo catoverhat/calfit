@@ -5,7 +5,21 @@ import { SemanticColors } from '@/theme/tokens';
 
 import { styles } from '../active-workout-session-screen.styles';
 
-export function SessionOverview({ elapsed, isSaving, title }: { elapsed: string; isSaving: boolean; title: string }) {
+export function SessionOverview({
+  completedSets,
+  elapsed,
+  isSaving,
+  title,
+  totalSets,
+}: {
+  completedSets: number;
+  elapsed: string;
+  isSaving: boolean;
+  title: string;
+  totalSets: number;
+}) {
+  const progress = totalSets > 0 ? completedSets / totalSets : 0;
+
   return (
     <>
       <View style={styles.sessionHeader}>
@@ -38,6 +52,22 @@ export function SessionOverview({ elapsed, isSaving, title }: { elapsed: string;
         <View style={styles.activePill}>
           <View style={styles.activeDot} />
           <Text style={styles.activeText}>Active</Text>
+        </View>
+      </View>
+
+      <View
+        accessibilityLabel={`${completedSets} of ${totalSets} sets completed`}
+        accessibilityRole="progressbar"
+        accessibilityValue={{ max: totalSets, min: 0, now: completedSets }}
+        style={styles.sessionProgressCard}>
+        <View style={styles.sessionProgressCopy}>
+          <Text style={styles.smallLabel}>Workout Progress</Text>
+          <Text style={styles.sessionProgressValue}>
+            {completedSets} / {totalSets} sets
+          </Text>
+        </View>
+        <View style={styles.sessionProgressTrack}>
+          <View style={[styles.sessionProgressFill, { width: `${progress * 100}%` }]} />
         </View>
       </View>
     </>

@@ -1,14 +1,14 @@
 import { StyleSheet } from 'react-native';
 
-import { Palette, Fonts, Typography, Spacing, MaxContentWidth } from '@/theme/tokens';
+import { DesignColors, Palette, Fonts, Typography, Spacing, MaxContentWidth, SemanticColors } from '@/theme/tokens';
 
 export const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: Palette.secondary[950],
+    backgroundColor: SemanticColors.canvas,
     flex: 1,
   },
   screen: {
-    backgroundColor: Palette.secondary[950],
+    backgroundColor: SemanticColors.canvas,
     flex: 1,
   },
   scrollContent: {
@@ -20,13 +20,13 @@ export const styles = StyleSheet.create({
   },
   content: {
     gap: Spacing.three,
-    maxWidth: Math.min(MaxContentWidth, 430),
+    maxWidth: Math.min(MaxContentWidth, 560),
     width: '100%',
   },
   brandBar: {
     alignItems: 'center',
-    backgroundColor: 'rgba(13, 14, 18, 0.96)',
-    borderColor: Palette.secondary[800],
+    backgroundColor: DesignColors.surfaceContainerLowest,
+    borderColor: SemanticColors.border,
     borderCurve: 'continuous',
     borderRadius: 10,
     borderWidth: 1,
@@ -66,6 +66,21 @@ export const styles = StyleSheet.create({
     ...Typography.lg,
     color: Palette.white,
     fontFamily: Fonts.heading,
+  },
+  savedStatus: {
+    alignItems: 'center',
+    backgroundColor: DesignColors.surfaceContainerHigh,
+    borderRadius: 16,
+    flexDirection: 'row',
+    gap: Spacing.one,
+    minHeight: 32,
+    paddingHorizontal: Spacing.two,
+  },
+  savedStatusText: {
+    color: SemanticColors.textPrimary,
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    lineHeight: 14,
   },
   cloudIcon: {
     height: 20,
@@ -248,13 +263,13 @@ export const styles = StyleSheet.create({
     borderCurve: 'continuous',
     borderRadius: 5,
     justifyContent: 'center',
-    minHeight: 32,
+    minHeight: 48,
     minWidth: 45,
     paddingHorizontal: Spacing.two,
   },
   segmentWide: {
     flex: 1,
-    minHeight: 42,
+    minHeight: 48,
   },
   segmentSelected: {
     backgroundColor: Palette.primary[500],

@@ -1,14 +1,22 @@
 import { StyleSheet } from 'react-native';
 
-import { Palette, Fonts, Typography, Spacing, MaxContentWidth } from '@/theme/tokens';
+import {
+  DesignColors,
+  Fonts,
+  MaxContentWidth,
+  Palette,
+  SemanticColors,
+  Spacing,
+  Typography,
+} from '@/theme/tokens';
 
 export const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: Palette.secondary[950],
+    backgroundColor: SemanticColors.canvas,
     flex: 1,
   },
   screen: {
-    backgroundColor: Palette.secondary[950],
+    backgroundColor: SemanticColors.canvas,
     flex: 1,
   },
   scrollContent: {
@@ -20,13 +28,13 @@ export const styles = StyleSheet.create({
   },
   content: {
     gap: Spacing.three,
-    maxWidth: Math.min(MaxContentWidth, 430),
+    maxWidth: Math.min(MaxContentWidth, 560),
     width: '100%',
   },
   brandBar: {
     alignItems: 'center',
-    backgroundColor: 'rgba(13, 14, 18, 0.96)',
-    borderColor: Palette.secondary[800],
+    backgroundColor: DesignColors.surfaceContainerLowest,
+    borderColor: SemanticColors.border,
     borderCurve: 'continuous',
     borderRadius: 10,
     borderWidth: 1,
@@ -40,6 +48,12 @@ export const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     gap: Spacing.two,
+    minWidth: 0,
+  },
+  profileLink: {
+    flex: 1,
+    justifyContent: 'center',
+    minHeight: 48,
     minWidth: 0,
   },
   avatar: {
@@ -72,7 +86,7 @@ export const styles = StyleSheet.create({
   },
   syncPill: {
     alignItems: 'center',
-    backgroundColor: '#272525',
+    backgroundColor: DesignColors.surfaceContainerHigh,
     borderCurve: 'continuous',
     borderRadius: 16,
     flexDirection: 'row',
@@ -216,6 +230,16 @@ export const styles = StyleSheet.create({
     fontFamily: Fonts.bodyMedium,
     fontSize: 13,
     lineHeight: 18,
+  },
+  heroIconTile: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 95, 31, 0.12)',
+    borderColor: 'rgba(255, 95, 31, 0.28)',
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 52,
+    justifyContent: 'center',
+    width: 52,
   },
   dumbbellMark: {
     height: 58,

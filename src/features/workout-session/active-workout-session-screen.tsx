@@ -20,6 +20,12 @@ export function ActiveWorkoutSessionScreen({ workout }: { workout: WorkoutSessio
   const [isFinishing, setIsFinishing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const hasSaveErrors = Object.keys(active.saveErrors).length > 0;
+  const totalSets = workout.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0);
+  const completedSets = workout.exercises.reduce(
+    (sum, exercise) =>
+      sum + exercise.sets.filter((set) => active.sets[set.id].completed).length,
+    0,
+  );
 
   const finishWorkout = async () => {
     if (isFinishing) return;
@@ -51,7 +57,13 @@ export function ActiveWorkoutSessionScreen({ workout }: { workout: WorkoutSessio
     <>
       <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} style={styles.screen}>
         <View style={styles.content}>
-          <SessionOverview elapsed={formatElapsed(active.elapsedSeconds)} isSaving={active.isSaving} title={workout.title} />
+          <SessionOverview
+            completedSets={completedSets}
+            elapsed={formatElapsed(active.elapsedSeconds)}
+            isSaving={active.isSaving}
+            title={workout.title}
+            totalSets={totalSets}
+          />
 
           {workout.exercises.map((exercise) => {
             const expanded = active.expandedExerciseId === exercise.id;
@@ -59,8 +71,11 @@ export function ActiveWorkoutSessionScreen({ workout }: { workout: WorkoutSessio
             return (
               <View key={exercise.id} style={styles.exerciseCard}>
                 <View style={styles.exerciseHeader}>
-                  <Pressable accessibilityLabel={`${expanded ? 'Collapse' : 'Expand'} ${exercise.name}`} accessibilityRole="button" onPress={() => active.setExpandedExerciseId(expanded ? '' : exercise.id)} style={styles.exerciseTitleBlock}>
-                    <Text style={styles.exerciseTitle}>{exercise.name}</Text>
+                  <Pressable accessibilityLabel={`${expanded ? 'Collapse' : 'Expand'} ${exercise.name}`} accessibilityRole="button" accessibilityState={{ expanded }} onPress={() => active.setExpandedExerciseId(expanded ? '' : exercise.id)} style={styles.exerciseTitleBlock}>
+                    <View style={styles.exerciseTitleLine}>
+                      <Text style={styles.exerciseTitle}>{exercise.name}</Text>
+                      <AppIcon color={SemanticColors.textMuted} name={expanded ? 'chevronUp' : 'chevronDown'} size={18} />
+                    </View>
                     <Text style={styles.exerciseMeta}>{completed} of {exercise.sets.length} sets complete</Text>
                   </Pressable>
                   <Pressable accessibilityLabel={`${exercise.name} information`} accessibilityRole="button" accessibilityState={{ expanded: active.infoExerciseId === exercise.id }} onPress={() => active.toggleInfo(exercise.id)} style={({ pressed }) => [styles.infoButton, pressed && styles.pressed]}>

@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
-import { Palette } from '@/theme/tokens';
+import { AppIcon } from '@/components/ui/app-icon';
+import { Palette, SemanticColors } from '@/theme/tokens';
 
 import { styles } from '../profile-setup-screen.styles';
 
@@ -86,6 +87,7 @@ export function SegmentedControl<T extends string>({
           <Pressable
             accessibilityLabel={`Select ${option.label}`}
             accessibilityRole="button"
+            accessibilityState={{ selected }}
             key={option.value}
             onPress={() => onChange(option.value)}
             style={({ pressed }) => [
@@ -106,17 +108,12 @@ export function SegmentedControl<T extends string>({
 
 export function CalendarIcon() {
   return (
-    <View accessibilityElementsHidden style={styles.calendarIcon}>
-      <View style={styles.calendarTop} />
-      <View style={styles.calendarBody} />
-    </View>
+    <AppIcon color={SemanticColors.textPrimary} name="calendar" size={18} />
   );
 }
 
 export function GearIcon() {
   return (
-    <View accessibilityElementsHidden style={styles.gearIcon}>
-      <Text style={styles.gearText}>*</Text>
-    </View>
+    <AppIcon color={SemanticColors.action} name="settings" size={18} />
   );
 }

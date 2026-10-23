@@ -35,11 +35,18 @@ export function RoutineCard({ routine }: { routine: RoutineSummaryViewModel }) {
               {routine.title}
             </ThemedText>
             <View
-              style={[
-                styles.statusDot,
-                !routine.active && styles.statusDotInactive,
-              ]}
-            />
+              accessibilityLabel={routine.active ? "Active workout" : "Inactive workout"}
+              style={styles.statusPill}>
+              <View
+                style={[
+                  styles.statusDot,
+                  !routine.active && styles.statusDotInactive,
+                ]}
+              />
+              <ThemedText style={styles.statusText}>
+                {routine.active ? "Active" : "Inactive"}
+              </ThemedText>
+            </View>
           </View>
           <ThemedText numberOfLines={2} style={styles.cardDescription}>
             {routine.description}

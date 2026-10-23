@@ -2,6 +2,8 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAppLock } from '@/features/auth/app-lock-context';
+import { AppIcon } from '@/components/ui/app-icon';
+import { DesignColors, SemanticColors } from '@/theme/tokens';
 import {
   CalendarIcon,
   GearIcon,
@@ -11,7 +13,6 @@ import {
 } from './components/profile-form-controls';
 import {
   ProfileHeader,
-  ProfileLaunchCard,
   ProfileSecuritySection,
 } from './components/profile-sections';
 import { styles } from './profile-setup-screen.styles';
@@ -43,9 +44,9 @@ export function ProfileSetupScreen() {
           <ProfileHeader name={draft.username} />
 
           <View style={styles.heroCopy}>
-            <Text style={styles.title}>Set up your profile</Text>
+            <Text style={styles.title}>Profile & Preferences</Text>
             <Text style={styles.subtitle}>
-              Complete your details to personalize your performance metrics and training plans.
+              Keep your measurements and training units accurate across the app.
             </Text>
           </View>
 
@@ -125,9 +126,7 @@ export function ProfileSetupScreen() {
             />
           </View>
 
-          <ProfileLaunchCard />
-
-          {isLoading ? <ActivityIndicator color="#ff5f1f" /> : null}
+          {isLoading ? <ActivityIndicator color={SemanticColors.action} /> : null}
           {error ? <Text selectable style={styles.feedbackError}>{error}</Text> : null}
           {success ? <Text accessibilityRole="alert" style={styles.feedbackSuccess}>{success}</Text> : null}
 
@@ -143,7 +142,7 @@ export function ProfileSetupScreen() {
               pressed && !isLoading && !isSaving && styles.saveButtonPressed,
             ]}>
             <Text style={styles.saveButtonText}>{isSaving ? 'Saving…' : 'Save Profile'}</Text>
-            <Text style={styles.saveArrow}>-&gt;</Text>
+            <AppIcon color={DesignColors.onPrimaryContainer} name="save" size={18} />
           </Pressable>
 
           <ProfileSecuritySection isWebSession={capability.kind === 'web'} onLock={lock} />

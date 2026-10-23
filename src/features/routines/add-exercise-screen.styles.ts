@@ -72,7 +72,7 @@ export const styles = StyleSheet.create({
     borderRadius: Radius.full,
     borderWidth: 1,
     justifyContent: 'center',
-    minHeight: 34,
+    minHeight: 48,
     minWidth: 62,
     paddingHorizontal: Spacing.three,
   },

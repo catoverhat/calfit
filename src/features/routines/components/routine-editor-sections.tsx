@@ -37,6 +37,7 @@ export function RoutineIdentitySection({ draft, mode, setDraftField }: {
           accessibilityLabel={draft.active ? 'Deactivate workout' : 'Activate workout'}
           accessibilityRole="switch"
           accessibilityState={{ checked: draft.active }}
+          hitSlop={9}
           onPress={() => setDraftField('active', !draft.active)}
           style={[styles.toggleTrack, draft.active && styles.toggleTrackActive]}>
           <View style={[styles.toggleThumb, draft.active && styles.toggleThumbActive]} />

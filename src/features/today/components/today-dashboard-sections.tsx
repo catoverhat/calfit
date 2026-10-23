@@ -1,6 +1,9 @@
 import { Image } from "expo-image";
+import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
+import { AppIcon } from "@/components/ui/app-icon";
+import { DesignColors, SemanticColors } from "@/theme/tokens";
 import { styles } from "../today-dashboard-screen.styles";
 import type {
   TodayDashboardData,
@@ -15,32 +18,38 @@ export function TodayHeader({
   const initials = name.slice(0, 2).toUpperCase();
 
   return (
-    <>
-      <View style={styles.brandBar}>
-        <View style={styles.brandLeft}>
-          {avatarUrl ? (
-            <Image
-              accessibilityLabel={`${name}'s profile photo`}
-              contentFit="cover"
-              source={avatarUrl}
-              style={styles.avatar}
-            />
-          ) : (
-            <View
-              accessibilityLabel={`${name}'s local profile initials`}
-              style={styles.avatarFallback}
-            >
-              <Text style={styles.avatarInitials}>{initials}</Text>
+    <View style={styles.brandBar}>
+      <Link href="/profile" asChild>
+        <Pressable
+          accessibilityLabel="Open profile"
+          accessibilityRole="button"
+          style={styles.profileLink}>
+          {({ pressed }) => (
+            <View style={[styles.brandLeft, pressed && styles.pressed]}>
+              {avatarUrl ? (
+                <Image
+                  accessibilityLabel={`${name}'s profile photo`}
+                  contentFit="cover"
+                  source={avatarUrl}
+                  style={styles.avatar}
+                />
+              ) : (
+                <View
+                  accessibilityLabel={`${name}'s local profile initials`}
+                  style={styles.avatarFallback}>
+                  <Text style={styles.avatarInitials}>{initials}</Text>
+                </View>
+              )}
+              <Text style={styles.brandName}>Kinetic Pulse</Text>
             </View>
           )}
-          <Text style={styles.brandName}>Kinetic Pulse</Text>
-        </View>
-        <View style={styles.syncPill}>
-          <CloudCheckIcon />
-          <Text style={styles.syncText}>{syncLabel}</Text>
-        </View>
+        </Pressable>
+      </Link>
+      <View accessibilityLabel={syncLabel} style={styles.syncPill}>
+        <AppIcon color={SemanticColors.success} name="cloudCheck" size={15} />
+        <Text style={styles.syncText}>{syncLabel}</Text>
       </View>
-    </>
+    </View>
   );
 }
 
@@ -84,15 +93,17 @@ export function TodayRoutineCard({
               <Text style={styles.workoutTitle}>{routine.title}</Text>
               <Text style={styles.focusText}>Focus: {routine.focus}</Text>
             </View>
-            <DumbbellMark />
+            <View style={styles.heroIconTile}>
+              <AppIcon color={SemanticColors.action} name="strength" size={28} />
+            </View>
           </View>
           <View style={styles.workoutMeta}>
             <View style={styles.metaItem}>
-              <GridIcon />
+              <AppIcon color={SemanticColors.action} name="exercises" size={16} />
               <Text style={styles.metaText}>{routine.exercises} Exercises</Text>
             </View>
             <View style={styles.metaItem}>
-              <ClockIcon />
+              <AppIcon color={SemanticColors.action} name="clock" size={16} />
               <Text style={styles.metaText}>{routine.duration}</Text>
             </View>
           </View>
@@ -121,7 +132,7 @@ export function TodayRoutineCard({
             pressed && !startDisabled && styles.startButtonPressed,
           ]}
         >
-          <Text style={styles.playIcon}>{">"}</Text>
+          <AppIcon color={DesignColors.onPrimaryContainer} name="play" size={18} />
           <Text style={styles.startButtonText}>
             {isStarting
               ? "Starting..."
@@ -156,12 +167,12 @@ export function ProgressSummary({
     <View style={styles.section}>
       <Text style={styles.sectionEyebrow}>Recent Progress</Text>
       <View style={styles.progressGrid}>
-        <View style={[styles.progressCard, styles.weightCard]}>
+        <View accessibilityLabel={`Body weight ${progress.bodyWeight}. ${progress.bodyWeightDelta}`} style={[styles.progressCard, styles.weightCard]}>
           <Text style={styles.progressLabel}>Body Weight</Text>
           <Text style={styles.progressValue}>{progress.bodyWeight}</Text>
           <Text style={styles.deltaText}>{progress.bodyWeightDelta}</Text>
         </View>
-        <View style={styles.progressCard}>
+        <View accessibilityLabel={`Workout streak ${progress.streak}`} style={styles.progressCard}>
           <Text style={styles.progressLabel}>Streak</Text>
           <Text style={styles.progressValue}>{progress.streak}</Text>
           <View style={styles.streakTrack}>
@@ -182,7 +193,7 @@ export function TrainingTip({ tip }: { tip: string }) {
   return (
     <View style={styles.tipCard}>
       <View style={styles.tipIcon}>
-        <MedalIcon />
+        <AppIcon color={SemanticColors.action} name="trophy" size={18} />
       </View>
       <Text style={styles.tipText}>{tip}</Text>
     </View>
@@ -191,58 +202,11 @@ export function TrainingTip({ tip }: { tip: string }) {
 
 export function StatusCard({ body, title }: { body: string; title: string }) {
   return (
-    <View style={styles.statusCard}>
+    <View accessibilityLiveRegion="polite" style={styles.statusCard}>
       <Text style={styles.statusTitle}>{title}</Text>
       <Text selectable style={styles.statusBody}>
         {body}
       </Text>
     </View>
-  );
-}
-
-export function CloudCheckIcon() {
-  return (
-    <View accessibilityElementsHidden style={styles.cloudIcon}>
-      <View style={styles.cloudBody} />
-      <Text style={styles.cloudCheck}>OK</Text>
-    </View>
-  );
-}
-
-export function DumbbellMark() {
-  return (
-    <View accessibilityElementsHidden style={styles.dumbbellMark}>
-      <View style={styles.dumbbellLine} />
-      <View style={[styles.dumbbellPlate, styles.dumbbellPlateLeft]} />
-      <View style={[styles.dumbbellPlate, styles.dumbbellPlateRight]} />
-      <View style={[styles.dumbbellPlate, styles.dumbbellPlateFarLeft]} />
-      <View style={[styles.dumbbellPlate, styles.dumbbellPlateFarRight]} />
-    </View>
-  );
-}
-
-export function GridIcon() {
-  return (
-    <View accessibilityElementsHidden style={styles.gridIcon}>
-      <View style={styles.gridLineHorizontal} />
-      <View style={styles.gridLineVertical} />
-    </View>
-  );
-}
-
-export function ClockIcon() {
-  return (
-    <View accessibilityElementsHidden style={styles.clockIcon}>
-      <View style={styles.clockHandTall} />
-      <View style={styles.clockHandWide} />
-    </View>
-  );
-}
-
-export function MedalIcon() {
-  return (
-    <Text accessibilityElementsHidden style={styles.medalIcon}>
-      O
-    </Text>
   );
 }

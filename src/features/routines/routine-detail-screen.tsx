@@ -23,8 +23,8 @@ export function RoutineDetailScreen({ routineId }: { routineId?: string }) {
         <View style={styles.stateIcon}><AppIcon color={SemanticColors.danger} name="warning" size={24} /></View>
         <ThemedText style={styles.title}>{error ? 'Workout unavailable' : 'Workout not found'}</ThemedText>
         <ThemedText style={styles.stateText}>{error ?? 'This workout no longer exists.'}</ThemedText>
-        {error ? <Pressable onPress={reload} style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}><ThemedText style={styles.secondaryButtonText}>Try again</ThemedText></Pressable> : null}
-        <Link href={'/workouts' as Href} asChild><Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Back to workouts</ThemedText></Pressable></Link>
+        {error ? <Pressable accessibilityRole="button" onPress={reload} style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}><ThemedText style={styles.secondaryButtonText}>Try again</ThemedText></Pressable> : null}
+        <Link href={'/workouts' as Href} asChild><Pressable accessibilityRole="button" style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Back to workouts</ThemedText></Pressable></Link>
       </ScrollView>
     );
   }
@@ -39,12 +39,12 @@ export function RoutineDetailScreen({ routineId }: { routineId?: string }) {
         <View style={styles.summary}>
           <View style={styles.titleRow}>
             <View style={styles.titleCopy}><ThemedText style={styles.eyebrow}>{routine.active ? 'Active workout' : 'Inactive workout'}</ThemedText><ThemedText style={styles.title}>{routine.name}</ThemedText></View>
-            <Link href={{ pathname: '/workouts/[id]/edit', params: { id: routine.routine_id } } as unknown as Href} asChild><Pressable accessibilityLabel={`Edit ${routine.name}`} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}><AppIcon color={SemanticColors.actionSoft} name="edit" size={20} /></Pressable></Link>
+            <Link href={{ pathname: '/workouts/[id]/edit', params: { id: routine.routine_id } } as unknown as Href} asChild><Pressable accessibilityLabel={`Edit ${routine.name}`} accessibilityRole="button" style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}><AppIcon color={SemanticColors.actionSoft} name="edit" size={20} /></Pressable></Link>
           </View>
           <ThemedText style={styles.description}>{routine.description ?? 'No description yet.'}</ThemedText>
           <View style={styles.statsRow}><Stat label="Exercises" value={String(totals.exerciseCount)} /><Stat label="Target sets" value={String(totals.setCount)} /></View>
           {error ? <ThemedText style={styles.inlineError}>{error}</ThemedText> : null}
-          <Pressable accessibilityLabel={activeSessionId ? 'Resume active workout' : `Start ${routine.name}`} accessibilityRole="button" disabled={isStarting || (!activeSessionId && !routine.active)} onPress={startWorkout} style={({ pressed }) => [styles.startButton, ((!activeSessionId && !routine.active) || isStarting) && styles.buttonDisabled, pressed && styles.pressed]}>
+          <Pressable accessibilityLabel={activeSessionId ? 'Resume active workout' : `Start ${routine.name}`} accessibilityRole="button" accessibilityState={{ busy: isStarting, disabled: isStarting || (!activeSessionId && !routine.active) }} disabled={isStarting || (!activeSessionId && !routine.active)} onPress={startWorkout} style={({ pressed }) => [styles.startButton, ((!activeSessionId && !routine.active) || isStarting) && styles.buttonDisabled, pressed && styles.pressed]}>
             {isStarting ? <ActivityIndicator color={DesignColors.onPrimaryContainer} /> : <AppIcon color={DesignColors.onPrimaryContainer} name="play" size={20} />}
             <ThemedText style={styles.startButtonText}>{isStarting ? 'Opening…' : activeSessionId ? 'Resume active workout' : 'Start workout'}</ThemedText>
           </Pressable>

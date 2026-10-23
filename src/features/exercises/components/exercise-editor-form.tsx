@@ -26,9 +26,9 @@ export function ExerciseEditorForm({
   const [active, setActive] = useState(data.initialValues.active);
   const [categoryId, setCategoryId] = useState<string | null>(data.initialValues.categoryId);
   const [description, setDescription] = useState(data.initialValues.description);
-  const [imageUrl] = useState<string | null>(data.initialValues.imageUrl);
+  const [imageUrl, setImageUrl] = useState<string | null>(data.initialValues.imageUrl);
   const [name, setName] = useState(data.initialValues.name);
-  const [videoUrl] = useState<string | null>(data.initialValues.videoUrl);
+  const [videoUrl, setVideoUrl] = useState<string | null>(data.initialValues.videoUrl);
   const selectedCategory = data.categories.find((category) => category.id === categoryId) ?? null;
   const muscleGroup = selectedCategory?.muscleGroup ?? data.initialValues.muscleGroup;
 
@@ -100,6 +100,38 @@ export function ExerciseEditorForm({
             />
           </View>
 
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Image URL (Optional)</Text>
+            <TextInput
+              accessibilityLabel="Exercise image URL"
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="url"
+              onChangeText={(value) => setImageUrl(value || null)}
+              placeholder="https://example.com/exercise.jpg"
+              placeholderTextColor="rgba(229, 226, 225, 0.26)"
+              selectionColor={SemanticColors.action}
+              style={styles.urlInput}
+              value={imageUrl ?? ''}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Video URL (Optional)</Text>
+            <TextInput
+              accessibilityLabel="Exercise video URL"
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="url"
+              onChangeText={(value) => setVideoUrl(value || null)}
+              placeholder="https://example.com/demo"
+              placeholderTextColor="rgba(229, 226, 225, 0.26)"
+              selectionColor={SemanticColors.action}
+              style={styles.urlInput}
+              value={videoUrl ?? ''}
+            />
+          </View>
+
           <ExerciseCategoryPicker
             categories={data.categories}
             onSelect={setCategoryId}
@@ -116,6 +148,7 @@ export function ExerciseEditorForm({
               accessibilityLabel={active ? 'Deactivate exercise' : 'Activate exercise'}
               accessibilityRole="switch"
               accessibilityState={{ checked: active }}
+              hitSlop={9}
               onPress={() => setActive((value) => !value)}
               style={[styles.switchTrack, active && styles.switchTrackActive]}>
               <View style={[styles.switchThumb, active && styles.switchThumbActive]} />

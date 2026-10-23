@@ -119,6 +119,8 @@ The tree describes active ownership boundaries, not a requirement to create ever
 
 The five top-level destinations are Today, Plan, Workouts, Progress, and Profile on both native and web. `src/features/plan` owns date-based ISO-week planning. The Workouts product area owns reusable workout definitions and the nested exercise catalog. Its implementation remains in `src/features/routines` and `src/features/exercises` so the existing SQLite `routines` identifiers and established feature modules remain compatible; no user-facing screen should call a workout a routine.
 
+The retired `/routines` and `/exercises` URL aliases are not registered in `src/app`. New navigation and links must use `/workouts` and `/workouts/exercises` exclusively.
+
 Date assignments belong to `db/repositories/workout-plan.ts`. Legacy `routine_schedules` data is read only by the one-time planner import and must not be used as Today's scheduling source or exposed in the workout editor.
 
 ## Folder Responsibilities

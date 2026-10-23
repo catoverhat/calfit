@@ -77,6 +77,8 @@ export function RoutineExerciseCard({
               </ThemedText>
               <Pressable
                 accessibilityLabel={`Remove set ${index + 1}`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: exercise.targets.length === 1 }}
                 disabled={exercise.targets.length === 1}
                 onPress={() => removeTarget(target.id)}
                 style={({ pressed }) => [
@@ -133,6 +135,7 @@ export function RoutineExerciseCard({
         ))}
       </View>
       <Pressable
+        accessibilityLabel={`Add target set to ${exercise.name}`}
         accessibilityRole="button"
         onPress={addTarget}
         style={({ pressed }) => [
@@ -198,6 +201,7 @@ function IconButton({
     <Pressable
       accessibilityLabel={label}
       accessibilityRole="button"
+      accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [

@@ -25,6 +25,7 @@ const ErrorState = ({
       <ThemedText style={styles.stateTitle}>Workouts unavailable</ThemedText>
       <ThemedText style={styles.stateText}>{error}</ThemedText>
       <Pressable
+        accessibilityLabel="Retry loading workouts"
         accessibilityRole="button"
         onPress={reload}
         style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
@@ -75,7 +76,7 @@ export function RoutineListScreen() {
         </View>
 
         <Link href={'/workouts/exercises' as Href} asChild>
-          <Pressable accessibilityRole="button" style={({ pressed }) => [styles.manageButton, pressed && styles.pressed]}>
+          <Pressable accessibilityLabel="Manage exercise catalog" accessibilityRole="button" style={({ pressed }) => [styles.manageButton, pressed && styles.pressed]}>
             <AppIcon color={SemanticColors.actionSoft} name="exercises" size={18} />
             <ThemedText style={styles.manageButtonText}>Manage Exercises</ThemedText>
             <AppIcon color={SemanticColors.textMuted} name="chevronRight" size={18} />
@@ -106,6 +107,23 @@ export function RoutineListScreen() {
             <ThemedText style={styles.stateText}>
               Combine exercises and set reusable training targets.
             </ThemedText>
+            <Link href="/workouts/create" asChild>
+              <Pressable
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.emptyCreateButton,
+                  pressed && styles.pressed,
+                ]}>
+                <AppIcon
+                  color={DesignColors.onPrimaryContainer}
+                  name="add"
+                  size={18}
+                />
+                <ThemedText style={styles.emptyCreateButtonText}>
+                  Create Workout
+                </ThemedText>
+              </Pressable>
+            </Link>
           </View>
         ) : (
           <View style={styles.list}>

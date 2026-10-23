@@ -17,10 +17,9 @@ export function ProfileHeader({ name }: { name: string }) {
         </View>
         <Text style={styles.brandName}>Kinetic Pulse</Text>
       </View>
-      <View accessibilityElementsHidden style={styles.cloudIcon}>
-        <View style={styles.cloudDomeLarge} />
-        <View style={styles.cloudDomeSmall} />
-        <View style={styles.cloudBase} />
+      <View accessibilityLabel="Saved locally" style={styles.savedStatus}>
+        <AppIcon color={Palette.primary[400]} name="cloudCheck" size={18} />
+        <Text style={styles.savedStatusText}>Local</Text>
       </View>
     </View>
   );

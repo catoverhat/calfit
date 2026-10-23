@@ -72,6 +72,13 @@ export const styles = StyleSheet.create({
     minHeight: 112,
     padding: 0,
   },
+  urlInput: {
+    ...Typography.sm,
+    color: SemanticColors.textPrimary,
+    fontFamily: Fonts.bodyMedium,
+    minHeight: 32,
+    padding: 0,
+  },
   categoryGroup: {
     backgroundColor: ComponentTokens.input.background,
     borderColor: ComponentTokens.input.borderColor,
@@ -91,7 +98,7 @@ export const styles = StyleSheet.create({
     borderRadius: Radius.full,
     borderWidth: 1,
     justifyContent: 'center',
-    minHeight: 34,
+    minHeight: 48,
     paddingHorizontal: Spacing.three,
   },
   categoryChipSelected: {

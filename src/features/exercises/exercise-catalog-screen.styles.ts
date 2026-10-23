@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
   },
   content: {
     gap: Spacing.three,
-    maxWidth: Math.min(MaxContentWidth, 430),
+    maxWidth: Math.min(MaxContentWidth, 720),
     paddingTop: Spacing.two,
     width: '100%',
   },
@@ -71,7 +71,7 @@ export const styles = StyleSheet.create({
     borderWidth: ComponentTokens.input.borderWidth,
     flexDirection: 'row',
     gap: Space.sm,
-    minHeight: 44,
+    minHeight: 48,
     paddingHorizontal: Spacing.three,
   },
   searchInput: {
@@ -96,7 +96,7 @@ export const styles = StyleSheet.create({
     borderRadius: Radius.full,
     borderWidth: 1,
     justifyContent: 'center',
-    minHeight: 30,
+    minHeight: 48,
     paddingHorizontal: Spacing.three,
   },
   filterChipSelected: {
@@ -116,24 +116,30 @@ export const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   exerciseCard: {
+    alignItems: 'center',
     backgroundColor: ComponentTokens.card.background,
     borderColor: ComponentTokens.card.borderColor,
     borderCurve: 'continuous',
     borderRadius: ComponentTokens.card.radius,
     borderWidth: ComponentTokens.card.borderWidth,
+    flexDirection: 'row',
+    gap: Spacing.three,
     overflow: 'hidden',
+    padding: Spacing.two,
   },
   exerciseImage: {
-    aspectRatio: 1.9,
     backgroundColor: DesignColors.surfaceContainerLowest,
-    width: '100%',
+    borderRadius: Radius.md,
+    height: 80,
+    width: 80,
   },
   exerciseImageFallback: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardBody: {
-    padding: Spacing.three,
+    flex: 1,
+    minWidth: 0,
   },
   cardTitleRow: {
     alignItems: 'flex-start',
@@ -165,14 +171,16 @@ export const styles = StyleSheet.create({
   tagText: {
     color: SemanticColors.actionSoft,
     fontFamily: Fonts.bodyBold,
-    fontSize: 8,
-    lineHeight: 10,
+    fontSize: 10,
+    lineHeight: 13,
   },
   menuButton: {
     alignItems: 'center',
-    height: 32,
+    backgroundColor: DesignColors.surfaceContainerHigh,
+    borderRadius: Radius.full,
+    height: 48,
     justifyContent: 'center',
-    width: 32,
+    width: 48,
   },
   addCustomCard: {
     alignItems: 'center',

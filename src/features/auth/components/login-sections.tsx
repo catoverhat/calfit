@@ -34,11 +34,6 @@ export function LoginMessageSection({ compact }: { compact: boolean }) {
         Track progress.{'\n'}
         <Text style={styles.messageAccent}>Stay consistent.</Text>
       </Text>
-      <View accessibilityElementsHidden style={styles.dots}>
-        <View style={[styles.dot, styles.dotActive]} />
-        <View style={styles.dot} />
-        <View style={styles.dot} />
-      </View>
     </View>
   );
 }

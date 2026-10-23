@@ -124,6 +124,20 @@ export const styles = StyleSheet.create({
     width: 8,
   },
   statusDotInactive: { backgroundColor: SemanticColors.textMuted },
+  statusPill: {
+    alignItems: "center",
+    backgroundColor: DesignColors.surfaceContainerHigh,
+    borderRadius: Radius.full,
+    flexDirection: "row",
+    gap: Spacing.one,
+    minHeight: 28,
+    paddingHorizontal: Spacing.two,
+  },
+  statusText: {
+    ...Typography.xs,
+    color: SemanticColors.textSecondary,
+    fontFamily: Fonts.bodySemiBold,
+  },
   metricRow: {
     backgroundColor: DesignColors.surfaceContainerLow,
     borderRadius: Radius.md,
@@ -192,7 +206,7 @@ export const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: "row",
-    gap: Spacing.four,
+    gap: Spacing.two,
   },
 
   footerActionButtonContent: {
@@ -203,8 +217,9 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: SemanticColors.actionSoft,
     borderRadius: Radius.md,
-    padding: Spacing.one,
-    width: 80,
+    minHeight: 48,
+    paddingHorizontal: Spacing.two,
+    width: 88,
   },
   footerActionButtonText: {
     ...Typography.xs,
@@ -241,6 +256,21 @@ export const styles = StyleSheet.create({
     color: SemanticColors.textSecondary,
     fontFamily: Fonts.body,
     textAlign: "center",
+  },
+  emptyCreateButton: {
+    alignItems: "center",
+    backgroundColor: SemanticColors.action,
+    borderRadius: Radius.md,
+    flexDirection: "row",
+    gap: Spacing.two,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: Spacing.four,
+  },
+  emptyCreateButtonText: {
+    ...Typography.sm,
+    color: DesignColors.onPrimaryContainer,
+    fontFamily: Fonts.bodyBold,
   },
   retryButton: {
     borderColor: SemanticColors.action,

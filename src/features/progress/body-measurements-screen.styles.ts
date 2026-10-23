@@ -197,7 +197,7 @@ export const styles = StyleSheet.create({
     fontFamily: Fonts.heading,
   },
   viewAllButton: {
-    minHeight: 32,
+    minHeight: 48,
     paddingHorizontal: Spacing.one,
     justifyContent: 'center',
   },

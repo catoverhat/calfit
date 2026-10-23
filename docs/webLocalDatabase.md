@@ -5,7 +5,7 @@ Calfit uses Expo SQLite on web. Expo SDK 56 marks this support as alpha and requ
 
 Production hosting must:
 
-- serve the single-page app entry for unknown application routes such as `/routines/:id`;
+- serve the single-page app entry for unknown application routes such as `/workouts/:id`;
 - send `Cross-Origin-Embedder-Policy: credentialless`;
 - send `Cross-Origin-Opener-Policy: same-origin`.
 

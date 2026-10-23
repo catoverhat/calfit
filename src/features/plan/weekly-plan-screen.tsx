@@ -92,6 +92,7 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
             </View>
             <Pressable
               accessibilityLabel="Return to the current week"
+              accessibilityRole="button"
               onPress={planner.goToToday}
               style={({ pressed }) => [styles.todayButton, pressed && styles.pressed]}>
               <AppIcon color={SemanticColors.actionSoft} name="calendar" size={18} />
@@ -139,7 +140,14 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
               <ThemedText style={styles.weekRange}>{range}</ThemedText>
             </View>
             <Pressable
+              accessibilityLabel="Copy assignments from the previous week"
               accessibilityRole="button"
+              accessibilityState={{
+                disabled:
+                  !planner.weekModel.isEmpty ||
+                  planner.isSaving ||
+                  planner.dates[6] < planner.today,
+              }}
               disabled={!planner.weekModel.isEmpty || planner.isSaving || planner.dates[6] < planner.today}
               onPress={() => void planner.copyPreviousWeek()}
               style={({ pressed }) => [
@@ -156,14 +164,26 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
             <View style={styles.errorBanner}>
               <AppIcon color={SemanticColors.danger} name="warning" size={18} />
               <ThemedText style={styles.errorText}>{planner.error}</ThemedText>
-              <Pressable onPress={planner.retry}><ThemedText style={styles.errorAction}>Retry</ThemedText></Pressable>
+              <Pressable
+                accessibilityLabel="Retry loading workout plan"
+                accessibilityRole="button"
+                onPress={planner.retry}
+                style={styles.errorRetry}>
+                <ThemedText style={styles.errorAction}>Retry</ThemedText>
+              </Pressable>
             </View>
           ) : null}
 
           {planner.notice && planner.undoLast ? (
             <View style={styles.undoBanner}>
               <ThemedText style={styles.noticeText}>{planner.notice}</ThemedText>
-              <Pressable disabled={planner.isSaving} onPress={() => void planner.undoLast?.()} style={styles.undoButton}>
+              <Pressable
+                accessibilityLabel="Undo last plan change"
+                accessibilityRole="button"
+                accessibilityState={{ disabled: planner.isSaving }}
+                disabled={planner.isSaving}
+                onPress={() => void planner.undoLast?.()}
+                style={styles.undoButton}>
                 <AppIcon color={SemanticColors.actionSoft} name="undo" size={17} />
                 <ThemedText style={styles.undoText}>Undo</ThemedText>
               </Pressable>
@@ -343,7 +363,12 @@ function WorkoutPicker({ onClose, onCreate, onSelect, open, title, workouts }: {
       </View>
       <ScrollView contentContainerStyle={styles.sheetList} keyboardShouldPersistTaps="handled">
         {visible.map((workout) => (
-          <Pressable key={workout.id} onPress={() => onSelect(workout)} style={({ pressed }) => [styles.workoutOption, pressed && styles.pressed]}>
+          <Pressable
+            accessibilityLabel={`Assign ${workout.title}`}
+            accessibilityRole="button"
+            key={workout.id}
+            onPress={() => onSelect(workout)}
+            style={({ pressed }) => [styles.workoutOption, pressed && styles.pressed]}>
             <View style={styles.optionIcon}><AppIcon color={SemanticColors.action} name={workout.focus === 'cardio' ? 'running' : 'strength'} size={20} /></View>
             <View style={styles.optionCopy}>
               <ThemedText style={styles.optionTitle}>{workout.title}</ThemedText>
@@ -354,7 +379,7 @@ function WorkoutPicker({ onClose, onCreate, onSelect, open, title, workouts }: {
         ))}
         {visible.length === 0 ? <ThemedText style={styles.emptyText}>No matching workouts.</ThemedText> : null}
       </ScrollView>
-      <Pressable onPress={onCreate} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}>
+      <Pressable accessibilityRole="button" onPress={onCreate} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}>
         <AppIcon color={DesignColors.onPrimaryContainer} name="add" size={19} />
         <ThemedText style={styles.primaryButtonText}>Create workout</ThemedText>
       </Pressable>
@@ -373,11 +398,11 @@ function ChoiceSheet({ change, onClose, onMoveOriginal, onReplace }: {
       <ThemedText style={styles.sheetDescription}>
         {change ? `${change.workout.title} will be assigned to ${change.day.weekday}, ${change.day.dateLabel}.` : ''}
       </ThemedText>
-      <Pressable onPress={onReplace} style={({ pressed }) => [styles.choiceCard, pressed && styles.pressed]}>
+      <Pressable accessibilityLabel="Replace original workout" accessibilityRole="button" onPress={onReplace} style={({ pressed }) => [styles.choiceCard, pressed && styles.pressed]}>
         <AppIcon color={SemanticColors.action} name="swap" size={21} />
         <View style={styles.optionCopy}><ThemedText style={styles.optionTitle}>Replace</ThemedText><ThemedText style={styles.optionMeta}>Remove the original assignment.</ThemedText></View>
       </Pressable>
-      <Pressable onPress={onMoveOriginal} style={({ pressed }) => [styles.choiceCard, pressed && styles.pressed]}>
+      <Pressable accessibilityLabel="Move original workout before replacing" accessibilityRole="button" onPress={onMoveOriginal} style={({ pressed }) => [styles.choiceCard, pressed && styles.pressed]}>
         <AppIcon color={SemanticColors.actionSoft} name="move" size={21} />
         <View style={styles.optionCopy}><ThemedText style={styles.optionTitle}>Move original</ThemedText><ThemedText style={styles.optionMeta}>Choose an empty current or future date first.</ThemedText></View>
       </Pressable>
@@ -403,7 +428,7 @@ function TargetSheet({ allowOccupied, onClose, onConfirmSwap, onNextWeek, onPrev
         <>
           <ThemedText style={styles.sheetDescription}>Both dates are occupied. Confirm to swap the two workouts.</ThemedText>
           <View style={styles.swapPreview}><ThemedText style={styles.optionTitle}>{sourceDate}</ThemedText><AppIcon color={SemanticColors.action} name="swap" size={22} /><ThemedText style={styles.optionTitle}>{swapTarget.date}</ThemedText></View>
-          <Pressable onPress={onConfirmSwap} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Confirm swap</ThemedText></Pressable>
+          <Pressable accessibilityRole="button" onPress={onConfirmSwap} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Confirm swap</ThemedText></Pressable>
         </>
       ) : (
         <>
@@ -415,6 +440,9 @@ function TargetSheet({ allowOccupied, onClose, onConfirmSwap, onNextWeek, onPrev
           <View style={styles.targetDays}>
             {week.days.map((day) => (
               <Pressable
+                accessibilityLabel={`${day.weekday}, ${day.dateLabel}. ${day.entryId ? (allowOccupied ? 'Swap workouts' : 'Occupied') : 'Empty'}`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !day.editable || day.date === sourceDate || (Boolean(day.entryId) && !allowOccupied) }}
                 disabled={!day.editable || day.date === sourceDate || (Boolean(day.entryId) && !allowOccupied)}
                 key={day.date}
                 onPress={() => onSelect(day)}
@@ -448,7 +476,7 @@ function LegacyImportSheet({ days, onDismiss, onImport, onSelect, open, selectio
             <ThemedText style={styles.optionTitle}>{parseLocalDateKey(day.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</ThemedText>
             <View style={styles.importOptions}>
               {day.routines.map((routine) => (
-                <Pressable key={routine.routine_id} onPress={() => onSelect(day.date, routine.routine_id)} style={[styles.importChip, selected === routine.routine_id && styles.importChipSelected]}>
+                <Pressable accessibilityLabel={`Choose ${routine.name}`} accessibilityRole="button" accessibilityState={{ selected: selected === routine.routine_id }} key={routine.routine_id} onPress={() => onSelect(day.date, routine.routine_id)} style={[styles.importChip, selected === routine.routine_id && styles.importChipSelected]}>
                   <ThemedText style={[styles.importChipText, selected === routine.routine_id && styles.importChipTextSelected]}>{routine.name}</ThemedText>
                 </Pressable>
               ))}
@@ -456,8 +484,8 @@ function LegacyImportSheet({ days, onDismiss, onImport, onSelect, open, selectio
           </View>;
         })}
       </ScrollView>
-      <Pressable onPress={onImport} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Import selections</ThemedText></Pressable>
-      <Pressable onPress={onDismiss} style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}><ThemedText style={styles.secondaryButtonText}>Start with an empty plan</ThemedText></Pressable>
+      <Pressable accessibilityRole="button" onPress={onImport} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Import selections</ThemedText></Pressable>
+      <Pressable accessibilityRole="button" onPress={onDismiss} style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}><ThemedText style={styles.secondaryButtonText}>Start with an empty plan</ThemedText></Pressable>
     </Sheet>
   );
 }
@@ -466,7 +494,7 @@ function Sheet({ children, onClose, open, title }: { children: React.ReactNode; 
   return (
     <Modal animationType="slide" onRequestClose={onClose} presentationStyle="overFullScreen" transparent visible={open}>
       <View style={styles.modalBackdrop}>
-        <Pressable accessibilityLabel="Close sheet" onPress={onClose} style={styles.backdropPress} />
+        <Pressable accessibilityLabel="Close sheet" accessibilityRole="button" onPress={onClose} style={styles.backdropPress} />
         <View accessibilityViewIsModal style={styles.sheet}>
           <View style={styles.sheetHeader}><ThemedText style={styles.sheetTitle}>{title}</ThemedText><IconButton label="Close" name="close" onPress={onClose} /></View>
           {children}
@@ -477,11 +505,11 @@ function Sheet({ children, onClose, open, title }: { children: React.ReactNode; 
 }
 
 function SmallAction({ danger, label, onPress, primary }: { danger?: boolean; label: string; onPress: () => void; primary?: boolean }) {
-  return <Pressable onPress={onPress} style={({ pressed }) => [styles.smallAction, primary && styles.smallActionPrimary, danger && styles.smallActionDanger, pressed && styles.pressed]}><ThemedText style={[styles.smallActionText, primary && styles.smallActionPrimaryText, danger && styles.smallActionDangerText]}>{label}</ThemedText></Pressable>;
+  return <Pressable accessibilityLabel={label} accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.smallAction, primary && styles.smallActionPrimary, danger && styles.smallActionDanger, pressed && styles.pressed]}><ThemedText style={[styles.smallActionText, primary && styles.smallActionPrimaryText, danger && styles.smallActionDangerText]}>{label}</ThemedText></Pressable>;
 }
 
 function IconButton({ label, name, onPress }: { label: string; name: 'chevronLeft' | 'chevronRight' | 'close'; onPress: () => void }) {
-  return <Pressable accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}><AppIcon color={SemanticColors.textPrimary} name={name} size={20} /></Pressable>;
+  return <Pressable accessibilityLabel={label} accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}><AppIcon color={SemanticColors.textPrimary} name={name} size={20} /></Pressable>;
 }
 
 function statusStyle(day: WorkoutPlanDay) {

@@ -164,7 +164,7 @@ The design system employs a consistent "Rounded Eight" (8px) logic for standard 
 - **Navigation Buttons:** When a button navigates with Expo Router, compose it as `Link` -> `Pressable` -> `View` -> icon or label. Set `asChild` on `Link`, put accessibility props on `Pressable`, and apply the button's visual styles plus the render-prop `pressed` style to the inner `View`. This keeps linked buttons visually and behaviorally consistent across platforms:
 
   ```tsx
-  <Link href="/routines/create" asChild>
+  <Link href="/workouts/create" asChild>
     <Pressable
       accessibilityLabel="Create routine"
       accessibilityRole="button"

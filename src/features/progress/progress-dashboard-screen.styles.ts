@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { DesignColors, SemanticColors, Fonts, Typography, Spacing, Radius, ComponentTokens, MaxContentWidth } from '@/theme/tokens';
+import { DesignColors, SemanticColors, Fonts, Typography, Spacing, Radius, ComponentTokens, MaxContentWidth, TypeScale } from '@/theme/tokens';
 
 export const styles = StyleSheet.create({
   scrollContent: {
@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
   },
   content: {
     gap: Spacing.three,
-    maxWidth: Math.min(MaxContentWidth, 430),
+    maxWidth: Math.min(MaxContentWidth, 720),
     width: '100%',
   },
   headingBlock: {
@@ -20,10 +20,8 @@ export const styles = StyleSheet.create({
     paddingTop: Spacing.one,
   },
   eyebrow: {
+    ...TypeScale.headlineLg,
     color: SemanticColors.textPrimary,
-    fontFamily: Fonts.bodyBold,
-    fontSize: 13,
-    lineHeight: 17,
   },
   subtitle: {
     color: SemanticColors.textSecondary,

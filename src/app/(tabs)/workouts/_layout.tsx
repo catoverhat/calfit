@@ -15,8 +15,8 @@ export default function WorkoutsLayout() {
       }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="[id]" options={{ headerShown: false }} />
-      <Stack.Screen name="create" options={{ title: 'Kinetic Pulse' }} />
-      <Stack.Screen name="add-exercise" options={{ title: 'Add Exercise' }} />
+      <Stack.Screen name="create" options={{ title: 'Create Workout' }} />
+      <Stack.Screen name="add-exercise" options={{ title: 'Choose Exercises' }} />
       <Stack.Screen name="exercises" options={{ headerShown: false }} />
     </Stack>
   );

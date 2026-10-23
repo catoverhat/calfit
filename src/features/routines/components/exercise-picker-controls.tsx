@@ -90,11 +90,21 @@ export function ExercisePickerFooter({
           <Text numberOfLines={1} style={styles.routineName}>{routineName}</Text>
         </View>
         <Pressable
-          accessibilityLabel="Add Selection"
+          accessibilityLabel={selectedCount > 0 ? `Add ${selectedCount} selected exercises` : 'Select exercises to add'}
           accessibilityRole="button"
+          accessibilityState={{ disabled: selectedCount === 0 }}
+          disabled={selectedCount === 0}
           onPress={onAddSelection}
-          style={({ pressed }) => [styles.addSelectionButton, pressed && styles.addSelectionPressed]}>
-          <Text style={styles.addSelectionText}>Add {selectedCount || ''} Selection{selectedCount === 1 ? '' : 's'}</Text>
+          style={({ pressed }) => [
+            styles.addSelectionButton,
+            selectedCount === 0 && { opacity: 0.5 },
+            pressed && styles.addSelectionPressed,
+          ]}>
+          <Text style={styles.addSelectionText}>
+            {selectedCount > 0
+              ? `Add ${selectedCount} Exercise${selectedCount === 1 ? '' : 's'}`
+              : 'Select Exercises'}
+          </Text>
         </Pressable>
       </View>
     </>

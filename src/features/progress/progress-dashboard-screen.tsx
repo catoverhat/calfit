@@ -72,7 +72,7 @@ export function ProgressDashboardScreen() {
               </View>
               {data.volumeSegments.length > 0 ? <LinePlot segments={data.volumeSegments} style={styles.bodyPlot} /> : <Text style={styles.emptyText}>Complete weighted sets in two workouts to see volume progression.</Text>}
             </View>
-            <View style={styles.card}>
+            <View accessibilityLabel="Workout consistency over recent weeks. Darker cells represent more completed training." style={styles.card}>
               <Text style={styles.cardTitle}>Workout Consistency</Text>
               <View style={styles.heatmapBlock}>
                 <View style={styles.heatmapLabels}>
@@ -87,6 +87,13 @@ export function ProgressDashboardScreen() {
                     </View>
                   ))}
                 </View>
+              </View>
+              <View style={styles.heatmapLegend}>
+                <Text style={styles.legendText}>Less</Text>
+                {heatmapCellStyles.map((cellStyle, index) => (
+                  <View key={index} style={[styles.legendCell, cellStyle]} />
+                ))}
+                <Text style={styles.legendText}>More</Text>
               </View>
             </View>
           </>

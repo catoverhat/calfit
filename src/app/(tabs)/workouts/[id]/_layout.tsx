@@ -14,7 +14,7 @@ export default function WorkoutDetailLayout() {
         headerTitleStyle: { color: SemanticColors.actionSoft, fontFamily: Fonts.heading },
       }}>
       <Stack.Screen name="index" options={{ title: 'Workout' }} />
-      <Stack.Screen name="edit" options={{ title: 'Kinetic Pulse' }} />
+      <Stack.Screen name="edit" options={{ title: 'Edit Workout' }} />
     </Stack>
   );
 }

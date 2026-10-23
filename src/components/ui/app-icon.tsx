@@ -6,11 +6,13 @@ import {
 export type AppIconName =
   | "bell"
   | "cloud"
+  | "cloudCheck"
   | "search"
   | "check"
   | "menu"
   | "camera"
   | "chevronDown"
+  | "chevronUp"
   | "chevrons"
   | "clock"
   | "timer"
@@ -51,6 +53,7 @@ export type AppIconName =
   | "workouts"
   | "progress"
   | "profile"
+  | "settings"
   | "faceScan"
   | "fingerprint"
   | "shield"
@@ -69,11 +72,13 @@ export type AppIconName =
 const icons: Record<AppIconName, LucideIconName> = {
   bell: "bell",
   cloud: "cloud",
+  cloudCheck: "cloud-check",
   search: "search",
   check: "check",
   menu: "ellipsis",
   camera: "camera",
   chevronDown: "chevron-down",
+  chevronUp: "chevron-up",
   chevrons: "chevrons-up-down",
   clock: "clock",
   timer: "timer",
@@ -114,6 +119,7 @@ const icons: Record<AppIconName, LucideIconName> = {
   workouts: "dumbbell",
   progress: "chart-bar",
   profile: "user",
+  settings: "settings",
   faceScan: "scan-face",
   fingerprint: "fingerprint",
   shield: "shield-check",
