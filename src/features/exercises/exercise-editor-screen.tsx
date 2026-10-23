@@ -4,10 +4,11 @@ import { useExerciseEditor } from './use-exercise-editor';
 type ExerciseEditorScreenProps = {
   exerciseId?: string;
   mode: 'create' | 'edit';
+  returnTo?: string;
 };
 
-export function ExerciseEditorScreen({ exerciseId, mode }: ExerciseEditorScreenProps) {
-  const { data, error, isLoading, isSaving, saveExercise } = useExerciseEditor({ exerciseId, mode });
+export function ExerciseEditorScreen({ exerciseId, mode, returnTo }: ExerciseEditorScreenProps) {
+  const { data, error, isLoading, isSaving, saveExercise } = useExerciseEditor({ exerciseId, mode, returnTo });
 
   return (
     <ExerciseEditorForm

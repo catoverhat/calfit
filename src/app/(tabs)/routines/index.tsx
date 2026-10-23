@@ -1,5 +1,5 @@
-import { RoutineListScreen } from '@/features/routines/routine-list-screen';
+import { Redirect, type Href } from 'expo-router';
 
 export default function RoutinesRoute() {
-  return <RoutineListScreen />;
+  return <Redirect href={'/workouts' as Href} />;
 }

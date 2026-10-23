@@ -16,6 +16,8 @@ export function TodayDashboardScreen() {
     error,
     isLoading,
     isStarting,
+    openPlan,
+    openWorkouts,
     startWorkout,
   } = useTodayDashboard();
 
@@ -47,6 +49,8 @@ export function TodayDashboardScreen() {
             error={error}
             isLoading={isLoading}
             isStarting={isStarting}
+            onBrowseWorkouts={openWorkouts}
+            onOpenPlan={openPlan}
             onStart={startWorkout}
             routine={todayDashboard.routine}
           />

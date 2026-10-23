@@ -7,11 +7,11 @@ import { RoutineEditorFooter, RoutineExerciseSection, RoutineIdentitySection } f
 import { styles } from './routine-editor-screen.styles';
 import { useRoutineEditor } from './use-routine-editor';
 
-export function RoutineEditorScreen({ mode, routineId }: { mode: 'create' | 'edit'; routineId?: string }) {
-  const editor = useRoutineEditor({ mode, routineId });
+export function RoutineEditorScreen({ mode, plannedDate, routineId }: { mode: 'create' | 'edit'; plannedDate?: string; routineId?: string }) {
+  const editor = useRoutineEditor({ mode, plannedDate, routineId });
 
   if (editor.isLoading || !editor.draft) {
-    return <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.stateContent} style={styles.screen}><ActivityIndicator color={SemanticColors.action} size="large" /><ThemedText style={styles.stateText}>{editor.error ?? 'Loading routine editor…'}</ThemedText></ScrollView>;
+    return <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.stateContent} style={styles.screen}><ActivityIndicator color={SemanticColors.action} size="large" /><ThemedText style={styles.stateText}>{editor.error ?? 'Loading workout editor…'}</ThemedText></ScrollView>;
   }
 
   return (
@@ -23,7 +23,7 @@ export function RoutineEditorScreen({ mode, routineId }: { mode: 'create' | 'edi
             addTarget={editor.addTarget}
             exercises={editor.draft.exercises}
             moveExercise={editor.moveExercise}
-            onAdd={() => router.push('/routines/add-exercise')}
+            onAdd={() => router.push('/workouts/add-exercise')}
             removeExercise={editor.removeExercise}
             removeTarget={editor.removeTarget}
             units={editor.units}

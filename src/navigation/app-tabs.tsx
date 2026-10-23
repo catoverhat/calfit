@@ -35,21 +35,21 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="routines">
-        <NativeTabs.Trigger.Label>Routines</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="plan">
+        <NativeTabs.Trigger.Label>Plan</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          md="alt_route"
-          sf={{ default: "figure.run", selected: "figure.run" }}
+          md="calendar_month"
+          sf={{ default: "calendar.badge.plus", selected: "calendar.badge.plus" }}
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="exercises">
-        <NativeTabs.Trigger.Label>Exercises</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="workouts">
+        <NativeTabs.Trigger.Label>Workouts</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          md="apps"
+          md="fitness_center"
           sf={{
-            default: "list.bullet.rectangle",
-            selected: "list.bullet.rectangle.fill",
+            default: "dumbbell",
+            selected: "dumbbell.fill",
           }}
         />
       </NativeTabs.Trigger>

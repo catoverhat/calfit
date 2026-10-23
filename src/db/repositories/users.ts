@@ -74,5 +74,11 @@ async function runInExclusiveTransaction<T>(
   db: LocalDatabase,
   task: (txn: LocalDatabase) => Promise<T>
 ): Promise<T> {
-  return db.withExclusiveTransactionAsync ? db.withExclusiveTransactionAsync(task) : task(db);
+  if (!db.withExclusiveTransactionAsync) return task(db);
+
+  let result!: T;
+  await db.withExclusiveTransactionAsync(async (txn) => {
+    result = await task(txn);
+  });
+  return result;
 }

@@ -1,7 +1,7 @@
 import { LOCAL_USER_ID } from '../schema';
 import type { DashboardSnapshot, LocalDatabase } from '../types';
 import { getRecentBodyMeasurements } from './body-measurements';
-import { getRoutineDetail, getTodayRoutine } from './routines';
+import { getWorkoutPlanEntryForDate } from './workout-plan';
 import { getLocalUserProfile } from './users';
 import { getInProgressWorkoutSession } from './workout-sessions';
 
@@ -37,9 +37,7 @@ export async function getTodayDashboardSnapshot(
 ): Promise<DashboardSnapshot> {
   const user = await getLocalUserProfile(db, userId);
   const activeSession = await getInProgressWorkoutSession(db, userId);
-  const routine = activeSession?.routine_id_fk
-    ? await getRoutineDetail(db, activeSession.routine_id_fk)
-    : await getTodayRoutine(db, userId, asOf);
+  const planEntry = await getWorkoutPlanEntryForDate(db, toLocalDateKey(asOf), userId);
   const measurements = await getRecentBodyMeasurements(db, userId, 2);
   const workoutStreak = await getWorkoutStreak(db, userId, asOf);
   const completedWorkoutRow = await db.getFirstAsync<{ completed_count: number }>(
@@ -53,7 +51,7 @@ export async function getTodayDashboardSnapshot(
   return {
     activeSession,
     user,
-    routine,
+    planEntry,
     latestBodyMeasurement: measurements[0] ?? null,
     previousBodyMeasurement: measurements[1] ?? null,
     workoutStreak,

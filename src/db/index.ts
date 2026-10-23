@@ -34,6 +34,26 @@ export {
 export type { CreateBodyMeasurementInput } from './repositories/body-measurements';
 export { getTodayDashboardSnapshot, getWorkoutStreak } from './repositories/dashboard';
 export {
+  assignWorkoutToDate,
+  copyWorkoutPlanWeek,
+  getLegacyWorkoutPlanDays,
+  getWorkoutPlanEntries,
+  getWorkoutPlanEntryForDate,
+  getWorkoutPlanSettings,
+  importLegacyWorkoutPlan,
+  markLegacyWorkoutPlanImportHandled,
+  moveWorkoutPlanEntry,
+  removeWorkoutPlanEntry,
+  removeFutureWorkoutPlanEntriesForRoutine,
+  replaceAndMoveWorkoutPlanEntry,
+  startOrResumeWorkoutFromPlanEntry,
+  undoWorkoutPlanChange,
+} from './repositories/workout-plan';
+export type {
+  LegacyWorkoutPlanDay,
+  WorkoutPlanUndo,
+} from './repositories/workout-plan';
+export {
   createRoutine,
   getRoutineDetail,
   getRoutineSummaries,
@@ -53,6 +73,7 @@ export type {
 } from './repositories/routines';
 export {
   completeWorkoutSession,
+  createWorkoutSessionFromRoutine,
   getInProgressWorkoutSession,
   getWorkoutHistory,
   getWorkoutSessionDetail,
@@ -99,6 +120,10 @@ export type {
   WorkoutExerciseRow,
   WorkoutExerciseWithSets,
   WorkoutHistoryItem,
+  WorkoutPlanEntryDetail,
+  WorkoutPlanEntry,
+  WorkoutPlanEntryRow,
+  WorkoutPlanSettingsRow,
   WorkoutSessionDetail,
   WorkoutSessionRow,
   WorkoutSessionStatus,

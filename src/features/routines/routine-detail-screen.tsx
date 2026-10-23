@@ -1,12 +1,12 @@
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
+import { Link, type Href } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
 import { ThemedText } from '@/components/ui/themed-text';
 import { distanceFromCanonical, formatUnitNumber, speedFromCanonical, weightFromCanonical, type RoutineExerciseTargetRow } from '@/db';
 import { DesignColors, SemanticColors } from '@/theme/tokens';
-import { getRoutineTotals, WEEKDAYS } from './routine.viewmodel';
+import { getRoutineTotals } from './routine.viewmodel';
 import { styles } from './routine-detail-screen.styles';
 import { useRoutineDetail } from './use-routine-detail';
 
@@ -14,17 +14,17 @@ export function RoutineDetailScreen({ routineId }: { routineId?: string }) {
   const { activeSessionId, error, isLoading, isStarting, reload, routine, startWorkout, units } = useRoutineDetail(routineId);
 
   if (isLoading) {
-    return <StateScreen loading message="Loading routine…" />;
+    return <StateScreen loading message="Loading workout…" />;
   }
 
   if (!routine) {
     return (
       <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.stateContent} style={styles.screen}>
         <View style={styles.stateIcon}><AppIcon color={SemanticColors.danger} name="warning" size={24} /></View>
-        <ThemedText style={styles.title}>{error ? 'Routine unavailable' : 'Routine not found'}</ThemedText>
-        <ThemedText style={styles.stateText}>{error ?? 'This routine no longer exists.'}</ThemedText>
+        <ThemedText style={styles.title}>{error ? 'Workout unavailable' : 'Workout not found'}</ThemedText>
+        <ThemedText style={styles.stateText}>{error ?? 'This workout no longer exists.'}</ThemedText>
         {error ? <Pressable onPress={reload} style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}><ThemedText style={styles.secondaryButtonText}>Try again</ThemedText></Pressable> : null}
-        <Link href="/routines" asChild><Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Back to routines</ThemedText></Pressable></Link>
+        <Link href={'/workouts' as Href} asChild><Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Back to workouts</ThemedText></Pressable></Link>
       </ScrollView>
     );
   }
@@ -38,12 +38,11 @@ export function RoutineDetailScreen({ routineId }: { routineId?: string }) {
         {hero ? <Image accessibilityLabel={`${routine.name} preview`} contentFit="cover" source={hero} style={styles.heroImage} transition={200} /> : <View style={styles.heroFallback}><AppIcon color={SemanticColors.action} name="strength" size={42} /></View>}
         <View style={styles.summary}>
           <View style={styles.titleRow}>
-            <View style={styles.titleCopy}><ThemedText style={styles.eyebrow}>{routine.active ? 'Active routine' : 'Inactive routine'}</ThemedText><ThemedText style={styles.title}>{routine.name}</ThemedText></View>
-            <Link href={{ pathname: '/routines/[id]/edit', params: { id: routine.routine_id } }} asChild><Pressable accessibilityLabel={`Edit ${routine.name}`} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}><AppIcon color={SemanticColors.actionSoft} name="edit" size={20} /></Pressable></Link>
+            <View style={styles.titleCopy}><ThemedText style={styles.eyebrow}>{routine.active ? 'Active workout' : 'Inactive workout'}</ThemedText><ThemedText style={styles.title}>{routine.name}</ThemedText></View>
+            <Link href={{ pathname: '/workouts/[id]/edit', params: { id: routine.routine_id } } as unknown as Href} asChild><Pressable accessibilityLabel={`Edit ${routine.name}`} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}><AppIcon color={SemanticColors.actionSoft} name="edit" size={20} /></Pressable></Link>
           </View>
           <ThemedText style={styles.description}>{routine.description ?? 'No description yet.'}</ThemedText>
-          <View style={styles.statsRow}><Stat label="Exercises" value={String(totals.exerciseCount)} /><Stat label="Target sets" value={String(totals.setCount)} /><Stat label="Training days" value={String(routine.schedules.length)} /></View>
-          <View style={styles.scheduleRow}>{routine.schedules.length ? routine.schedules.map((schedule) => <View key={schedule.routine_schedule_id} style={styles.scheduleChip}><ThemedText style={styles.scheduleText}>{WEEKDAYS[schedule.day_of_week]?.longLabel}</ThemedText></View>) : <ThemedText style={styles.flexibleText}>Flexible schedule</ThemedText>}</View>
+          <View style={styles.statsRow}><Stat label="Exercises" value={String(totals.exerciseCount)} /><Stat label="Target sets" value={String(totals.setCount)} /></View>
           {error ? <ThemedText style={styles.inlineError}>{error}</ThemedText> : null}
           <Pressable accessibilityLabel={activeSessionId ? 'Resume active workout' : `Start ${routine.name}`} accessibilityRole="button" disabled={isStarting || (!activeSessionId && !routine.active)} onPress={startWorkout} style={({ pressed }) => [styles.startButton, ((!activeSessionId && !routine.active) || isStarting) && styles.buttonDisabled, pressed && styles.pressed]}>
             {isStarting ? <ActivityIndicator color={DesignColors.onPrimaryContainer} /> : <AppIcon color={DesignColors.onPrimaryContainer} name="play" size={20} />}

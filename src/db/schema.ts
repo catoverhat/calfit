@@ -1,7 +1,7 @@
 import type { LocalDatabase } from './types';
 
 export const DATABASE_NAME = 'calfit.db';
-export const DATABASE_VERSION = 4;
+export const DATABASE_VERSION = 5;
 export const LOCAL_USER_ID = 'local-user';
 
 export const STARTER_CATEGORIES = [
@@ -24,6 +24,8 @@ export const EXPECTED_TABLES = [
   'workout_sessions',
   'workout_exercises',
   'workout_sets',
+  'workout_plan_entries',
+  'workout_plan_settings',
   'body_measurements',
 ] as const;
 
@@ -146,6 +148,26 @@ export const CREATE_TABLE_STATEMENTS = [
     FOREIGN KEY (workout_exercise_id_fk) REFERENCES workout_exercises(workout_exercise_id) ON DELETE CASCADE,
     UNIQUE (workout_exercise_id_fk, set_number)
   )`,
+  `CREATE TABLE IF NOT EXISTS workout_plan_entries (
+    workout_plan_entry_id TEXT PRIMARY KEY NOT NULL,
+    user_id_fk TEXT NOT NULL,
+    routine_id_fk TEXT NOT NULL,
+    planned_date TEXT NOT NULL,
+    workout_session_id_fk TEXT UNIQUE,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (user_id_fk) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (routine_id_fk) REFERENCES routines(routine_id) ON DELETE RESTRICT,
+    FOREIGN KEY (workout_session_id_fk) REFERENCES workout_sessions(workout_session_id) ON DELETE SET NULL,
+    UNIQUE (user_id_fk, planned_date)
+  )`,
+  `CREATE TABLE IF NOT EXISTS workout_plan_settings (
+    user_id_fk TEXT PRIMARY KEY NOT NULL,
+    legacy_import_handled INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (user_id_fk) REFERENCES users(user_id) ON DELETE CASCADE
+  )`,
   `CREATE TABLE IF NOT EXISTS body_measurements (
     body_measurement_id TEXT PRIMARY KEY NOT NULL,
     user_id_fk TEXT NOT NULL,
@@ -167,6 +189,8 @@ export const CREATE_INDEX_STATEMENTS = [
   'CREATE INDEX IF NOT EXISTS idx_workout_sessions_user ON workout_sessions(user_id_fk, started_at)',
   'CREATE INDEX IF NOT EXISTS idx_workout_exercises_session ON workout_exercises(workout_session_id_fk, order_index)',
   'CREATE INDEX IF NOT EXISTS idx_workout_sets_exercise ON workout_sets(workout_exercise_id_fk, set_number)',
+  'CREATE INDEX IF NOT EXISTS idx_workout_plan_entries_user_date ON workout_plan_entries(user_id_fk, planned_date)',
+  'CREATE INDEX IF NOT EXISTS idx_workout_plan_entries_routine ON workout_plan_entries(routine_id_fk, planned_date)',
   'CREATE INDEX IF NOT EXISTS idx_body_measurements_user ON body_measurements(user_id_fk, created_at)',
 ] as const;
 
@@ -215,6 +239,15 @@ export async function migrateDbIfNeeded(db: LocalDatabase): Promise<void> {
   if (currentVersion > 0 && currentVersion < 4) {
     await db.execAsync('ALTER TABLE workout_sets ADD COLUMN completed_at TEXT');
     await db.runAsync("UPDATE users SET distance_unit = 'km' WHERE distance_unit = 'm'");
+  }
+
+  if (currentVersion > 0 && currentVersion < 5) {
+    for (const tableName of ['workout_plan_entries', 'workout_plan_settings']) {
+      const statement = CREATE_TABLE_STATEMENTS.find((candidate) =>
+        candidate.includes(`CREATE TABLE IF NOT EXISTS ${tableName}`)
+      );
+      if (statement) await db.execAsync(statement);
+    }
   }
 
   for (const statement of CREATE_INDEX_STATEMENTS) {

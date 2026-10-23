@@ -195,7 +195,7 @@ export async function createRoutine(db: LocalDatabase, input: CreateRoutineInput
   });
 
   const routine = await getRoutineDetail(db, routineId);
-  if (!routine) throw new Error(`Routine was not created: ${routineId}`);
+  if (!routine) throw new Error(`Workout was not created: ${routineId}`);
   return routine;
 }
 
@@ -207,7 +207,7 @@ export async function updateRoutine(db: LocalDatabase, input: UpdateRoutineInput
       'SELECT * FROM routines WHERE routine_id = ?',
       input.routineId
     );
-    if (!existing) throw new Error('Routine could not be found.');
+    if (!existing) throw new Error('Workout could not be found.');
 
     await txn.runAsync(
       `UPDATE routines
@@ -351,14 +351,12 @@ export async function seedDemoRoutinesIfEmpty(
     }
   }
 
-  const activeRoutine = await getTodayRoutine(db, userId, new Date(now));
-  if (activeRoutine) return activeRoutine;
-
-  const [existingRoutine] = await getRoutineSummaries(db, userId);
+  const summaries = await getRoutineSummaries(db, userId);
+  const existingRoutine = summaries.find((routine) => routine.active === 1) ?? summaries[0];
   const routine = existingRoutine
     ? await getRoutineDetail(db, existingRoutine.routine_id)
     : null;
-  if (!routine) throw new Error('A starter routine could not be loaded.');
+  if (!routine) throw new Error('A starter workout could not be loaded.');
   return routine;
 }
 
@@ -439,7 +437,13 @@ async function runInExclusiveTransaction<T>(
   db: LocalDatabase,
   task: (txn: LocalDatabase) => Promise<T>
 ): Promise<T> {
-  return db.withExclusiveTransactionAsync ? db.withExclusiveTransactionAsync(task) : task(db);
+  if (!db.withExclusiveTransactionAsync) return task(db);
+
+  let result!: T;
+  await db.withExclusiveTransactionAsync(async (txn) => {
+    result = await task(txn);
+  });
+  return result;
 }
 
 function mapExerciseFromRoutineJoin(row: RoutineExerciseQueryRow): ExerciseRow {

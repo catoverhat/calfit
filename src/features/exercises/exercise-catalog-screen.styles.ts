@@ -12,6 +12,9 @@ export const styles = StyleSheet.create({
     paddingBottom: 116,
     paddingHorizontal: Spacing.three,
   },
+  nestedScrollContent: {
+    paddingBottom: Spacing.five,
+  },
   content: {
     gap: Spacing.three,
     maxWidth: Math.min(MaxContentWidth, 430),

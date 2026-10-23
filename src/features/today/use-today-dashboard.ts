@@ -5,7 +5,7 @@ import {
   getTodayDashboardSnapshot,
   initializeLocalDatabase,
   seedStarterRoutineIfEmpty,
-  startOrResumeWorkoutFromRoutine,
+  startOrResumeWorkoutFromPlanEntry,
 } from '@/db';
 import {
   createTodayDashboardData,
@@ -19,7 +19,11 @@ interface TodayDashboardState {
   isStarting: boolean;
 }
 
-export function useTodayDashboard(): TodayDashboardState & { startWorkout: () => Promise<void> } {
+export function useTodayDashboard(): TodayDashboardState & {
+  openPlan: () => void;
+  openWorkouts: () => void;
+  startWorkout: () => Promise<void>;
+} {
   const [state, setState] = useState<TodayDashboardState>({
     data: createTodayDashboardData(null),
     error: null,
@@ -67,14 +71,12 @@ export function useTodayDashboard(): TodayDashboardState & { startWorkout: () =>
       router.push(workoutHref(state.data.activeSessionId));
       return;
     }
-    if (!state.data.routine) return;
+    if (!state.data.routine || state.data.routine.state === 'completed' || state.data.routine.state === 'unavailable') return;
 
     setState((current) => ({ ...current, error: null, isStarting: true }));
     try {
       const db = await initializeLocalDatabase();
-      const result = await startOrResumeWorkoutFromRoutine(db, {
-        routineId: state.data.routine.id,
-      });
+      const result = await startOrResumeWorkoutFromPlanEntry(db, state.data.routine.planEntryId);
       router.push(workoutHref(result.session.workout_session_id));
     } catch (error) {
       setState((current) => ({
@@ -85,7 +87,16 @@ export function useTodayDashboard(): TodayDashboardState & { startWorkout: () =>
     }
   }, [state.data.activeSessionId, state.data.routine, state.isStarting]);
 
-  return { ...state, startWorkout };
+  const openPlan = useCallback(() => {
+    const now = new Date();
+    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+      now.getDate()
+    ).padStart(2, '0')}`;
+    router.push({ pathname: '/plan', params: { date } } as unknown as Href);
+  }, []);
+  const openWorkouts = useCallback(() => router.push('/workouts' as Href), []);
+
+  return { ...state, openPlan, openWorkouts, startWorkout };
 }
 
 function workoutHref(id: string): Href {

@@ -37,4 +37,27 @@ describe('database schema migrations', () => {
     expect(db.tables.get('workout_sets')?.[0].completed_at).toBeNull();
   });
 
+  it('upgrades v4 with date-based planning tables without changing existing data', async () => {
+    const db = new MemoryDb();
+    db.userVersion = 4;
+    const routine = { routine_id: 'workout-1', name: 'Existing workout' };
+    const exercise = { exercise_id: 'exercise-1', name: 'Existing exercise' };
+    const target = { routine_exercise_target_id: 'target-1', target_reps: 8 };
+    const session = { workout_session_id: 'session-1', routine_id_fk: 'workout-1' };
+    db.tables.set('routines', [routine]);
+    db.tables.set('exercises', [exercise]);
+    db.tables.set('routine_exercise_targets', [target]);
+    db.tables.set('workout_sessions', [session]);
+
+    await migrateDbIfNeeded(db);
+
+    expect(db.userVersion).toBe(5);
+    expect(db.createdTables.has('workout_plan_entries')).toBe(true);
+    expect(db.createdTables.has('workout_plan_settings')).toBe(true);
+    expect(db.tables.get('routines')).toEqual([routine]);
+    expect(db.tables.get('exercises')).toEqual([exercise]);
+    expect(db.tables.get('routine_exercise_targets')).toEqual([target]);
+    expect(db.tables.get('workout_sessions')).toEqual([session]);
+  });
+
 });

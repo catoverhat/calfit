@@ -1,5 +1,5 @@
-import { ExerciseEditorScreen } from '@/features/exercises/exercise-editor-screen';
+import { Redirect } from 'expo-router';
 
 export default function CreateExerciseRoute() {
-  return <ExerciseEditorScreen mode="create" />;
+  return <Redirect href="/workouts/exercises/create" />;
 }

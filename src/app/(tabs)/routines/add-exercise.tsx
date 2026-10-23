@@ -1,5 +1,5 @@
-import { AddExerciseScreen } from '@/features/routines/add-exercise-screen';
+import { Redirect } from 'expo-router';
 
 export default function AddExerciseRoute() {
-  return <AddExerciseScreen />;
+  return <Redirect href="/workouts/add-exercise" />;
 }

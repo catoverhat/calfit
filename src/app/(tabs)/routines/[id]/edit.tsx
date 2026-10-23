@@ -1,9 +1,7 @@
-import { useLocalSearchParams } from 'expo-router';
-
-import { RoutineEditorScreen } from '@/features/routines/routine-editor-screen';
+import { Redirect, type Href, useLocalSearchParams } from 'expo-router';
 
 export default function EditRoutineRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  return <RoutineEditorScreen mode="edit" routineId={id} />;
+  return <Redirect href={{ pathname: '/workouts/[id]/edit', params: { id } } as unknown as Href} />;
 }

@@ -1,5 +1,5 @@
-import { RoutineEditorScreen } from '@/features/routines/routine-editor-screen';
+import { Redirect } from 'expo-router';
 
 export default function CreateRoutineRoute() {
-  return <RoutineEditorScreen mode="create" />;
+  return <Redirect href="/workouts/create" />;
 }

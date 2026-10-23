@@ -9,11 +9,13 @@ import {
 
 export interface TodayDashboardRoutine {
   id: string;
+  planEntryId: string;
   title: string;
   focus: string;
   scheduledTime: string;
   exercises: number;
   duration: string;
+  state: 'assigned' | 'completed' | 'in_progress' | 'unavailable';
 }
 
 export interface TodayDashboardData {
@@ -38,7 +40,7 @@ export interface TodayDashboardData {
 
 export function createTodayDashboardData(snapshot: DashboardSnapshot | null, date = new Date()): TodayDashboardData {
   const user = snapshot?.user ?? createFallbackUser();
-  const routine = snapshot?.routine ?? null;
+  const planEntry = snapshot?.planEntry ?? null;
   const progress = createProgressData(
     user,
     snapshot?.latestBodyMeasurement ?? null,
@@ -47,7 +49,11 @@ export function createTodayDashboardData(snapshot: DashboardSnapshot | null, dat
   );
 
   return {
-    actionLabel: snapshot?.activeSession ? 'Resume Workout' : 'Start Workout',
+    actionLabel: snapshot?.activeSession
+      ? 'Resume Workout'
+      : planEntry?.session?.status === 'completed'
+        ? 'Workout Complete'
+        : 'Start Workout',
     activeSessionId: snapshot?.activeSession?.workout_session_id ?? null,
     avatarUrl: null,
     dateLabel: formatDashboardDate(date),
@@ -56,7 +62,7 @@ export function createTodayDashboardData(snapshot: DashboardSnapshot | null, dat
     weekDays: createWeekDays(date),
     selectedDate: formatDayNumber(date),
     syncLabel: 'Saved locally',
-    routine: routine ? mapRoutineToDashboardRoutine(routine) : null,
+    routine: planEntry ? mapPlanEntryToDashboardRoutine(planEntry) : null,
     progress,
     tip: createDashboardTip(snapshot),
   };
@@ -69,7 +75,7 @@ function createGreeting(date: Date): string {
   return 'Good evening';
 }
 
-export function mapRoutineToDashboardRoutine(routine: RoutineDetail): TodayDashboardRoutine {
+export function mapRoutineToDashboardRoutine(routine: RoutineDetail): Omit<TodayDashboardRoutine, 'planEntryId' | 'state'> {
   return {
     id: routine.routine_id,
     title: routine.name,
@@ -78,6 +84,20 @@ export function mapRoutineToDashboardRoutine(routine: RoutineDetail): TodayDashb
     exercises: routine.exercises.length,
     duration: estimateRoutineDuration(routine),
   };
+}
+
+function mapPlanEntryToDashboardRoutine(
+  entry: NonNullable<DashboardSnapshot['planEntry']>
+): TodayDashboardRoutine {
+  const routine = mapRoutineToDashboardRoutine(entry.routine);
+  const state = entry.routine.active !== 1
+    ? 'unavailable'
+    : entry.session?.status === 'completed'
+      ? 'completed'
+      : entry.session?.status === 'in_progress'
+        ? 'in_progress'
+        : 'assigned';
+  return { ...routine, planEntryId: entry.workout_plan_entry_id, state };
 }
 
 function createWeekDays(date: Date): { date: string; day: string }[] {
@@ -142,8 +162,8 @@ function createWeightDeltaLabel(
 }
 
 function createDashboardTip(snapshot: DashboardSnapshot | null): string {
-  if (!snapshot?.routine) {
-    return 'Create a local routine to make Today actionable.';
+  if (!snapshot?.planEntry) {
+    return 'Recovery is part of the plan. Assign a workout whenever you are ready.';
   }
 
   if (!snapshot.latestBodyMeasurement) {
@@ -151,7 +171,7 @@ function createDashboardTip(snapshot: DashboardSnapshot | null): string {
   }
 
   if (snapshot.workoutStreak === 0) {
-    return `Start ${snapshot.routine.name} to begin your local streak.`;
+    return `Start ${snapshot.planEntry.routine.name} to begin your local streak.`;
   }
 
   return `Local streak active: ${snapshot.workoutStreak} ${snapshot.workoutStreak === 1 ? 'day' : 'days'}.`;
@@ -193,6 +213,6 @@ function estimateRoutineDuration(routine: RoutineDetail): string {
 function buildFocusLabel(routine: RoutineDetail): string {
   const exerciseNames = routine.exercises.map((exercise) => exercise.exercise.name).slice(0, 3);
 
-  return exerciseNames.length > 0 ? exerciseNames.join(', ') : 'Local routine';
+  return exerciseNames.length > 0 ? exerciseNames.join(', ') : 'Local workout';
 }
 

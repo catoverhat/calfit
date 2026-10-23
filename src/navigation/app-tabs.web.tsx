@@ -1,4 +1,5 @@
 import { Image, type ImageSource } from 'expo-image';
+import type { Href } from 'expo-router';
 import {
   TabList,
   TabSlot,
@@ -17,8 +18,8 @@ const WEB_TAB_BAR_SPACE = 92;
 
 const tabIcons = {
   today: require('@/assets/icons/tabs/today.svg'),
-  routines: require('@/assets/icons/tabs/routines.svg'),
-  exercises: require('@/assets/icons/tabs/exercises.svg'),
+  plan: require('@/assets/icons/tabs/routines.svg'),
+  workouts: require('@/assets/icons/tabs/exercises.svg'),
   progress: require('@/assets/icons/tabs/progress.svg'),
   profile: require('@/assets/icons/tabs/profile.svg'),
 } satisfies Record<string, ImageSource>;
@@ -39,11 +40,11 @@ export default function AppTabs() {
           <TabTrigger name="today" href="/(tabs)" asChild>
             <TabButton icon="today" label="Today" />
           </TabTrigger>
-          <TabTrigger name="routines" href="/routines" asChild>
-            <TabButton icon="routines" label="Routines" />
+          <TabTrigger name="plan" href={'/plan' as Href} asChild>
+            <TabButton icon="plan" label="Plan" />
           </TabTrigger>
-          <TabTrigger name="exercises" href="/exercises" asChild>
-            <TabButton icon="exercises" label="Exercises" />
+          <TabTrigger name="workouts" href={'/workouts' as Href} asChild>
+            <TabButton icon="workouts" label="Workouts" />
           </TabTrigger>
           <TabTrigger name="progress" href="/progress" asChild>
             <TabButton icon="progress" label="Progress" />

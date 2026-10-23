@@ -64,27 +64,34 @@ export async function startWorkoutFromRoutine(
   db: LocalDatabase,
   input: StartWorkoutFromRoutineInput
 ): Promise<WorkoutSessionRow> {
+  return runInExclusiveTransaction(db, (txn) => createWorkoutSessionFromRoutine(txn, input));
+}
+
+/** Creates the session snapshot on the supplied database/transaction. */
+export async function createWorkoutSessionFromRoutine(
+  db: LocalDatabase,
+  input: StartWorkoutFromRoutineInput
+): Promise<WorkoutSessionRow> {
   const workoutSessionId = input.id ?? createLocalId('workout_session');
   const now = input.now ?? new Date().toISOString();
   const startedAt = input.startedAt ?? now;
   const userId = input.userId ?? LOCAL_USER_ID;
   const status = input.status ?? 'in_progress';
 
-  await runInExclusiveTransaction(db, async (txn) => {
-    const routineExercises = await txn.getAllAsync<RoutineExerciseRow>(
-      `SELECT *
+  const routineExercises = await db.getAllAsync<RoutineExerciseRow>(
+    `SELECT *
       FROM routine_exercises
       WHERE routine_id_fk = ?
       ORDER BY order_index ASC`,
-      input.routineId
-    );
+    input.routineId
+  );
 
-    if (routineExercises.length === 0) {
-      throw new Error(`Routine has no exercises: ${input.routineId}`);
-    }
+  if (routineExercises.length === 0) {
+    throw new Error(`Workout has no exercises: ${input.routineId}`);
+  }
 
-    await txn.runAsync(
-      `INSERT INTO workout_sessions (
+  await db.runAsync(
+    `INSERT INTO workout_sessions (
         workout_session_id,
         user_id_fk,
         routine_id_fk,
@@ -101,14 +108,14 @@ export async function startWorkoutFromRoutine(
       status === 'in_progress' ? startedAt : null,
       null,
       status,
-      now
-    );
+    now
+  );
 
-    for (const routineExercise of routineExercises) {
-      const workoutExerciseId = createLocalId('workout_exercise');
+  for (const routineExercise of routineExercises) {
+    const workoutExerciseId = createLocalId('workout_exercise');
 
-      await txn.runAsync(
-        `INSERT INTO workout_exercises (
+    await db.runAsync(
+      `INSERT INTO workout_exercises (
           workout_exercise_id,
           workout_session_id_fk,
           exercise_id_fk,
@@ -119,20 +126,20 @@ export async function startWorkoutFromRoutine(
         workoutSessionId,
         routineExercise.exercise_id_fk,
         routineExercise.order_index,
-        now
-      );
+      now
+    );
 
-      const targets = await txn.getAllAsync<RoutineExerciseTargetRow>(
-        `SELECT *
+    const targets = await db.getAllAsync<RoutineExerciseTargetRow>(
+      `SELECT *
         FROM routine_exercise_targets
         WHERE routine_exercise_id_fk = ?
         ORDER BY set_number ASC`,
-        routineExercise.routine_exercise_id
-      );
+      routineExercise.routine_exercise_id
+    );
 
-      for (const target of targets) {
-        await txn.runAsync(
-          `INSERT INTO workout_sets (
+    for (const target of targets) {
+      await db.runAsync(
+        `INSERT INTO workout_sets (
             workout_set_id,
             workout_exercise_id_fk,
             set_number,
@@ -157,11 +164,10 @@ export async function startWorkoutFromRoutine(
           target.rest_time_seconds,
           0,
           null,
-          now
-        );
-      }
+        now
+      );
     }
-  });
+  }
 
   const session = await db.getFirstAsync<WorkoutSessionRow>(
     'SELECT * FROM workout_sessions WHERE workout_session_id = ?',
@@ -354,11 +360,13 @@ async function runInExclusiveTransaction<T>(
   db: LocalDatabase,
   task: (txn: LocalDatabase) => Promise<T>
 ): Promise<T> {
-  if (db.withExclusiveTransactionAsync) {
-    return db.withExclusiveTransactionAsync(task);
-  }
+  if (!db.withExclusiveTransactionAsync) return task(db);
 
-  return task(db);
+  let result!: T;
+  await db.withExclusiveTransactionAsync(async (txn) => {
+    result = await task(txn);
+  });
+  return result;
 }
 
 function coalesceSql(nextValue: SqlValue | undefined, fallback: SqlValue): SqlValue {

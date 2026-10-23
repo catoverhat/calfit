@@ -13,6 +13,8 @@ const PRIMARY_KEYS: Record<string, string> = {
   workout_sessions: 'workout_session_id',
   workout_exercises: 'workout_exercise_id',
   workout_sets: 'workout_set_id',
+  workout_plan_entries: 'workout_plan_entry_id',
+  workout_plan_settings: 'user_id_fk',
   body_measurements: 'body_measurement_id',
 };
 
@@ -127,6 +129,45 @@ export class MemoryDb implements LocalDatabase {
 
     if (normalized === 'select * from workout_sessions where workout_session_id = ?') {
       return this.selectBy('workout_sessions', 'workout_session_id', params[0]) as T[];
+    }
+
+    if (
+      normalized ===
+      'select * from workout_plan_entries where user_id_fk = ? and planned_date between ? and ? order by planned_date asc'
+    ) {
+      return this.selectBy('workout_plan_entries', 'user_id_fk', params[0])
+        .filter((row) => String(row.planned_date) >= String(params[1]) && String(row.planned_date) <= String(params[2]))
+        .sort((left, right) => String(left.planned_date).localeCompare(String(right.planned_date))) as T[];
+    }
+
+    if (
+      normalized ===
+      'select * from workout_plan_entries where user_id_fk = ? and planned_date = ?'
+    ) {
+      return this.selectBy('workout_plan_entries', 'user_id_fk', params[0])
+        .filter((row) => row.planned_date === params[1]) as T[];
+    }
+
+    if (
+      normalized ===
+      'select * from workout_plan_entries where user_id_fk = ? and planned_date >= ? and routine_id_fk = ? order by planned_date asc'
+    ) {
+      return this.selectBy('workout_plan_entries', 'user_id_fk', params[0])
+        .filter(
+          (row) =>
+            String(row.planned_date) >= String(params[1]) && row.routine_id_fk === params[2]
+        )
+        .sort((left, right) =>
+          String(left.planned_date).localeCompare(String(right.planned_date))
+        ) as T[];
+    }
+
+    if (normalized === 'select * from workout_plan_entries where workout_plan_entry_id = ?') {
+      return this.selectBy('workout_plan_entries', 'workout_plan_entry_id', params[0]) as T[];
+    }
+
+    if (normalized === 'select * from workout_plan_settings where user_id_fk = ?') {
+      return this.selectBy('workout_plan_settings', 'user_id_fk', params[0]) as T[];
     }
 
     if (
@@ -314,11 +355,62 @@ export class MemoryDb implements LocalDatabase {
       });
     }
 
+    if (normalized.startsWith('update workout_plan_settings')) {
+      return this.updateById('workout_plan_settings', 'user_id_fk', params[1], {
+        legacy_import_handled: 1,
+        updated_at: params[0],
+      });
+    }
+
+    if (normalized.startsWith('update workout_plan_entries set routine_id_fk')) {
+      return this.updateById('workout_plan_entries', 'workout_plan_entry_id', params[2], {
+        routine_id_fk: params[0],
+        updated_at: params[1],
+      });
+    }
+
+    if (normalized.startsWith('update workout_plan_entries set planned_date')) {
+      return this.updateById('workout_plan_entries', 'workout_plan_entry_id', params[2], {
+        planned_date: params[0],
+        updated_at: params[1],
+      });
+    }
+
+    if (normalized.startsWith('update workout_plan_entries set workout_session_id_fk')) {
+      return this.updateById('workout_plan_entries', 'workout_plan_entry_id', params[2], {
+        workout_session_id_fk: params[0],
+        updated_at: params[1],
+      });
+    }
+
+    if (normalized === 'delete from workout_plan_entries where workout_plan_entry_id = ?') {
+      return this.deleteWhere('workout_plan_entries', (row) => row.workout_plan_entry_id === params[0]);
+    }
+
+    if (normalized === 'delete from workout_plan_entries where user_id_fk = ? and planned_date = ?') {
+      return this.deleteWhere(
+        'workout_plan_entries',
+        (row) => row.user_id_fk === params[0] && row.planned_date === params[1]
+      );
+    }
+
     throw new Error(`Unhandled runAsync SQL: ${source}`);
   }
 
-  async withExclusiveTransactionAsync<T>(task: (txn: LocalDatabase) => Promise<T>): Promise<T> {
-    return task(this);
+  async withExclusiveTransactionAsync(task: (txn: LocalDatabase) => Promise<void>): Promise<void> {
+    const snapshot = new Map(
+      [...this.tables.entries()].map(([table, rows]) => [
+        table,
+        rows.map((row) => ({ ...row })),
+      ])
+    );
+    try {
+      await task(this);
+    } catch (error) {
+      this.tables.clear();
+      snapshot.forEach((rows, table) => this.tables.set(table, rows));
+      throw error;
+    }
   }
 
   private ensureTable(tableName: string): TableRow[] {
@@ -351,6 +443,16 @@ export class MemoryDb implements LocalDatabase {
       if (exists) {
         return { changes: 0 };
       }
+    }
+
+
+    if (
+      tableName === 'workout_plan_entries' &&
+      rows.some((existingRow) =>
+        existingRow.user_id_fk === row.user_id_fk && existingRow.planned_date === row.planned_date
+      )
+    ) {
+      throw new Error('UNIQUE constraint failed: workout_plan_entries.user_id_fk, workout_plan_entries.planned_date');
     }
 
     rows.push(row);

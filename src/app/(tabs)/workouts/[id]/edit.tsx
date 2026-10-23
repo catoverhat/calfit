@@ -1,0 +1,8 @@
+import { useLocalSearchParams } from 'expo-router';
+
+import { RoutineEditorScreen } from '@/features/routines/routine-editor-screen';
+
+export default function EditWorkoutRoute() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  return <RoutineEditorScreen mode="edit" routineId={id} />;
+}

@@ -23,20 +23,23 @@ src/
 │   └── (tabs)/
 │       ├── _layout.tsx
 │       ├── index.tsx
-│       ├── exercises/
+│       ├── plan/
 │       │   ├── _layout.tsx
-│       │   ├── index.tsx
-│       │   ├── create.tsx
-│       │   └── [id]/
-│       │       └── edit.tsx
-│       ├── routines/
+│       │   └── index.tsx
+│       ├── workouts/
 │       │   ├── _layout.tsx
 │       │   ├── index.tsx
 │       │   ├── create.tsx
 │       │   ├── add-exercise.tsx
-│       │   └── [id]/
+│       │   ├── [id]/
+│       │   │   ├── index.tsx
+│       │   │   └── edit.tsx
+│       │   └── exercises/
+│       │       ├── _layout.tsx
 │       │       ├── index.tsx
-│       │       └── edit.tsx
+│       │       ├── create.tsx
+│       │       └── [id]/
+│       │           └── edit.tsx
 │       ├── progress/
 │       │   ├── _layout.tsx
 │       │   ├── index.tsx
@@ -50,8 +53,9 @@ src/
 ├── features/                   # Product capabilities and feature-owned code
 │   ├── auth/
 │   ├── today/
-│   ├── exercises/
-│   ├── routines/
+│   ├── plan/                   # ISO-week planner UI, calendar rules, and view models
+│   ├── exercises/              # Exercise management owned by the Workouts product area
+│   ├── routines/               # Workout library/builder; legacy internal persistence naming
 │   ├── workout-session/
 │   ├── progress/
 │   └── profile/
@@ -83,6 +87,8 @@ src/
 │   │   ├── exercises.test.ts
 │   │   ├── routines.ts
 │   │   ├── routines.test.ts
+│   │   ├── workout-plan.ts
+│   │   ├── workout-plan.test.ts
 │   │   ├── users.ts
 │   │   ├── users.test.ts
 │   │   ├── workout-sessions.ts
@@ -108,6 +114,12 @@ src/
 Configuration files such as `app.json`, `package.json`, `tsconfig.json`, and `eslint.config.js` remain at the repository root. Expo assets remain in the root `assets` directory.
 
 The tree describes active ownership boundaries, not a requirement to create every possible directory. Do not add empty folders merely to match the diagram.
+
+### Plan and Workouts ownership
+
+The five top-level destinations are Today, Plan, Workouts, Progress, and Profile on both native and web. `src/features/plan` owns date-based ISO-week planning. The Workouts product area owns reusable workout definitions and the nested exercise catalog. Its implementation remains in `src/features/routines` and `src/features/exercises` so the existing SQLite `routines` identifiers and established feature modules remain compatible; no user-facing screen should call a workout a routine.
+
+Date assignments belong to `db/repositories/workout-plan.ts`. Legacy `routine_schedules` data is read only by the one-time planner import and must not be used as Today's scheduling source or exposed in the workout editor.
 
 ## Folder Responsibilities
 

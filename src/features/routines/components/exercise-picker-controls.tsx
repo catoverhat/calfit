@@ -75,7 +75,9 @@ export function ExercisePickerFooter({
       <Pressable
         accessibilityLabel="Create Custom Exercise"
         accessibilityRole="button"
-        onPress={() => router.push('/exercises/create')}
+        onPress={() =>
+          router.push({ pathname: '/workouts/exercises/create', params: { returnTo: 'builder' } })
+        }
         style={({ pressed }) => [styles.customButton, pressed && styles.pressed]}>
         <View style={styles.customIcon}>
           <AppIcon color={SemanticColors.actionSoft} name="add" size={16} />

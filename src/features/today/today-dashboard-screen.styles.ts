@@ -341,6 +341,24 @@ export const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 22,
   },
+  restActions: {
+    gap: Spacing.two,
+  },
+  secondaryButton: {
+    alignItems: 'center',
+    borderColor: Palette.primary[500],
+    borderRadius: 8,
+    borderWidth: 1,
+    justifyContent: 'center',
+    minHeight: 48,
+    paddingHorizontal: Spacing.three,
+  },
+  secondaryButtonText: {
+    color: Palette.primary[300],
+    fontFamily: Fonts.bodyBold,
+    fontSize: 14,
+    lineHeight: 20,
+  },
   section: {
     gap: Spacing.two,
   },

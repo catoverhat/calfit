@@ -54,6 +54,23 @@ export const styles = StyleSheet.create({
     width: 52,
     justifyContent: "center",
   },
+  manageButton: {
+    alignItems: "center",
+    backgroundColor: DesignColors.surfaceContainerLow,
+    borderColor: SemanticColors.border,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: Spacing.two,
+    minHeight: 48,
+    paddingHorizontal: Spacing.three,
+  },
+  manageButtonText: {
+    ...Typography.sm,
+    color: SemanticColors.actionSoft,
+    flex: 1,
+    fontFamily: Fonts.bodySemiBold,
+  },
   list: { gap: Spacing.three },
   card: {
     backgroundColor: ComponentTokens.card.background,

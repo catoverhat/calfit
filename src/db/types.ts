@@ -12,7 +12,7 @@ export interface LocalDatabase {
   getAllAsync<T>(source: string, ...params: SqlValue[]): Promise<T[]>;
   getFirstAsync<T>(source: string, ...params: SqlValue[]): Promise<T | null>;
   runAsync(source: string, ...params: SqlValue[]): Promise<SqlRunResult>;
-  withExclusiveTransactionAsync?<T>(task: (txn: LocalDatabase) => Promise<T>): Promise<T>;
+  withExclusiveTransactionAsync?(task: (txn: LocalDatabase) => Promise<void>): Promise<void>;
 }
 
 export type WorkoutSessionStatus = 'scheduled' | 'in_progress' | 'completed' | 'skipped';
@@ -127,6 +127,23 @@ export interface WorkoutSetRow {
   created_at: string;
 }
 
+export interface WorkoutPlanEntryRow {
+  workout_plan_entry_id: string;
+  user_id_fk: string;
+  routine_id_fk: string;
+  planned_date: string;
+  workout_session_id_fk: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkoutPlanSettingsRow {
+  user_id_fk: string;
+  legacy_import_handled: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface BodyMeasurementRow {
   body_measurement_id: string;
   user_id_fk: string;
@@ -161,10 +178,18 @@ export interface WorkoutSessionDetail extends WorkoutSessionRow {
   exercises: WorkoutExerciseWithSets[];
 }
 
+export interface WorkoutPlanEntryDetail extends WorkoutPlanEntryRow {
+  routine: RoutineDetail;
+  session: WorkoutSessionRow | null;
+}
+
+/** User-plan domain name; persisted workout identifiers still reference `routines`. */
+export type WorkoutPlanEntry = WorkoutPlanEntryDetail;
+
 export interface DashboardSnapshot {
   activeSession: WorkoutSessionRow | null;
   user: UserRow;
-  routine: RoutineDetail | null;
+  planEntry: WorkoutPlanEntryDetail | null;
   latestBodyMeasurement: BodyMeasurementRow | null;
   previousBodyMeasurement: BodyMeasurementRow | null;
   workoutStreak: number;

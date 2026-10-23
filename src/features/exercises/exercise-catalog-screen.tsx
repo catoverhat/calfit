@@ -1,7 +1,7 @@
 import { styles } from './exercise-catalog-screen.styles';
 import { Link } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Header } from '@/components/layout/header';
 import { TabScreen } from '@/components/layout/tab-screen';
@@ -15,7 +15,7 @@ import {
   StatusCard,
 } from './components/exercise-catalog-sections';
 
-export function ExerciseCatalogScreen() {
+export function ExerciseCatalogScreen({ nested = false }: { nested?: boolean }) {
   const { data, error, isLoading } = useExerciseCatalog();
   const [query, setQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('All Categories');
@@ -25,14 +25,13 @@ export function ExerciseCatalogScreen() {
     return filterExerciseCatalogItems(data.items, activeFilter, query);
   }, [activeFilter, data.items, query]);
 
-  return (
-    <TabScreen contentContainerStyle={styles.scrollContent} style={styles.screen}>
+  const content = (
       <View style={styles.content}>
-        <Header
+        {!nested ? <Header
           avatarUrl={data.avatarUrl}
           profileName={data.profileName}
           showAction={false}
-        />
+        /> : null}
 
         <ExerciseCatalogToolbar
           filters={data.filters}
@@ -56,7 +55,7 @@ export function ExerciseCatalogScreen() {
             </View>
           )}
 
-          <Link href="/(tabs)/exercises/create" push asChild>
+          <Link href="/workouts/exercises/create" push asChild>
             <Pressable accessibilityLabel="Add Custom Exercise" accessibilityRole="button">
               {({ pressed }) => (
                 <View style={[styles.addCustomCard, pressed && styles.pressed]}>
@@ -70,6 +69,22 @@ export function ExerciseCatalogScreen() {
           </Link>
         </View>
       </View>
+  );
+
+  if (nested) {
+    return (
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={[styles.scrollContent, styles.nestedScrollContent]}
+        style={styles.screen}>
+        {content}
+      </ScrollView>
+    );
+  }
+
+  return (
+    <TabScreen contentContainerStyle={styles.scrollContent} style={styles.screen}>
+      {content}
     </TabScreen>
   );
 }

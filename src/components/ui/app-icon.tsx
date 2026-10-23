@@ -56,7 +56,15 @@ export type AppIconName =
   | "shield"
   | "trash"
   | "arrowUp"
-  | "arrowDown";
+  | "arrowDown"
+  | "chevronLeft"
+  | "chevronRight"
+  | "calendar"
+  | "copy"
+  | "undo"
+  | "close"
+  | "move"
+  | "swap";
 
 const icons: Record<AppIconName, LucideIconName> = {
   bell: "bell",
@@ -112,6 +120,14 @@ const icons: Record<AppIconName, LucideIconName> = {
   trash: "trash-2",
   arrowUp: "arrow-up",
   arrowDown: "arrow-down",
+  chevronLeft: "chevron-left",
+  chevronRight: "chevron-right",
+  calendar: "calendar-days",
+  copy: "copy",
+  undo: "undo-2",
+  close: "x",
+  move: "move-right",
+  swap: "arrow-left-right",
 };
 
 type AppIconProps = {

@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { Link } from "expo-router";
+import { Link, type Href } from "expo-router";
 import { Pressable, View } from "react-native";
 
 import { AppIcon } from "@/components/ui/app-icon";
@@ -60,25 +60,6 @@ export function RoutineCard({ routine }: { routine: RoutineSummaryViewModel }) {
         />
       </View>
 
-      <View style={styles.scheduleBlock}>
-        <ThemedText style={styles.metaLabel}>Weekly schedule</ThemedText>
-        <View style={styles.scheduleRow}>
-          {routine.schedule.length ? (
-            routine.schedule.map((day) => (
-              <View
-                accessibilityLabel={day.longLabel}
-                key={day.day}
-                style={styles.scheduleChip}
-              >
-                <ThemedText style={styles.scheduleText}>{day.label}</ThemedText>
-              </View>
-            ))
-          ) : (
-            <ThemedText style={styles.unscheduledText}>Flexible</ThemedText>
-          )}
-        </View>
-      </View>
-
       <View style={styles.cardFooter}>
         <ThemedText style={styles.lastCompleted}>
           {routine.lastCompleted}
@@ -86,9 +67,9 @@ export function RoutineCard({ routine }: { routine: RoutineSummaryViewModel }) {
         <View style={styles.actionRow}>
           <Link
             href={{
-              pathname: "/routines/[id]/edit",
+              pathname: "/workouts/[id]/edit",
               params: { id: routine.id },
-            }}
+            } as unknown as Href}
             asChild
           >
             <Pressable
@@ -115,7 +96,7 @@ export function RoutineCard({ routine }: { routine: RoutineSummaryViewModel }) {
             </Pressable>
           </Link>
           <Link
-            href={{ pathname: "/routines/[id]", params: { id: routine.id } }}
+            href={{ pathname: "/workouts/[id]", params: { id: routine.id } } as unknown as Href}
             asChild
           >
             <Pressable

@@ -50,6 +50,8 @@ export function TodayRoutineCard({
   error,
   isLoading,
   isStarting,
+  onBrowseWorkouts,
+  onOpenPlan,
   onStart,
   routine,
 }: {
@@ -58,10 +60,12 @@ export function TodayRoutineCard({
   error: string | null;
   isLoading: boolean;
   isStarting: boolean;
+  onBrowseWorkouts: () => void;
+  onOpenPlan: () => void;
   onStart: () => void;
   routine: TodayDashboardRoutine | null;
 }) {
-  const startDisabled = isLoading || isStarting || !canStart;
+  const startDisabled = isLoading || isStarting || !canStart || routine?.state === 'completed' || routine?.state === 'unavailable';
 
   return (
     <View style={styles.workoutCard}>
@@ -72,7 +76,7 @@ export function TodayRoutineCard({
           <View style={styles.schedulePill}>
             <View style={styles.scheduleDot} />
             <Text style={styles.scheduleText}>
-              Scheduled for {routine.scheduledTime}
+              {routine.state === 'completed' ? 'Completed today' : routine.state === 'in_progress' ? 'Workout in progress' : routine.state === 'unavailable' ? 'Workout unavailable' : 'Planned for today'}
             </Text>
           </View>
           <View style={styles.cardTitleRow}>
@@ -97,35 +101,48 @@ export function TodayRoutineCard({
         <StatusCard
           body={
             isLoading
-              ? "Preparing your local routine data."
+              ? "Preparing your local plan."
               : canStart
                 ? "Your active workout is ready to continue."
-                : "Create a routine to see it here."
+                : "No workout is assigned today. Recover or plan one when it fits your week."
           }
-          title={isLoading ? "Loading local routine" : canStart ? "Workout in progress" : "No routine ready"}
+          title={isLoading ? "Loading today’s plan" : canStart ? "Workout in progress" : "Planned Rest Day"}
         />
       )}
-      <Pressable
-        accessibilityLabel={isStarting ? "Opening workout" : actionLabel}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: startDisabled }}
-        disabled={startDisabled}
-        onPress={onStart}
-        style={({ pressed }) => [
-          styles.startButton,
-          startDisabled && styles.startButtonDisabled,
-          pressed && !startDisabled && styles.startButtonPressed,
-        ]}
-      >
-        <Text style={styles.playIcon}>{">"}</Text>
-        <Text style={styles.startButtonText}>
-          {isStarting
-            ? "Starting..."
-            : isLoading
-              ? "Loading..."
-              : actionLabel}
-        </Text>
-      </Pressable>
+      {routine || canStart ? <View style={styles.restActions}><Pressable
+          accessibilityLabel={isStarting ? "Opening workout" : actionLabel}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: startDisabled }}
+          disabled={startDisabled}
+          onPress={onStart}
+          style={({ pressed }) => [
+            styles.startButton,
+            startDisabled && styles.startButtonDisabled,
+            pressed && !startDisabled && styles.startButtonPressed,
+          ]}
+        >
+          <Text style={styles.playIcon}>{">"}</Text>
+          <Text style={styles.startButtonText}>
+            {isStarting
+              ? "Starting..."
+              : isLoading
+                ? "Loading..."
+                : actionLabel}
+          </Text>
+        </Pressable>
+        {routine ? <Pressable accessibilityLabel="Edit today's plan" accessibilityRole="button" onPress={onOpenPlan} style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}>
+          <Text style={styles.secondaryButtonText}>Edit Today&apos;s Plan</Text>
+        </Pressable> : null}
+      </View> : !isLoading && !error ? (
+        <View style={styles.restActions}>
+          <Pressable accessibilityLabel="Plan this week" accessibilityRole="button" onPress={onOpenPlan} style={({ pressed }) => [styles.startButton, pressed && styles.startButtonPressed]}>
+            <Text style={styles.startButtonText}>Plan This Week</Text>
+          </Pressable>
+          <Pressable accessibilityLabel="Browse workouts" accessibilityRole="button" onPress={onBrowseWorkouts} style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}>
+            <Text style={styles.secondaryButtonText}>Browse Workouts</Text>
+          </Pressable>
+        </View>
+      ) : null}
     </View>
   );
 }

@@ -1,5 +1,5 @@
-import { ExerciseCatalogScreen } from '@/features/exercises/exercise-catalog-screen';
+import { Redirect, type Href } from 'expo-router';
 
 export default function ExercisesScreen() {
-  return <ExerciseCatalogScreen />;
+  return <Redirect href={'/workouts/exercises' as Href} />;
 }

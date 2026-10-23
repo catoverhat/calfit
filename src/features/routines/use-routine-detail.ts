@@ -44,7 +44,7 @@ export function useRoutineDetail(routineId?: string): RoutineDetailState & {
       let active = true;
       async function load() {
         if (!routineId) {
-          setState((current) => ({ ...current, activeSessionId: null, error: 'Routine id is missing.', isLoading: false, isStarting: false, routine: null }));
+          setState((current) => ({ ...current, activeSessionId: null, error: 'Workout id is missing.', isLoading: false, isStarting: false, routine: null }));
           return;
         }
         setState((current) => ({
@@ -65,7 +65,7 @@ export function useRoutineDetail(routineId?: string): RoutineDetailState & {
           if (active) {
             setState({
               activeSessionId: null,
-              error: error instanceof Error ? error.message : 'Routine could not be loaded.',
+              error: error instanceof Error ? error.message : 'Workout could not be loaded.',
               isLoading: false,
               isStarting: false,
               routine: null,

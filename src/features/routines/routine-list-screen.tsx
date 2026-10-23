@@ -1,4 +1,4 @@
-import { Link } from "expo-router";
+import { Link, type Href } from "expo-router";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { Header } from "@/components/layout/header";
@@ -22,7 +22,7 @@ const ErrorState = ({
       <View style={styles.stateIcon}>
         <AppIcon color={SemanticColors.danger} name="warning" size={22} />
       </View>
-      <ThemedText style={styles.stateTitle}>Routines unavailable</ThemedText>
+      <ThemedText style={styles.stateTitle}>Workouts unavailable</ThemedText>
       <ThemedText style={styles.stateText}>{error}</ThemedText>
       <Pressable
         accessibilityRole="button"
@@ -48,17 +48,17 @@ export function RoutineListScreen() {
         <View style={styles.headingRow}>
           <View style={styles.heading}>
             <ThemedText style={styles.eyebrow}>Your program</ThemedText>
-            <ThemedText style={styles.title}>Workout Routines</ThemedText>
+            <ThemedText style={styles.title}>Workout Library</ThemedText>
             {!isLoading && !error ? (
               <ThemedText style={styles.subtitle}>
                 {routines.length}{" "}
-                {routines.length === 1 ? "routine" : "routines"} stored locally
+                {routines.length === 1 ? "workout" : "workouts"} stored locally
               </ThemedText>
             ) : null}
           </View>
-          <Link href="/routines/create" asChild>
+          <Link href="/workouts/create" asChild>
             <Pressable
-              accessibilityLabel="Create routine"
+              accessibilityLabel="Create workout"
               accessibilityRole="button"
             >
               {({ pressed }) => (
@@ -74,11 +74,19 @@ export function RoutineListScreen() {
           </Link>
         </View>
 
+        <Link href={'/workouts/exercises' as Href} asChild>
+          <Pressable accessibilityRole="button" style={({ pressed }) => [styles.manageButton, pressed && styles.pressed]}>
+            <AppIcon color={SemanticColors.actionSoft} name="exercises" size={18} />
+            <ThemedText style={styles.manageButtonText}>Manage Exercises</ThemedText>
+            <AppIcon color={SemanticColors.textMuted} name="chevronRight" size={18} />
+          </Pressable>
+        </Link>
+
         {isLoading ? (
-          <View accessibilityLabel="Loading routines" style={styles.stateCard}>
+          <View accessibilityLabel="Loading workouts" style={styles.stateCard}>
             <ActivityIndicator color={SemanticColors.action} size="large" />
             <ThemedText style={styles.stateText}>
-              Loading your routines…
+              Loading your workouts…
             </ThemedText>
           </View>
         ) : error ? (
@@ -93,10 +101,10 @@ export function RoutineListScreen() {
               />
             </View>
             <ThemedText style={styles.stateTitle}>
-              Build your first routine
+              Build your first workout
             </ThemedText>
             <ThemedText style={styles.stateText}>
-              Combine exercises, set targets, and choose your training days.
+              Combine exercises and set reusable training targets.
             </ThemedText>
           </View>
         ) : (

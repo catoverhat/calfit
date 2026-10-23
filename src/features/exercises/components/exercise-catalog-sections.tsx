@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
+import { Link, type Href } from 'expo-router';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
@@ -28,7 +28,7 @@ export function ExerciseCatalogToolbar({
           <Text style={styles.title}>Catalog</Text>
           <Text style={styles.subtitle}>Browse or create your next move</Text>
         </View>
-        <Link href="/(tabs)/exercises/create" push asChild>
+        <Link href="/workouts/exercises/create" push asChild>
           <Pressable accessibilityLabel="Create Exercise" accessibilityRole="button">
             {({ pressed }) => (
               <View style={[styles.createButton, pressed && styles.pressed]}>
@@ -112,9 +112,9 @@ export function ExerciseCatalogCard({ exercise }: { exercise: ExerciseCatalogVie
 
           <Link
             href={{
-              pathname: '/(tabs)/exercises/[id]/edit',
+              pathname: '/workouts/exercises/[id]/edit',
               params: { id: exercise.id },
-            }}
+            } as unknown as Href}
             push
             asChild>
             <Pressable

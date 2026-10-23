@@ -1,15 +1,19 @@
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Platform } from 'react-native';
 
 import {
+  assignWorkoutToDate,
   createRoutine,
   distanceToCanonical,
   getLocalUserProfile,
   getRoutineDetail,
+  getWorkoutPlanEntries,
   initializeLocalDatabase,
   normalizeDistanceUnit,
   normalizeSpeedUnit,
   normalizeWeightUnit,
+  removeFutureWorkoutPlanEntriesForRoutine,
   speedToCanonical,
   updateRoutine,
   weightToCanonical,
@@ -17,7 +21,7 @@ import {
 } from '@/db';
 import { useRoutineDraft, type RoutineDraft, type RoutineUnits } from './routine-draft-context';
 
-export function useRoutineEditor({ mode, routineId }: { mode: 'create' | 'edit'; routineId?: string }) {
+export function useRoutineEditor({ mode, plannedDate, routineId }: { mode: 'create' | 'edit'; plannedDate?: string; routineId?: string }) {
   const draftState = useRoutineDraft();
   const draftStateRef = useRef(draftState);
   const [isLoading, setIsLoading] = useState(mode === 'edit');
@@ -36,7 +40,7 @@ export function useRoutineEditor({ mode, routineId }: { mode: 'create' | 'edit';
       setError(null);
       if (!routineId) {
         if (mode === 'edit') {
-          setError('Routine id is missing.');
+          setError('Workout id is missing.');
           setIsLoading(false);
           return;
         }
@@ -57,11 +61,11 @@ export function useRoutineEditor({ mode, routineId }: { mode: 'create' | 'edit';
         }
         if (currentDraftState.draft?.sourceKey === `edit:${routineId}`) return;
         const routine = await getRoutineDetail(db, routineId as string);
-        if (!routine) throw new Error('Routine could not be found.');
+        if (!routine) throw new Error('Workout could not be found.');
         if (active) currentDraftState.initializeEdit(routine, nextUnits);
       } catch (loadError) {
         if (active) {
-          setError(loadError instanceof Error ? loadError.message : 'Routine could not be loaded.');
+          setError(loadError instanceof Error ? loadError.message : 'Workout could not be loaded.');
         }
       } finally {
         if (active) setIsLoading(false);
@@ -90,32 +94,78 @@ export function useRoutineEditor({ mode, routineId }: { mode: 'create' | 'edit';
         description: draft.description.trim() || null,
         active: draft.active,
         exercises: mapDraftExercises(draft, units),
-        scheduleDays: draft.scheduleDays,
       };
       if (mode === 'edit') {
-        if (!routineId) throw new Error('Routine id is missing.');
+        if (!routineId) throw new Error('Workout id is missing.');
+        const current = await getRoutineDetail(db, routineId);
+        if (!current) throw new Error('Workout could not be found.');
+        if (current.active === 1 && !draft.active) {
+          const today = localDateKey(new Date());
+          const future = (await getWorkoutPlanEntries(db, today, '9999-12-31')).filter(
+            (entry) => entry.routine_id_fk === routineId
+          );
+          if (future.length > 0) {
+            const confirmed = await confirmDeactivate(future.length);
+            if (!confirmed) {
+              setIsSaving(false);
+              return;
+            }
+            await removeFutureWorkoutPlanEntriesForRoutine(db, { routineId, today });
+          }
+        }
         await updateRoutine(db, { routineId, ...input });
       } else {
-        await createRoutine(db, input);
+        const created = await createRoutine(db, input);
+        if (plannedDate) {
+          await assignWorkoutToDate(db, {
+            plannedDate,
+            routineId: created.routine_id,
+          });
+        }
       }
       draftState.clearDraft();
-      router.replace('/routines');
+      router.replace(
+        (plannedDate ? { pathname: '/plan', params: { date: plannedDate } } : '/workouts') as Href
+      );
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'Routine could not be saved.');
+      setError(saveError instanceof Error ? saveError.message : 'Workout could not be saved.');
       setIsSaving(false);
     }
-  }, [draftState, isSaving, mode, routineId, units]);
+  }, [draftState, isSaving, mode, plannedDate, routineId, units]);
 
   return { ...draftState, error, isLoading, isSaving, save, units };
 }
 
 export function validateRoutineDraft(draft: RoutineDraft): string | null {
-  if (!draft.name.trim()) return 'Routine name is required.';
+  if (!draft.name.trim()) return 'Workout name is required.';
   if (draft.exercises.length === 0) return 'Add at least one exercise.';
   if (draft.exercises.some((exercise) => exercise.targets.length === 0)) {
     return 'Every exercise needs at least one target set.';
   }
   return null;
+}
+
+function confirmDeactivate(futureAssignments: number): Promise<boolean> {
+  const message = `${futureAssignments} future plan assignment${futureAssignments === 1 ? '' : 's'} will be removed. Historical entries stay intact.`;
+  if (Platform.OS === 'web') {
+    return Promise.resolve(globalThis.confirm(`Deactivate workout?\n\n${message}`));
+  }
+  return new Promise((resolve) => {
+    Alert.alert(
+      'Deactivate workout?',
+      message,
+      [
+        { onPress: () => resolve(false), style: 'cancel', text: 'Keep active' },
+        { onPress: () => resolve(true), style: 'destructive', text: 'Deactivate' },
+      ]
+    );
+  });
+}
+
+function localDateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate()
+  ).padStart(2, '0')}`;
 }
 
 function mapDraftExercises(draft: RoutineDraft, units: RoutineUnits): CreateRoutineExerciseInput[] {

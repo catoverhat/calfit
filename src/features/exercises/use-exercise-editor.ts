@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
 import {
@@ -20,6 +20,7 @@ import {
 interface UseExerciseEditorInput {
   exerciseId?: string;
   mode: 'create' | 'edit';
+  returnTo?: string;
 }
 
 interface ExerciseEditorState {
@@ -32,6 +33,7 @@ interface ExerciseEditorState {
 export function useExerciseEditor({
   exerciseId,
   mode,
+  returnTo,
 }: UseExerciseEditorInput): ExerciseEditorState & {
   saveExercise: (input: ExerciseEditorSaveInput) => Promise<void>;
 } {
@@ -139,7 +141,9 @@ export function useExerciseEditor({
           });
         }
 
-        router.replace('/exercises');
+        router.replace(
+          (returnTo === 'builder' ? '/workouts/add-exercise' : '/workouts/exercises') as Href
+        );
       } catch (error) {
         setState((current) => ({
           ...current,
@@ -148,7 +152,7 @@ export function useExerciseEditor({
         }));
       }
     },
-    [exerciseId, mode]
+    [exerciseId, mode, returnTo]
   );
 
   return { ...state, saveExercise };

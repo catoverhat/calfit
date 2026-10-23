@@ -2,6 +2,7 @@
 
 import {
   completeWorkoutSession,
+  assignWorkoutToDate,
   createBodyMeasurement,
   getTodayDashboardSnapshot,
   getTodayRoutine,
@@ -23,6 +24,7 @@ describe('dashboard repository', () => {
     const emptySnapshot = await getTodayDashboardSnapshot(db, LOCAL_USER_ID, new Date('2026-07-06T12:00:00.000Z'));
 
     expect(emptySnapshot.latestBodyMeasurement).toBeNull();
+    expect(emptySnapshot.planEntry).toBeNull();
     expect(emptySnapshot.workoutStreak).toBe(0);
 
     await createBodyMeasurement(db, {
@@ -38,6 +40,12 @@ describe('dashboard repository', () => {
 
     const routine = await getTodayRoutine(db);
     if (!routine) throw new Error('Expected seeded routine');
+
+    await assignWorkoutToDate(db, {
+      plannedDate: '2026-07-06',
+      routineId: routine.routine_id,
+      today: '2026-07-06',
+    });
 
     const todaySession = await startWorkoutFromRoutine(db, {
       id: 'session-today',
@@ -63,5 +71,8 @@ describe('dashboard repository', () => {
     expect(snapshot.previousBodyMeasurement?.body_measurement_id).toBe('measurement-old');
     expect(snapshot.workoutStreak).toBe(2);
     expect(snapshot.completedWorkoutCount).toBe(2);
+    expect(snapshot.planEntry).toEqual(
+      expect.objectContaining({ planned_date: '2026-07-06', routine_id_fk: routine.routine_id })
+    );
   });
 });

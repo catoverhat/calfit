@@ -68,7 +68,17 @@ const routine: RoutineDetail = {
 const baseSnapshot: DashboardSnapshot = {
   activeSession: null,
   user,
-  routine,
+  planEntry: {
+    workout_plan_entry_id: 'plan-1',
+    user_id_fk: 'local-user',
+    routine_id_fk: 'routine-1',
+    planned_date: '2026-07-06',
+    workout_session_id_fk: null,
+    created_at: '2026-07-06T08:00:00.000Z',
+    updated_at: '2026-07-06T08:00:00.000Z',
+    routine,
+    session: null,
+  },
   latestBodyMeasurement: null,
   previousBodyMeasurement: null,
   workoutStreak: 0,
@@ -169,5 +179,54 @@ describe('today dashboard view models', () => {
 
     expect(data.actionLabel).toBe('Resume Workout');
     expect(data.activeSessionId).toBe('session-active');
+  });
+
+  it('shows a planned rest day when no workout is assigned', () => {
+    const data = createTodayDashboardData({ ...baseSnapshot, planEntry: null });
+    expect(data.routine).toBeNull();
+    expect(data.actionLabel).toBe('Start Workout');
+    expect(data.tip).toContain('Recovery');
+  });
+
+  it('derives in-progress, completed, and unavailable states from linked data', () => {
+    const linkedSession = {
+      workout_session_id: 'session-linked',
+      user_id_fk: 'local-user',
+      routine_id_fk: 'routine-1',
+      scheduled_for: '2026-07-06',
+      started_at: '2026-07-06T13:00:00.000Z',
+      completed_at: null,
+      status: 'in_progress' as const,
+      created_at: '2026-07-06T13:00:00.000Z',
+    };
+    const inProgress = createTodayDashboardData({
+      ...baseSnapshot,
+      activeSession: linkedSession,
+      planEntry: { ...baseSnapshot.planEntry!, session: linkedSession },
+    });
+    const completed = createTodayDashboardData({
+      ...baseSnapshot,
+      planEntry: {
+        ...baseSnapshot.planEntry!,
+        session: {
+          ...linkedSession,
+          completed_at: '2026-07-06T14:00:00.000Z',
+          status: 'completed',
+        },
+      },
+    });
+    const unavailable = createTodayDashboardData({
+      ...baseSnapshot,
+      planEntry: {
+        ...baseSnapshot.planEntry!,
+        routine: { ...routine, active: 0 },
+      },
+    });
+
+    expect(inProgress.routine?.state).toBe('in_progress');
+    expect(inProgress.actionLabel).toBe('Resume Workout');
+    expect(completed.routine?.state).toBe('completed');
+    expect(completed.actionLabel).toBe('Workout Complete');
+    expect(unavailable.routine?.state).toBe('unavailable');
   });
 });

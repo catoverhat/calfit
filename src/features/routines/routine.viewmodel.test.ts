@@ -46,7 +46,7 @@ describe('routine view models', () => {
 
   it('validates routine names, exercises, and target sets', () => {
     expect(validateRoutineDraft(draft)).toBeNull();
-    expect(validateRoutineDraft({ ...draft, name: '   ' })).toBe('Routine name is required.');
+    expect(validateRoutineDraft({ ...draft, name: '   ' })).toBe('Workout name is required.');
     expect(validateRoutineDraft({ ...draft, exercises: [] })).toBe('Add at least one exercise.');
     expect(
       validateRoutineDraft({

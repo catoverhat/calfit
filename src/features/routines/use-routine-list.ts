@@ -54,7 +54,7 @@ export function useRoutineList(): RoutineListState & { reload: () => void } {
           if (active) {
             setState((current) => ({
               ...current,
-              error: error instanceof Error ? error.message : 'Routines could not be loaded.',
+              error: error instanceof Error ? error.message : 'Workouts could not be loaded.',
               isLoading: false,
             }));
           }
