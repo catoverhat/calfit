@@ -108,3 +108,5 @@ Calculated using WCAG relative luminance on solid sRGB tokens. These are token c
 Native splash configuration changes require a new native build. No Expo development server was started.
 
 Palette verification: TypeScript and ESLint passed; Jest passed all 22 suites / 85 tests; `git diff --check` passed. The nine documented solid-color pairs meet their respective text (4.5:1) or control-boundary (3:1) targets. Visual QA remains pending; no production export was rerun for this palette pass.
+
+Planner button refinement: day-card actions now share a fixed 80 px width, centered labels, and a minimum 48 px height. Rows wrap on smaller cards; labels can wrap with larger text.
