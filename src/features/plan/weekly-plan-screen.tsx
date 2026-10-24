@@ -1,7 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
@@ -16,6 +15,7 @@ import { TabScreen } from '@/components/layout/tab-screen';
 import { AppIcon } from '@/components/ui/app-icon';
 import { ThemedText } from '@/components/ui/themed-text';
 import { DesignColors, SemanticColors } from '@/theme/tokens';
+import { DayCard } from './weekly-plan-day-card';
 import { formatWeekRange, getIsoWeek, parseLocalDateKey } from './plan-calendar';
 import { styles } from './weekly-plan-screen.styles';
 import { useWeeklyPlan } from './use-weekly-plan';
@@ -144,11 +144,11 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
               accessibilityRole="button"
               accessibilityState={{
                 disabled:
-                  !planner.weekModel.isEmpty ||
+                  planner.isLoading || !planner.weekModel.isEmpty ||
                   planner.isSaving ||
                   planner.dates[6] < planner.today,
               }}
-              disabled={!planner.weekModel.isEmpty || planner.isSaving || planner.dates[6] < planner.today}
+              disabled={planner.isLoading || !planner.weekModel.isEmpty || planner.isSaving || planner.dates[6] < planner.today}
               onPress={() => void planner.copyPreviousWeek()}
               style={({ pressed }) => [
                 styles.copyButton,
@@ -174,32 +174,13 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
             </View>
           ) : null}
 
-          {planner.notice && planner.undoLast ? (
-            <View style={styles.undoBanner}>
-              <ThemedText style={styles.noticeText}>{planner.notice}</ThemedText>
-              <Pressable
-                accessibilityLabel="Undo last plan change"
-                accessibilityRole="button"
-                accessibilityState={{ disabled: planner.isSaving }}
-                disabled={planner.isSaving}
-                onPress={() => void planner.undoLast?.()}
-                style={styles.undoButton}>
-                <AppIcon color={SemanticColors.actionSoft} name="undo" size={17} />
-                <ThemedText style={styles.undoText}>Undo</ThemedText>
-              </Pressable>
-            </View>
-          ) : null}
-
-          {planner.isLoading ? (
-            <View style={styles.loadingCard}>
-              <ActivityIndicator color={SemanticColors.action} size="large" />
-              <ThemedText style={styles.muted}>Loading this plan…</ThemedText>
-            </View>
-          ) : (
             <View style={[styles.dayGrid, wide && styles.dayGridWide]}>
               {planner.weekModel.days.map((day) => (
                 <DayCard
                   day={day}
+                  busy={planner.isLoading || planner.savingDates.includes(day.date)}
+                  initialLoading={planner.isLoading}
+                  disabled={planner.isSaving || planner.isLoading}
                   key={day.date}
                   onAssign={() => setPicker({ day, mode: 'assign' })}
                   onChange={() => setPicker({ day, mode: 'change' })}
@@ -214,9 +195,26 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
                 />
               ))}
             </View>
-          )}
         </View>
       </TabScreen>
+
+      <View pointerEvents="box-none" style={styles.noticeDock}>
+        {planner.notice && planner.undoLast ? (
+            <View style={styles.undoBanner}>
+              <ThemedText style={styles.noticeText}>{planner.notice}</ThemedText>
+              <Pressable
+                accessibilityLabel="Undo last plan change"
+                accessibilityRole="button"
+                accessibilityState={{ disabled: planner.isSaving }}
+                disabled={planner.isSaving}
+                onPress={() => void planner.undoLast?.()}
+                style={styles.undoButton}>
+                <AppIcon color={SemanticColors.actionSoft} name="undo" size={17} />
+                <ThemedText style={styles.undoText}>Undo</ThemedText>
+              </Pressable>
+            </View>
+          ) : null}
+      </View>
 
       <WorkoutPicker
         onClose={() => setPicker(null)}
@@ -285,54 +283,6 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
         selections={legacySelections}
       />
     </>
-  );
-}
-
-function DayCard({ day, onAssign, onChange, onMove, onRemove, onStart, onView, wide }: {
-  day: WorkoutPlanDay;
-  onAssign: () => void;
-  onChange: () => void;
-  onMove: () => void;
-  onRemove: () => void;
-  onStart: () => void;
-  onView: () => void;
-  wide: boolean;
-}) {
-  const canStart = day.entryId && (day.state === 'assigned' || day.state === 'in_progress') && day.isToday;
-  return (
-    <View style={[styles.dayCard, wide && styles.dayCardWide, day.isToday && styles.dayCardToday]}>
-      <View style={styles.dayHeader}>
-        <View>
-          <ThemedText style={styles.weekday}>{wide ? day.weekday.slice(0, 3) : day.weekday}</ThemedText>
-          <ThemedText style={styles.dateLabel}>{day.dateLabel}</ThemedText>
-        </View>
-        <View style={[styles.statePill, statusStyle(day)]}>
-          <ThemedText style={styles.stateText}>
-            {day.isToday && (day.state === 'rest' || day.state === 'assigned')
-              ? 'Today'
-              : day.stateLabel}
-          </ThemedText>
-        </View>
-      </View>
-      {day.workout ? (
-        <View style={styles.dayBody}>
-          <ThemedText numberOfLines={2} style={styles.workoutTitle}>{day.workout.title}</ThemedText>
-          <ThemedText style={styles.workoutMeta}>{day.workout.exerciseCount} exercises · {day.workout.duration}</ThemedText>
-          {canStart ? <SmallAction label={day.state === 'in_progress' ? 'Resume' : 'Start'} onPress={onStart} primary /> : null}
-          <View style={styles.dayActions}>
-            <SmallAction label="View" onPress={onView} />
-            {day.editable ? <SmallAction label="Change" onPress={onChange} /> : null}
-            {day.editable ? <SmallAction label="Move" onPress={onMove} /> : null}
-            {day.editable ? <SmallAction danger label="Remove" onPress={onRemove} /> : null}
-          </View>
-        </View>
-      ) : (
-        <View style={styles.restBody}>
-          <ThemedText style={styles.restTitle}>{day.isToday ? 'Planned rest day' : 'Rest day'}</ThemedText>
-          {day.editable ? <SmallAction label="Assign workout" onPress={onAssign} primary /> : <ThemedText style={styles.lockedText}>Read-only</ThemedText>}
-        </View>
-      )}
-    </View>
   );
 }
 
@@ -504,19 +454,8 @@ function Sheet({ children, onClose, open, title }: { children: React.ReactNode; 
   );
 }
 
-function SmallAction({ danger, label, onPress, primary }: { danger?: boolean; label: string; onPress: () => void; primary?: boolean }) {
-  return <Pressable accessibilityLabel={label} accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.smallAction, primary && styles.smallActionPrimary, danger && styles.smallActionDanger, pressed && styles.pressed]}><ThemedText style={[styles.smallActionText, primary && styles.smallActionPrimaryText, danger && styles.smallActionDangerText]}>{label}</ThemedText></Pressable>;
-}
-
 function IconButton({ label, name, onPress }: { label: string; name: 'chevronLeft' | 'chevronRight' | 'close'; onPress: () => void }) {
   return <Pressable accessibilityLabel={label} accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}><AppIcon color={SemanticColors.textPrimary} name={name} size={20} /></Pressable>;
-}
-
-function statusStyle(day: WorkoutPlanDay) {
-  if (day.state === 'completed') return styles.stateCompleted;
-  if (day.state === 'missed' || day.state === 'unavailable') return styles.stateDanger;
-  if (day.state === 'in_progress' || day.isToday) return styles.stateActive;
-  return styles.stateNeutral;
 }
 
 function navigateWeek(planner: ReturnType<typeof useWeeklyPlan>, direction: -1 | 1) {

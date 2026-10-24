@@ -1,5 +1,5 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import {
   getLocalUserProfile,
@@ -17,6 +17,7 @@ interface RoutineListState {
 }
 
 export function useRoutineList(): RoutineListState & { reload: () => void } {
+  const hasLoaded = useRef(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [state, setState] = useState<RoutineListState>({
     error: null,
@@ -32,8 +33,7 @@ export function useRoutineList(): RoutineListState & { reload: () => void } {
         setState((current) => ({
           ...current,
           error: null,
-          isLoading: true,
-          routines: reloadKey > 0 ? current.routines : [],
+          isLoading: !hasLoaded.current,
         }));
         try {
           const db = await initializeLocalDatabase();
@@ -43,6 +43,7 @@ export function useRoutineList(): RoutineListState & { reload: () => void } {
             getRoutineSummaries(db),
           ]);
           if (active) {
+            hasLoaded.current = true;
             setState({
               error: null,
               isLoading: false,
@@ -64,6 +65,8 @@ export function useRoutineList(): RoutineListState & { reload: () => void } {
       return () => {
         active = false;
       };
+    // The retry token deliberately restarts the focus refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reloadKey])
   );
 

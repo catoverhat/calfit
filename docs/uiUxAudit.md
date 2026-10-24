@@ -4,26 +4,26 @@ This checklist tracks the page-by-page Calfit interface review. A page is marked
 
 The retired `/routines` and `/exercises` aliases have been removed. All workout and exercise management routes live below `/workouts`.
 
-| # | Page / state | Route | Feature owner | Review status | Notes |
-|---:|---|---|---|---|---|
-| 1 | Login / app unlock | `/login` | Auth | Polished | Removed the misleading carousel indicator; retained one clear secure-entry action and device-auth feedback. |
-| 2 | Today | `/` | Today | Polished | Standardized icons and surfaces, made the identity header open Profile, and improved workout-state accessibility. |
-| 3 | Weekly planner | `/plan` | Plan | Polished | Added complete control labels/states and 48 px retry/undo targets across assignment, move, swap, and import flows. |
-| 4 | Workout library | `/workouts` | Workouts | Polished | Added readable active/inactive status and enlarged Edit/View actions while preserving at-a-glance workout metrics. |
-| 5 | Create workout | `/workouts/create` | Workouts | Polished | Corrected the route title, enlarged reorder/remove controls, and clarified disabled and add-set actions. |
-| 6 | Workout details | `/workouts/[id]` | Workouts | Polished | Improved error recovery, edit/start semantics, and busy/disabled state announcements. |
-| 7 | Edit workout | `/workouts/[id]/edit` | Workouts | Polished | Corrected the route title and aligned editor controls with the create flow and minimum touch target. |
-| 8 | Add exercise to workout | `/workouts/add-exercise` | Workouts | Polished | Enlarged filters and made the footer action explicit and unavailable until exercises are selected. |
-| 9 | Exercise catalog | `/workouts/exercises` | Exercises | Polished | Converted oversized cards to scannable rows and enlarged search, filter, and edit controls. |
-| 10 | Create exercise | `/workouts/exercises/create` | Exercises | Polished | Added editable optional media URLs and enlarged categories and switch interaction areas. |
-| 11 | Edit exercise | `/workouts/exercises/[id]/edit` | Exercises | Polished | Existing image/video values can now be edited; form control sizing and accessibility match create mode. |
-| 12 | Active workout | `/workout-session/[id]` | Workout session | Polished | Added overall set progress plus visible and announced exercise expand/collapse state. |
-| 13 | Progress dashboard | `/progress` | Progress | Polished | Strengthened page hierarchy, widened the responsive content area, and added a consistency legend and chart summary. |
-| 14 | Workout history | `/progress/history` | Progress | Polished | Enlarged session filter chips to reliable 48 px touch targets. |
-| 15 | Body measurements | `/progress/measurements` | Progress | Polished | Enlarged the history navigation target; reviewed form, chart, loading, and empty states. |
-| 16 | Workout summary | `/progress/summary` | Progress | Reviewed | Completion hierarchy, stats, notes, history, and primary continuation action already follow the design system. |
-| 17 | Local storage status | `/progress/storage` | Progress | Polished | Enlarged recovery action and reviewed clear ready/error/offline explanations. |
-| 18 | Profile and preferences | `/profile` | Profile | Polished | Reframed onboarding copy as persistent preferences, removed decorative interruption, standardized icons, and enlarged unit controls. |
+|   # | Page / state            | Route                           | Feature owner   | Review status | Notes                                                                                                                                |
+| --: | ----------------------- | ------------------------------- | --------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+|   1 | Login / app unlock      | `/login`                        | Auth            | Polished      | Removed the misleading carousel indicator; retained one clear secure-entry action and device-auth feedback.                          |
+|   2 | Today                   | `/`                             | Today           | Polished      | Standardized icons and surfaces, made the identity header open Profile, and improved workout-state accessibility.                    |
+|   3 | Weekly planner          | `/plan`                         | Plan            | Polished      | Added complete control labels/states and 48 px retry/undo targets across assignment, move, swap, and import flows.                   |
+|   4 | Workout library         | `/workouts`                     | Workouts        | Polished      | Added readable active/inactive status and enlarged Edit/View actions while preserving at-a-glance workout metrics.                   |
+|   5 | Create workout          | `/workouts/create`              | Workouts        | Polished      | Corrected the route title, enlarged reorder/remove controls, and clarified disabled and add-set actions.                             |
+|   6 | Workout details         | `/workouts/[id]`                | Workouts        | Polished      | Improved error recovery, edit/start semantics, and busy/disabled state announcements.                                                |
+|   7 | Edit workout            | `/workouts/[id]/edit`           | Workouts        | Polished      | Corrected the route title and aligned editor controls with the create flow and minimum touch target.                                 |
+|   8 | Add exercise to workout | `/workouts/add-exercise`        | Workouts        | Polished      | Enlarged filters and made the footer action explicit and unavailable until exercises are selected.                                   |
+|   9 | Exercise catalog        | `/workouts/exercises`           | Exercises       | Polished      | Converted oversized cards to scannable rows and enlarged search, filter, and edit controls.                                          |
+|  10 | Create exercise         | `/workouts/exercises/create`    | Exercises       | Polished      | Added editable optional media URLs and enlarged categories and switch interaction areas.                                             |
+|  11 | Edit exercise           | `/workouts/exercises/[id]/edit` | Exercises       | Polished      | Existing image/video values can now be edited; form control sizing and accessibility match create mode.                              |
+|  12 | Active workout          | `/workout-session/[id]`         | Workout session | Polished      | Added overall set progress plus visible and announced exercise expand/collapse state.                                                |
+|  13 | Progress dashboard      | `/progress`                     | Progress        | Polished      | Strengthened page hierarchy, widened the responsive content area, and added a consistency legend and chart summary.                  |
+|  14 | Workout history         | `/progress/history`             | Progress        | Polished      | Enlarged session filter chips to reliable 48 px touch targets.                                                                       |
+|  15 | Body measurements       | `/progress/measurements`        | Progress        | Polished      | Enlarged the history navigation target; reviewed form, chart, loading, and empty states.                                             |
+|  16 | Workout summary         | `/progress/summary`             | Progress        | Reviewed      | Completion hierarchy, stats, notes, history, and primary continuation action already follow the design system.                       |
+|  17 | Local storage status    | `/progress/storage`             | Progress        | Polished      | Enlarged recovery action and reviewed clear ready/error/offline explanations.                                                        |
+|  18 | Profile and preferences | `/profile`                      | Profile         | Polished      | Reframed onboarding copy as persistent preferences, removed decorative interruption, standardized icons, and enlarged unit controls. |
 
 ## Verification
 
@@ -36,16 +36,16 @@ The retired `/routines` and `/exercises` aliases have been removed. All workout 
 
 This pass implements the earlier code-level review. The dark charcoal palette, Electric Orange actions, Montserrat/Inter roles, standard 8 px corners, and feature ownership remain the design direction.
 
-| Previous issue | Implemented change | User benefit |
-|---|---|---|
-| Shared profile avatars announced an action without a handler | Header avatars link to Profile by default; Profile renders its own avatar without a redundant action | Predictable navigation and accurate accessibility semantics |
-| Separate Today/Profile header designs and uneven side slots | Shared branded Header with equal 48 px slots | Consistent alignment and reliable touch targets |
-| Competing Progress charts without a clear starting point | Training overview, 7/30/90-day selector, workout/volume tabs, separate latest measurements, and exploration links | Faster answers to how much and how often the athlete trained |
-| Fixed chart strokes and a six-row consistency grid | Connected responsive line geometry, all seven weekdays aligned to Monday, blank future dates, and count legends | Charts reflect the recorded data correctly |
-| Profile used legacy colors, small controls, and faint placeholders | Shared semantic tokens, 48 px fields, larger unit labels, readable placeholders, and feet/inches guidance | Easier form entry and a consistent visual system |
-| Small catalog labels and a cramped exercise-picker footer | Larger search/filter text, compact thumbnails, and a wrapping footer | Improved readability and compact-screen behavior |
-| Web controls had no deliberate focus treatment | Keyboard focus rings, pointer feedback, larger tab labels, and a selected-tab surface | Clearer feedback for keyboard and pointer input |
-| Automatic system theme conflicted with consistently dark app surfaces | Shared dark navigation theme and light status-bar text | Consistent system chrome on devices using light mode |
+| Previous issue                                                        | Implemented change                                                                                                | User benefit                                                 |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Shared profile avatars announced an action without a handler          | Header avatars link to Profile by default; Profile renders its own avatar without a redundant action              | Predictable navigation and accurate accessibility semantics  |
+| Separate Today/Profile header designs and uneven side slots           | Shared branded Header with equal 48 px slots                                                                      | Consistent alignment and reliable touch targets              |
+| Competing Progress charts without a clear starting point              | Training overview, 7/30/90-day selector, workout/volume tabs, separate latest measurements, and exploration links | Faster answers to how much and how often the athlete trained |
+| Fixed chart strokes and a six-row consistency grid                    | Connected responsive line geometry, all seven weekdays aligned to Monday, blank future dates, and count legends   | Charts reflect the recorded data correctly                   |
+| Profile used legacy colors, small controls, and faint placeholders    | Shared semantic tokens, 48 px fields, larger unit labels, readable placeholders, and feet/inches guidance         | Easier form entry and a consistent visual system             |
+| Small catalog labels and a cramped exercise-picker footer             | Larger search/filter text, compact thumbnails, and a wrapping footer                                              | Improved readability and compact-screen behavior             |
+| Web controls had no deliberate focus treatment                        | Keyboard focus rings, pointer feedback, larger tab labels, and a selected-tab surface                             | Clearer feedback for keyboard and pointer input              |
+| Automatic system theme conflicted with consistently dark app surfaces | Shared dark navigation theme and light status-bar text                                                            | Consistent system chrome on devices using light mode         |
 
 Regression coverage includes period boundaries, distinct training-day counts, full-period volume totals, Sunday consistency entries, absent weight entries, and chart endpoints at phone/tablet widths. An existing repository test now supplies an explicit date instead of depending on the current weekday.
 
@@ -62,7 +62,6 @@ Verification above covers code, data behavior, and web bundling. Device/browser 
 - Layouts preserve the 8 px rhythm, tonal borders, Electric Orange action hierarchy, and Montserrat/Inter type roles.
 - Content remains usable on compact phones and constrained to a readable width on larger screens/web.
 - Controls expose accessibility roles, labels, state, and logical reading order.
-
 
 ## Wellness color investigation ? 2026-10-23
 
@@ -82,17 +81,17 @@ Use muted green-charcoal across the largest areas, sage for completion, teal for
 
 Calculated using WCAG relative luminance on solid sRGB tokens. These are token checks, not certification of every rendered screen.
 
-| Role | Foreground / background | Contrast |
-|---|---|---:|
-| Primary text / card | `#EDF2EC` / `#202925` | 13.17:1 |
-| Secondary text / card | `#C2CFC5` / `#202925` | 9.27:1 |
-| Muted text / highest surface | `#A7B9AD` / `#35423B` | 5.11:1 |
-| Action label / orange | `#29180F` / `#FF854D` | 7.07:1 |
-| Peach label / card | `#FFBC99` / `#202925` | 9.18:1 |
-| Sage / success container | `#9CCDAB` / `#243C2D` | 6.67:1 |
-| Teal / elevated surface | `#8DD5CE` / `#2B3631` | 7.49:1 |
-| Error / error container | `#FFB4AF` / `#5C252B` | 7.07:1 |
-| Input boundary / recessed | `#71867A` / `#18201C` | 4.27:1 |
+| Role                         | Foreground / background | Contrast |
+| ---------------------------- | ----------------------- | -------: |
+| Primary text / card          | `#EDF2EC` / `#202925`   |  13.17:1 |
+| Secondary text / card        | `#C2CFC5` / `#202925`   |   9.27:1 |
+| Muted text / highest surface | `#A7B9AD` / `#35423B`   |   5.11:1 |
+| Action label / orange        | `#29180F` / `#FF854D`   |   7.07:1 |
+| Peach label / card           | `#FFBC99` / `#202925`   |   9.18:1 |
+| Sage / success container     | `#9CCDAB` / `#243C2D`   |   6.67:1 |
+| Teal / elevated surface      | `#8DD5CE` / `#2B3631`   |   7.49:1 |
+| Error / error container      | `#FFB4AF` / `#5C252B`   |   7.07:1 |
+| Input boundary / recessed    | `#71867A` / `#18201C`   |   4.27:1 |
 
 ### Implementation tracking
 
@@ -110,3 +109,28 @@ Native splash configuration changes require a new native build. No Expo developm
 Palette verification: TypeScript and ESLint passed; Jest passed all 22 suites / 85 tests; `git diff --check` passed. The nine documented solid-color pairs meet their respective text (4.5:1) or control-boundary (3:1) targets. Visual QA remains pending; no production export was rerun for this palette pass.
 
 Planner button refinement: day-card actions now share a fixed 80 px width, centered labels, and a minimum 48 px height. Rows wrap on smaller cards; labels can wrap with larger text.
+
+## Component loading and navigation continuity ? 2026-10-23
+
+- [x] Planner initial loading stays within seven dated day cards instead of replacing the week with a large spinner.
+- [x] Assignment, replacement, removal, and start show a busy indicator on the affected day. Moves/swaps mark both source and destination; copy/import use the relevant week and undo uses its affected dates.
+- [x] Retain other day cards during writes and data reconciliation; keep the pending indicator until updated entries arrive.
+- [x] Block overlapping planner writes and announce busy/disabled states. Failed saves retain the week and expose retry/recovery feedback.
+- [x] Ignore stale planner refreshes started before a write. Retain cached year data on focus; changing year still loads the new year.
+- [x] Widen Assign workout to 144 px while keeping the short action buttons at 80 px, constrained by available card width. Center labels and retain wrapping for larger text.
+- [x] Returning to Today, Workouts, Exercises, and Progress refreshes data without replacing previously loaded content with initial-loading UI. Progress retains its previous snapshot if a refresh fails.
+- [x] Verification: TypeScript and ESLint passed; 23 Jest suites / 87 tests passed. New asynchronous hook coverage checks day-scoped busy state through reconciliation, duplicate-submission prevention, failure cleanup, and retry.
+- [ ] Manual device checks: tab/back transition feel, day-card layout with large text, and screen-reader announcements. No frame-rate measurements or device visual validation performed. The Expo development server was not started.
+
+## Assignment transition refinement - 2026-10-23
+
+Reviewed the supplied screen recording and the planner render path. The earlier day loader still replaced the card body, and inserting the undo banner above the grid could shift the scroll layout.
+
+- [x] Keep rest/workout content and action rows mounted during saves; use the status pill and assign button for inline pending feedback. Body spinners are reserved for the initial load.
+- [x] Give rest and assigned content matching minimum space, and animate remaining card size/position changes over 180 ms with system reduced-motion support.
+- [x] Move undo feedback to an overlay above the tab bar, outside scroll layout.
+- [x] Replace the undersized assign action with a 176 px button, plus icon, centered 14 px label, and matching inline saving state. Retain 48 px minimum height and available-width constraints.
+- [x] Extract the feature-owned day card for focused regression coverage. Component tests confirm that the assign button keeps its dimensions during saving and that existing workout/action content stays mounted.
+- [x] TypeScript and ESLint passed; both day-card component tests and both planner hook tests passed. Animation timing and final appearance still require device review; no dev server was started.
+
+This supersedes the earlier full-body per-day save spinner and 144 px assign-button treatment.

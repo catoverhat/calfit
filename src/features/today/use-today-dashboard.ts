@@ -1,5 +1,5 @@
 import { router, type Href, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import {
   getTodayDashboardSnapshot,
@@ -24,6 +24,7 @@ export function useTodayDashboard(): TodayDashboardState & {
   openWorkouts: () => void;
   startWorkout: () => Promise<void>;
 } {
+  const hasLoaded = useRef(false);
   const [state, setState] = useState<TodayDashboardState>({
     data: createTodayDashboardData(null),
     error: null,
@@ -35,12 +36,13 @@ export function useTodayDashboard(): TodayDashboardState & {
     useCallback(() => {
       let active = true;
       async function load() {
-        setState((current) => ({ ...current, error: null, isLoading: true }));
+        setState((current) => ({ ...current, error: null, isLoading: !hasLoaded.current }));
         try {
           const db = await initializeLocalDatabase();
           await seedStarterRoutineIfEmpty(db);
           const snapshot = await getTodayDashboardSnapshot(db);
           if (active) {
+            hasLoaded.current = true;
             setState({
               data: createTodayDashboardData(snapshot),
               error: null,

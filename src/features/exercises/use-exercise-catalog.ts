@@ -1,5 +1,5 @@
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 
 import {
   getExerciseCatalog,
@@ -7,12 +7,12 @@ import {
   getLocalUserProfile,
   initializeLocalDatabase,
   seedBuiltInExercisesIfEmpty,
-} from '@/db';
+} from "@/db";
 import {
   createEmptyExerciseCatalogData,
   createExerciseCatalogData,
   type ExerciseCatalogData,
-} from './exercise-catalog.viewmodel';
+} from "./exercise-catalog.viewmodel";
 
 interface ExerciseCatalogState {
   data: ExerciseCatalogData;
@@ -21,6 +21,7 @@ interface ExerciseCatalogState {
 }
 
 export function useExerciseCatalog(): ExerciseCatalogState {
+  const hasLoaded = useRef(false);
   const [state, setState] = useState<ExerciseCatalogState>({
     data: createEmptyExerciseCatalogData(),
     error: null,
@@ -32,7 +33,11 @@ export function useExerciseCatalog(): ExerciseCatalogState {
       let active = true;
 
       async function load() {
-        setState((current) => ({ ...current, error: null, isLoading: true }));
+        setState((current) => ({
+          ...current,
+          error: null,
+          isLoading: !hasLoaded.current,
+        }));
 
         try {
           const db = await initializeLocalDatabase();
@@ -45,6 +50,7 @@ export function useExerciseCatalog(): ExerciseCatalogState {
           ]);
 
           if (active) {
+            hasLoaded.current = true;
             setState({
               data: createExerciseCatalogData({ categories, exercises, user }),
               error: null,
@@ -56,7 +62,9 @@ export function useExerciseCatalog(): ExerciseCatalogState {
             setState((current) => ({
               ...current,
               error:
-                error instanceof Error ? error.message : 'Exercise catalog could not be loaded.',
+                error instanceof Error
+                  ? error.message
+                  : "Exercise catalog could not be loaded.",
               isLoading: false,
             }));
           }
@@ -68,7 +76,7 @@ export function useExerciseCatalog(): ExerciseCatalogState {
       return () => {
         active = false;
       };
-    }, [])
+    }, []),
   );
 
   return state;

@@ -1,5 +1,5 @@
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import {
   assignWorkoutToDate,
@@ -21,7 +21,7 @@ import {
   type LegacyWorkoutPlanDay,
   type WorkoutPlanEntryDetail,
   type WorkoutPlanUndo,
-} from '@/db';
+} from "@/db";
 import {
   addDaysToDateKey,
   getIsoWeek,
@@ -30,19 +30,21 @@ import {
   getIsoYearDateRange,
   parseLocalDateKey,
   toLocalDateKey,
-} from './plan-calendar';
+} from "./plan-calendar";
 import {
   createWorkoutPlanWeek,
   mapWorkoutDefinitions,
   type WorkoutDefinition,
   type WorkoutPlanWeek,
-} from './weekly-plan.viewmodel';
+} from "./weekly-plan.viewmodel";
 
 interface PlanState {
   entries: WorkoutPlanEntryDetail[];
   error: string | null;
   isLoading: boolean;
   isSaving: boolean;
+  savingDates: string[];
+  loadedYear: number | null;
   legacyDays: LegacyWorkoutPlanDay[];
   legacyImportPending: boolean;
   notice: string | null;
@@ -62,31 +64,36 @@ export function useWeeklyPlan(initialDate?: string) {
     error: null,
     isLoading: true,
     isSaving: false,
+    savingDates: [],
+    loadedYear: null,
     legacyDays: [],
     legacyImportPending: false,
     notice: null,
-    profileName: 'Local Athlete',
+    profileName: "Local Athlete",
     undo: null,
     workouts: [],
   });
+
+  const mutationLock = useRef(false);
+  const loadVersion = useRef(0);
 
   const today = toLocalDateKey(new Date());
   const dates = useMemo(() => getIsoWeekDateKeys(year, week), [week, year]);
   const currentIsoWeek = getIsoWeek(new Date());
   const weekModel: WorkoutPlanWeek = useMemo(
     () => createWorkoutPlanWeek(state.entries, year, week),
-    [state.entries, week, year]
+    [state.entries, week, year],
   );
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      const version = ++loadVersion.current;
       async function load() {
         setState((current) => ({
           ...current,
-          entries: reloadKey > 0 ? current.entries : [],
           error: null,
-          isLoading: true,
+          isLoading: current.loadedYear !== year,
         }));
         try {
           const db = await initializeLocalDatabase();
@@ -105,30 +112,30 @@ export function useWeeklyPlan(initialDate?: string) {
             legacyDays = await getLegacyWorkoutPlanDays(
               db,
               getIsoWeekDateKeys(current.year, current.week),
-              today
+              today,
             );
             if (legacyDays.length === 0) {
               await markLegacyWorkoutPlanImportHandled(db);
               legacyImportPending = false;
             }
           }
-          if (!active) return;
+          if (!active || version !== loadVersion.current) return;
           setState((current) => ({
             ...current,
             entries,
             error: null,
             isLoading: false,
-            isSaving: false,
+            loadedYear: year,
             legacyDays,
             legacyImportPending,
             profileName: user.username,
             workouts: mapWorkoutDefinitions(routines),
           }));
         } catch (error) {
-          if (!active) return;
+          if (!active || version !== loadVersion.current) return;
           setState((current) => ({
             ...current,
-            error: messageFrom(error, 'Weekly plan could not be loaded.'),
+            error: messageFrom(error, "Weekly plan could not be loaded."),
             isLoading: false,
           }));
         }
@@ -137,39 +144,75 @@ export function useWeeklyPlan(initialDate?: string) {
       return () => {
         active = false;
       };
-    }, [reloadKey, today, year])
+      // The retry token deliberately restarts the focus refresh.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [reloadKey, today, year]),
   );
 
   const refresh = useCallback(() => setReloadKey((value) => value + 1), []);
   const mutate = useCallback(
-    async (task: () => Promise<{ notice?: string; undo?: WorkoutPlanUndo | null }>) => {
-      setState((current) => ({ ...current, error: null, isSaving: true, notice: null }));
+    async (
+      task: () => Promise<{ notice?: string; undo?: WorkoutPlanUndo | null }>,
+      affectedDates: string[] = dates,
+    ) => {
+      if (mutationLock.current) return;
+      mutationLock.current = true;
+      // Ignore a focus refresh that began before this write.
+      ++loadVersion.current;
+      setState((current) => ({
+        ...current,
+        error: null,
+        isSaving: true,
+        savingDates: affectedDates,
+        notice: null,
+      }));
       try {
         const result = await task();
+        const db = await initializeLocalDatabase();
+        const range = getIsoYearDateRange(year);
+        const entries = await getWorkoutPlanEntries(
+          db,
+          range.startDate,
+          range.endDate,
+        );
+        ++loadVersion.current;
         setState((current) => ({
           ...current,
+          entries,
+          loadedYear: year,
+          isLoading: false,
           isSaving: false,
-          notice: result.notice ?? 'Plan saved.',
+          savingDates: [],
+          notice: result.notice ?? "Plan saved.",
           undo: result.undo ?? null,
         }));
-        refresh();
       } catch (error) {
         setState((current) => ({
           ...current,
-          error: messageFrom(error, 'The plan could not be updated.'),
+          error: messageFrom(error, "The plan could not be updated."),
           isSaving: false,
+          savingDates: [],
         }));
+      } finally {
+        mutationLock.current = false;
       }
     },
-    [refresh]
+    [dates, year],
   );
 
+  const entryDates = (entryId: string) =>
+    state.entries
+      .filter((entry) => entry.workout_plan_entry_id === entryId)
+      .map((entry) => entry.planned_date);
+
   const selectYear = useCallback((nextYear: number) => {
+    if (mutationLock.current) return;
     setYear(nextYear);
     setWeek((current) => Math.min(current, getIsoWeeksInYear(nextYear)));
   }, []);
 
   const goToToday = useCallback(() => {
+    if (mutationLock.current) return;
     const current = getIsoWeek(new Date());
     setYear(current.year);
     setWeek(current.week);
@@ -187,8 +230,14 @@ export function useWeeklyPlan(initialDate?: string) {
     assign: (date: string, routineId: string) =>
       mutate(async () => {
         const db = await initializeLocalDatabase();
-        return { undo: await assignWorkoutToDate(db, { plannedDate: date, routineId, today }) };
-      }),
+        return {
+          undo: await assignWorkoutToDate(db, {
+            plannedDate: date,
+            routineId,
+            today,
+          }),
+        };
+      }, [date]),
     copyPreviousWeek: () =>
       mutate(async () => {
         const db = await initializeLocalDatabase();
@@ -202,8 +251,8 @@ export function useWeeklyPlan(initialDate?: string) {
         const skipped = result.skippedInactive;
         return {
           notice: skipped
-            ? `Week copied. ${skipped} inactive workout${skipped === 1 ? '' : 's'} skipped.`
-            : 'Previous week copied.',
+            ? `Week copied. ${skipped} inactive workout${skipped === 1 ? "" : "s"} skipped.`
+            : "Previous week copied.",
           undo: result.undo,
         };
       }),
@@ -212,44 +261,48 @@ export function useWeeklyPlan(initialDate?: string) {
         const db = await initializeLocalDatabase();
         await markLegacyWorkoutPlanImportHandled(db);
         setState((current) => ({ ...current, legacyImportPending: false }));
-        return { notice: 'Started with an empty plan.' };
+        return { notice: "Started with an empty plan." };
       }),
     importLegacy: (selections: { date: string; routineId: string }[]) =>
       mutate(async () => {
         const db = await initializeLocalDatabase();
         const undo = await importLegacyWorkoutPlan(db, { selections });
         setState((current) => ({ ...current, legacyImportPending: false }));
-        return { notice: 'Legacy schedule imported.', undo };
+        return { notice: "Legacy schedule imported.", undo };
       }),
     move: (entryId: string, targetDate: string) =>
       mutate(async () => {
         const db = await initializeLocalDatabase();
         return {
-          notice: 'Workout moved.',
+          notice: "Workout moved.",
           undo: await moveWorkoutPlanEntry(db, { entryId, targetDate, today }),
         };
-      }),
+      }, [...entryDates(entryId), targetDate]),
     remove: (entryId: string) =>
       mutate(async () => {
         const db = await initializeLocalDatabase();
         return {
-          notice: 'Assignment removed.',
+          notice: "Assignment removed.",
           undo: await removeWorkoutPlanEntry(db, { entryId, today }),
         };
-      }),
+      }, entryDates(entryId)),
     replace: (date: string, routineId: string) =>
       mutate(async () => {
         const db = await initializeLocalDatabase();
         return {
-          notice: 'Workout replaced.',
-          undo: await assignWorkoutToDate(db, { plannedDate: date, routineId, today }),
+          notice: "Workout replaced.",
+          undo: await assignWorkoutToDate(db, {
+            plannedDate: date,
+            routineId,
+            today,
+          }),
         };
-      }),
+      }, [date]),
     replaceAndMove: (entryId: string, routineId: string, targetDate: string) =>
       mutate(async () => {
         const db = await initializeLocalDatabase();
         return {
-          notice: 'Workout changed and the original moved.',
+          notice: "Workout changed and the original moved.",
           undo: await replaceAndMoveWorkoutPlanEntry(db, {
             entryId,
             originalTargetDate: targetDate,
@@ -257,24 +310,39 @@ export function useWeeklyPlan(initialDate?: string) {
             today,
           }),
         };
-      }),
+      }, [...entryDates(entryId), targetDate]),
     retry: refresh,
-    selectWeek: setWeek,
+    selectWeek: (nextWeek: number) => {
+      if (!mutationLock.current) setWeek(nextWeek);
+    },
     selectYear,
     start: async (entryId: string) => {
-      setState((current) => ({ ...current, error: null, isSaving: true }));
+      if (mutationLock.current) return;
+      mutationLock.current = true;
+      setState((current) => ({
+        ...current,
+        error: null,
+        isSaving: true,
+        savingDates: entryDates(entryId),
+      }));
       try {
         const db = await initializeLocalDatabase();
         const result = await startOrResumeWorkoutFromPlanEntry(db, entryId);
         router.push({
-          pathname: '/workout-session/[id]',
+          pathname: "/workout-session/[id]",
           params: { id: result.session.workout_session_id },
         });
       } catch (error) {
         setState((current) => ({
           ...current,
-          error: messageFrom(error, 'Workout could not be opened.'),
+          error: messageFrom(error, "Workout could not be opened."),
+        }));
+      } finally {
+        mutationLock.current = false;
+        setState((current) => ({
+          ...current,
           isSaving: false,
+          savingDates: [],
         }));
       }
     },
@@ -283,8 +351,8 @@ export function useWeeklyPlan(initialDate?: string) {
           mutate(async () => {
             const db = await initializeLocalDatabase();
             await undoWorkoutPlanChange(db, state.undo as WorkoutPlanUndo);
-            return { notice: 'Last plan change undone.' };
-          })
+            return { notice: "Last plan change undone." };
+          }, state.undo?.affectedDates ?? dates)
       : null,
     goToToday,
   };

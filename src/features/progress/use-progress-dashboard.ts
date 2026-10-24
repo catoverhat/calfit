@@ -22,7 +22,7 @@ export function useProgressDashboard() {
 
   const reload = useCallback(async () => {
     const version = ++loadVersion.current;
-    setState((current) => ({ ...current, error: null, isLoading: true }));
+    setState((current) => ({ ...current, error: null, isLoading: current.snapshot === null }));
     try {
       const db = await initializeLocalDatabase();
       const [user, measurements, history] = await Promise.all([
@@ -35,7 +35,7 @@ export function useProgressDashboard() {
       }
     } catch (error) {
       if (version === loadVersion.current) {
-        setState({ snapshot: null, error: error instanceof Error ? error.message : 'Progress could not be loaded.', isLoading: false });
+        setState((current) => ({ ...current, error: error instanceof Error ? error.message : 'Progress could not be loaded.', isLoading: false }));
       }
     }
   }, []);
