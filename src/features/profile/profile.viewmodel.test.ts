@@ -15,7 +15,7 @@ describe('profile validation', () => {
   });
 
   it('rejects invalid optional values and an empty username', () => {
-    expect(validateProfileDraft({ birthDate: '', distanceUnit: 'km', height: '', heightUnit: 'cm', speedUnit: 'kmh', username: ' ', weight: '', weightUnit: 'kg' }).error).toBe('Username is required.');
+    expect(validateProfileDraft({ birthDate: '', distanceUnit: 'km', height: '', heightUnit: 'cm', speedUnit: 'kmh', username: ' ', weight: '', weightUnit: 'kg' }).error).toBe('Display name is required.');
     expect(validateProfileDraft({ birthDate: '2026-99-99', distanceUnit: 'km', height: '', heightUnit: 'cm', speedUnit: 'kmh', username: 'Athlete', weight: '', weightUnit: 'kg' }).values).toBeNull();
   });
 });

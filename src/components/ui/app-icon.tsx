@@ -22,6 +22,8 @@ export type AppIconName =
   | "offline"
   | "wifi"
   | "wifiOff"
+  | "sun"
+  | "moon"
   | "device"
   | "sync"
   | "database"
@@ -87,6 +89,8 @@ const icons: Record<AppIconName, LucideIconName> = {
   offline: "cloud-off",
   wifi: "wifi",
   wifiOff: "wifi-off",
+  sun: "sun",
+  moon: "moon",
   device: "smartphone",
   sync: "refresh-cw",
   database: "database",

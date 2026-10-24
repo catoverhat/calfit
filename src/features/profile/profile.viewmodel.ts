@@ -32,7 +32,7 @@ export function validateProfileDraft(
   draft: ProfileDraft
 ): { error: string; values: null } | { error: null; values: ProfileSaveValues } {
   const username = draft.username.trim();
-  if (!username) return { error: 'Username is required.', values: null };
+  if (!username) return { error: 'Display name is required.', values: null };
 
   const dob = draft.birthDate.trim() || null;
   if (dob && !isValidPastDate(dob)) {

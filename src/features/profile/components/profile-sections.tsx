@@ -1,48 +1,90 @@
-import { useAppTheme } from '@/theme/app-theme-provider';
-import { Pressable, Text, View } from 'react-native';
+import type { ReactNode } from "react";
+import { Pressable, Text, View } from "react-native";
 
-import { AppIcon } from '@/components/ui/app-icon';
-import { Header } from '@/components/layout/header';
-
-import { useStyles } from '../profile-setup-screen.styles';
-
+import { Header } from "@/components/layout/header";
+import { AppIcon, type AppIconName } from "@/components/ui/app-icon";
+import { useAppTheme } from "@/theme/app-theme-provider";
+import { useStyles } from "../profile-setup-screen.styles";
 
 export function ProfileHeader({ name }: { name: string }) {
-  return <Header profileIsInteractive={false} profileName={name} showAction={false} statusLabel="Your profile" />;
+  return (
+    <Header
+      profileIsInteractive={false}
+      profileName={name}
+      showAction={false}
+      statusLabel="Made for you"
+    />
+  );
 }
 
-interface ProfileSecuritySectionProps {
-  isWebSession: boolean;
-  onLock: () => void;
-}
-
-export function ProfileSecuritySection({ isWebSession, onLock }: ProfileSecuritySectionProps) {
+export function ProfileSection({
+  children,
+  description,
+  icon,
+  title,
+}: {
+  children: ReactNode;
+  description: string;
+  icon: AppIconName;
+  title: string;
+}) {
   const styles = useStyles();
   const { SemanticColors } = useAppTheme();
   return (
-    <View style={styles.securitySection}>
+    <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <AppIcon color={SemanticColors.actionSoft} name="lock" size={18} />
-        <Text style={styles.sectionTitle}>App Security</Text>
+        <View style={styles.sectionIcon}>
+          <AppIcon color={SemanticColors.actionSoft} name={icon} size={18} />
+        </View>
+        <View style={styles.sectionHeading}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>
+            {title}
+          </Text>
+          <Text style={styles.sectionDescription}>{description}</Text>
+        </View>
       </View>
-      <View style={styles.securityCard}>
+      <View style={styles.sectionCard}>{children}</View>
+    </View>
+  );
+}
+
+export function ProfileSecuritySection({
+  isWebSession,
+  onLock,
+}: {
+  isWebSession: boolean;
+  onLock: () => void;
+}) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
+  return (
+    <ProfileSection
+      title="Privacy & security"
+      description="Your profile stays on this device."
+      icon="shield"
+    >
+      <View style={styles.securityRow}>
         <View style={styles.securityCopy}>
-          <Text style={styles.securityCardTitle}>Local app lock</Text>
-          <Text style={styles.securityCardDescription}>
+          <Text style={styles.unitLabel}>App lock</Text>
+          <Text style={styles.fieldHelper}>
             {isWebSession
-              ? 'Lock this browser session now. Continue on Web will be required to return.'
-              : 'Lock Calfit now. Device authentication will be required to return.'}
+              ? "Lock this session. Select Continue on Web to return."
+              : "Lock now. Use device authentication to return."}
           </Text>
         </View>
         <Pressable
-          accessibilityLabel="Lock Calfit"
+          accessibilityLabel="Lock Calfit now"
           accessibilityRole="button"
           onPress={onLock}
-          style={({ pressed }) => [styles.lockButton, pressed && styles.lockButtonPressed]}>
-          <AppIcon color={SemanticColors.actionSoft} name="lock" size={18} />
-          <Text style={styles.lockButtonText}>Lock App</Text>
+          style={({ pressed }) => [
+            styles.lockButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <AppIcon color={SemanticColors.actionSoft} name="lock" size={16} />
+          <Text style={styles.lockButtonText}>Lock app</Text>
         </Pressable>
       </View>
-    </View>
+    </ProfileSection>
   );
 }

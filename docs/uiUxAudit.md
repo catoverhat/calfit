@@ -191,3 +191,25 @@ Architecture and design documentation now describe the real appearance system. T
 
 
 Expo color-themes guide verification: re-read https://docs.expo.dev/develop/user-interface/color-themes/ and compared it to the implementation. Confirmed automatic userInterfaceStyle, installed expo-system-ui, and React Native useColorScheme as the live System-mode source. Ran pnpm exec expo config --type introspect: generated iOS UIUserInterfaceStyle is Automatic; Android MainActivity handles uiMode and AppTheme inherits Theme.AppCompat.DayNight.NoActionBar. Persisted user overrides and theme-aware styles extend the guide's minimal example. This verifies source/native configuration, not physical-device behavior.
+
+
+## Profile redesign - 2026-10-24
+
+Applied the UI UX Designer all-in-one and redesign workflows to the existing native/web Profile screen. Goal: make personal details, saved units, automatically saved appearance, and security understandable in a wellness app. Kept the existing semantic palettes, Montserrat/Inter roles, 8 px radii, 8 px spacing rhythm, and feature ownership.
+
+| Before | Implemented change | Reason |
+|---|---|---|
+| Appearance controls and profile fields looked like one continuous form | Separate Appearance, Personal details, Body measurements, Training units, and Privacy & security sections | Scan to the relevant preference and understand which actions save automatically |
+| Three plain theme labels | Equal preview tiles with radio semantics, selected check, icons, current System preview, and saving/error feedback | Make the choice visible and understandable in either theme |
+| Repeated orange uppercase labels and nested controls squeezing input space | Sentence-case labels, recessed full-width inputs, neutral text, optional markers, clear focus borders, and units beside the label | Improve reading and text entry at phone sizes |
+| One narrow layout at every width | Shared 800 px content bound and paired fields on wider screens; stack fields with larger system text | Improve use of space without crowding compact layouts |
+| Save always active; progress text separated from its action | Dirty-state-aware Save changes with inline pending/success/error state and duplicate-write protection | Make save intent and outcome clear |
+| Focus reload could overwrite an unfinished draft | Preserve unsaved edits on refocus and ignore stale reads after edits | Avoid losing form work |
+| Blank editable fields during loading | Local details loading/retry state; disable editing during saves | Prevent overwritten input and conflicting writes |
+| Heavy security action and implementation-focused wording | Compact outlined Lock app action and plain device/browser-specific explanation | Keep security accessible without competing with the primary save action |
+
+Appearance remains saved independently from profile details. Changing weight explains that a changed value adds a measurement. Height feet/inches guidance and canonical unit conversions remain intact. No schema, font embedding, or top-level navigation changes were needed.
+
+Verification: TypeScript and ESLint passed; all 27 Jest suites / 105 tests passed. Added hook coverage for clean/dirty state, refocus preservation, single pending writes, failure retry, and initial-load recovery. Web production export passed to dist/profile-ui-preview. A responsive single-file visual prototype is available at dist/profile-redesign/profile-preview.html (design preview, not the running native screen). Browser screenshot capture was unavailable under sandbox permissions. Device appearance, native text scaling, keyboard behavior, and screen-reader interaction still need manual review. No Expo development server was started.
+
+Profile ordering follow-up: moved Appearance directly above Privacy & security, after the profile details and save action, as requested.
