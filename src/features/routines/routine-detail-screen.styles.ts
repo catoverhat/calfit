@@ -1,7 +1,8 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
-import { ComponentTokens, DesignColors, Fonts, MaxContentWidth, Radius, SemanticColors, Spacing, TypeScale, Typography } from '@/theme/tokens';
+import { Fonts, MaxContentWidth, Radius, Spacing, TypeScale, Typography } from '@/theme/tokens';
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, ComponentTokens }) => StyleSheet.create({
   screen: { backgroundColor: SemanticColors.canvas, flex: 1 },
   scrollContent: { alignItems: 'center', paddingBottom: Spacing.five },
   content: { gap: Spacing.four, maxWidth: MaxContentWidth, width: '100%' },
@@ -18,10 +19,6 @@ export const styles = StyleSheet.create({
   stat: { alignItems: 'center', flex: 1, gap: Spacing.one },
   statValue: { ...Typography.xl, color: SemanticColors.textPrimary, fontFamily: Fonts.heading },
   statLabel: { ...Typography.xs, color: SemanticColors.textMuted, fontFamily: Fonts.bodyMedium, textAlign: 'center' },
-  scheduleRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  scheduleChip: { backgroundColor: DesignColors.surfaceContainerHigh, borderRadius: Radius.full, paddingHorizontal: Spacing.three, paddingVertical: Spacing.two },
-  scheduleText: { ...Typography.xs, color: SemanticColors.actionSoft, fontFamily: Fonts.bodyBold },
-  flexibleText: { ...Typography.sm, color: SemanticColors.textSecondary, fontFamily: Fonts.bodyMedium },
   startButton: { alignItems: 'center', backgroundColor: SemanticColors.action, borderRadius: Radius.md, flexDirection: 'row', gap: Spacing.two, justifyContent: 'center', minHeight: 56, paddingHorizontal: Spacing.three },
   startButtonText: { ...Typography.base, color: DesignColors.onPrimaryContainer, fontFamily: Fonts.bodyBold },
   buttonDisabled: { opacity: 0.45 },
@@ -48,4 +45,4 @@ export const styles = StyleSheet.create({
   secondaryButton: { borderColor: SemanticColors.action, borderRadius: Radius.md, borderWidth: 1, justifyContent: 'center', minHeight: 48, paddingHorizontal: Spacing.three },
   secondaryButtonText: { ...Typography.sm, color: SemanticColors.actionSoft, fontFamily: Fonts.bodyBold },
   pressed: { opacity: 0.7, transform: [{ scale: 0.99 }] },
-});
+}));

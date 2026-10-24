@@ -1,8 +1,9 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
 
-import { SemanticColors, Fonts, Typography, Spacing } from '@/theme/tokens';
+import { Fonts, Typography, Spacing } from '@/theme/tokens';
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ SemanticColors, scheme }) => StyleSheet.create({
   screen: {
     backgroundColor: SemanticColors.canvas,
     flex: 1,
@@ -19,10 +20,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
   },
   photoShade: {
-    backgroundColor: 'rgba(5, 5, 6, 0.42)',
+    backgroundColor: scheme === 'dark' ? 'rgba(5, 5, 6, 0.42)' : 'rgba(244, 247, 242, 0.9)',
   },
   warmShade: {
-    backgroundColor: 'rgba(67, 17, 5, 0.18)',
+    backgroundColor: scheme === 'dark' ? 'rgba(67, 17, 5, 0.18)' : 'rgba(244, 247, 242, 0.12)',
   },
   content: {
     alignItems: 'center',
@@ -37,7 +38,7 @@ export const styles = StyleSheet.create({
   },
   logoTile: {
     alignItems: 'center',
-    backgroundColor: 'rgba(17, 19, 21, 0.82)',
+    backgroundColor: SemanticColors.card,
     borderColor: SemanticColors.action,
     borderCurve: 'continuous',
     borderRadius: 12,
@@ -107,7 +108,7 @@ export const styles = StyleSheet.create({
   messagePanel: {
     alignItems: 'center',
     alignSelf: 'stretch',
-    backgroundColor: 'rgba(34, 37, 41, 0.9)',
+    backgroundColor: SemanticColors.card,
     borderCurve: 'continuous',
     borderRadius: 8,
     boxShadow: '0 16px 26px rgba(0, 0, 0, 0.3)',
@@ -152,8 +153,8 @@ export const styles = StyleSheet.create({
     marginTop: Spacing.four,
   },
   securitySummary: {
-    backgroundColor: 'rgba(17, 19, 21, 0.68)',
-    borderColor: 'rgba(255, 255, 255, 0.14)',
+    backgroundColor: SemanticColors.card,
+    borderColor: SemanticColors.borderStrong,
     borderCurve: 'continuous',
     borderRadius: 8,
     borderWidth: 1,
@@ -205,4 +206,4 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-});
+}));

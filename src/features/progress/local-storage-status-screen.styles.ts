@@ -1,8 +1,9 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
 
-import { DesignColors, Fonts, MaxContentWidth, Radius, SemanticColors, Spacing, Typography } from '@/theme/tokens';
+import { Fonts, MaxContentWidth, Radius, Spacing, Typography } from '@/theme/tokens';
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors }) => StyleSheet.create({
   scrollContent: { alignItems: 'center', flexGrow: 1, paddingBottom: 112, paddingHorizontal: Spacing.three, paddingTop: Spacing.two },
   content: { gap: Spacing.three, maxWidth: Math.min(MaxContentWidth, 430), width: '100%' },
   headingBlock: { gap: Spacing.one },
@@ -26,4 +27,4 @@ export const styles = StyleSheet.create({
   guidelineTitle: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold, fontSize: 13, lineHeight: 17 },
   guidelineBody: { color: SemanticColors.textSecondary, fontFamily: Fonts.bodyMedium, fontSize: 12, lineHeight: 17 },
   pressed: { opacity: 0.72 },
-});
+}));

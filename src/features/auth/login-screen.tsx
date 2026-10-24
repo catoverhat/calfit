@@ -1,4 +1,4 @@
-import { styles } from './login-screen.styles';
+import { useStyles } from './login-screen.styles';
 import { Image } from 'expo-image';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +14,7 @@ import {
 const backgroundImage = require('@/assets/images/login-runner-bg.png');
 
 export function LoginScreen() {
+  const styles = useStyles();
   const { capability, feedback, status, unlock } = useAppLock();
   const insets = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();

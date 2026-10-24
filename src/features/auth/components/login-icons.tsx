@@ -1,8 +1,9 @@
 import { View } from 'react-native';
 
-import { styles } from '../login-screen.styles';
+import { useStyles } from '../login-screen.styles';
 
 export function LightningMark() {
+  const styles = useStyles();
   return (
     <View accessibilityElementsHidden style={styles.lightning}>
       <View style={styles.lightningTop} />

@@ -37,7 +37,6 @@ export interface RoutineDraft {
   exercises: RoutineExerciseDraft[];
   name: string;
   routineId?: string;
-  scheduleDays: number[];
   sourceKey: string;
 }
 
@@ -49,7 +48,7 @@ interface RoutineDraftContextValue {
   moveExercise: (id: string, direction: -1 | 1) => void;
   removeExercise: (id: string) => void;
   removeTarget: (exerciseId: string, targetId: string) => void;
-  setDraftField: <Key extends 'active' | 'description' | 'name' | 'scheduleDays'>(
+  setDraftField: <Key extends 'active' | 'description' | 'name'>(
     key: Key,
     value: RoutineDraft[Key]
   ) => void;
@@ -81,7 +80,6 @@ export function RoutineDraftProvider({ children }: { children: ReactNode }) {
                 description: '',
                 exercises: [],
                 name: '',
-                scheduleDays: [],
                 sourceKey: 'create',
               }
         ),
@@ -201,7 +199,6 @@ function mapRoutineToDraft(routine: RoutineDetail, units: RoutineUnits): Routine
     })),
     name: routine.name,
     routineId: routine.routine_id,
-    scheduleDays: routine.schedules.map((schedule) => schedule.day_of_week),
     sourceKey: `edit:${routine.routine_id}`,
   };
 }

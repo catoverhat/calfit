@@ -6,6 +6,7 @@ import {
 import type { DashboardSnapshot, RoutineDetail, UserRow } from '@/db';
 
 const user: UserRow = {
+  theme_preference: 'system',
   user_id: 'local-user',
   username: 'Local Athlete',
   email: null,
@@ -14,7 +15,7 @@ const user: UserRow = {
   height_unit: 'cm',
   weight_unit: 'kg',
   speed_unit: 'kmh',
-  distance_unit: 'm',
+  distance_unit: 'km',
   created_at: '2026-07-06T12:00:00.000Z',
   updated_at: '2026-07-06T12:00:00.000Z',
 };
@@ -27,7 +28,6 @@ const routine: RoutineDetail = {
   active: 1,
   created_at: '2026-07-06T12:00:00.000Z',
   updated_at: '2026-07-06T12:00:00.000Z',
-  schedules: [],
   exercises: [
     {
       routine_exercise_id: 'routine-exercise-1',
@@ -90,7 +90,6 @@ describe('today dashboard view models', () => {
     const data = createTodayDashboardData(baseSnapshot, new Date('2026-07-06T12:00:00.000Z'));
 
     expect(data.dateLabel).toBe('Monday, Jul 6');
-    expect(data.selectedDate).toBe('06');
     expect(data.syncLabel).toBe('Saved locally');
     expect(data.name).toBe('Local Athlete');
     expect(data.progress).toEqual({

@@ -1,14 +1,16 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
-import { ComponentTokens, SemanticColors } from '@/theme/tokens';
-import { styles } from '../progress-dashboard-screen.styles';
+
+import { useStyles } from '../progress-dashboard-screen.styles';
 import type { ProgressDashboardData, ProgressPeriod } from '../progress.viewmodel';
 import { LinePlot } from './line-plot';
 
 export function PeriodSelector({ period, onChange }: { period: ProgressPeriod; onChange: (period: ProgressPeriod) => void }) {
+  const styles = useStyles();
   return (
     <View accessibilityLabel="Training period" accessibilityRole="tablist" style={styles.periodSelector}>
       {([7, 30, 90] as const).map((days) => (
@@ -27,6 +29,8 @@ export function PeriodSelector({ period, onChange }: { period: ProgressPeriod; o
 }
 
 export function TrainingChart({ data }: { data: ProgressDashboardData }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const [mode, setMode] = useState<'sessions' | 'volume'>('sessions');
   const isSessions = mode === 'sessions';
 
@@ -87,6 +91,8 @@ export function TrainingChart({ data }: { data: ProgressDashboardData }) {
 }
 
 export function WeightTrendCard({ data }: { data: ProgressDashboardData }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <Link href="/progress/measurements" push asChild>
       <Pressable accessibilityLabel={`Body weight. ${data.weightSummary} Open measurements.`} accessibilityRole="button">
@@ -112,6 +118,8 @@ export function WeightTrendCard({ data }: { data: ProgressDashboardData }) {
 }
 
 export function ConsistencyCard({ data }: { data: ProgressDashboardData }) {
+  const styles = useStyles();
+  const { ComponentTokens } = useAppTheme();
   return (
     <View style={styles.card}>
       <View style={styles.cardHeading}>
@@ -149,6 +157,8 @@ export function ConsistencyCard({ data }: { data: ProgressDashboardData }) {
 type ProgressHref = '/progress/history' | '/progress/measurements' | '/progress/storage' | '/workouts';
 
 export function ProgressLink({ href, icon, label }: { href: ProgressHref; icon: AppIconName; label: string }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <Link href={href} push asChild>
       <Pressable accessibilityLabel={label} accessibilityRole="button">
@@ -165,6 +175,8 @@ export function ProgressLink({ href, icon, label }: { href: ProgressHref; icon: 
 }
 
 export function ProgressStatus({ error, isLoading, onRetry }: { error: string | null; isLoading: boolean; onRetry: () => void }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   if (!error && !isLoading) return null;
   return (
     <View accessibilityLiveRegion="polite" style={styles.card}>

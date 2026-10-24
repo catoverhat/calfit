@@ -1,14 +1,17 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Image } from "expo-image";
 import { Link, type Href } from "expo-router";
 import { Pressable, View } from "react-native";
 
 import { AppIcon } from "@/components/ui/app-icon";
 import { ThemedText } from "@/components/ui/themed-text";
-import { SemanticColors } from "@/theme/tokens";
-import { styles } from "../routine-list-screen.styles";
+
+import { useStyles } from "../routine-list-screen.styles";
 import type { RoutineSummaryViewModel } from "../routine.viewmodel";
 
 export function RoutineCard({ routine }: { routine: RoutineSummaryViewModel }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -144,6 +147,8 @@ function Metric({
   label: string;
   value: string;
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <View style={styles.metric}>
       <AppIcon color={SemanticColors.textMuted} name={icon} size={16} />

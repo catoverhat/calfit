@@ -178,6 +178,12 @@ export function createMeasurementTrendSegments(measurements: BodyMeasurementRow[
   return createTrendSegments(weights);
 }
 
+export const HISTORY_FILTERS: { id: ProgressHistoryFilter; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'completed', label: 'Completed' },
+  { id: 'in_progress', label: 'In Progress' },
+];
+
 export function createHistoryGroups(
   history: WorkoutHistoryItem[],
   filter: ProgressHistoryFilter,

@@ -17,12 +17,11 @@ const draft: RoutineDraft = {
     },
   ],
   name: 'Push Day',
-  scheduleDays: [1, 3, 5],
   sourceKey: 'create',
 };
 
 describe('routine view models', () => {
-  it('maps database schedule days and completion state without mock labels', () => {
+  it('maps workout definitions and completion state', () => {
     const result = mapRoutineSummary({
       routine_id: 'push-day',
       user_id_fk: 'local-user',
@@ -33,13 +32,11 @@ describe('routine view models', () => {
       updated_at: '2026-07-06T12:00:00.000Z',
       exercise_count: 3,
       set_count: 10,
-      schedule_days: [1, 3, 5],
       last_completed_at: null,
       image_url: null,
       focus: 'strength',
     });
 
-    expect(result.schedule.map((day) => day.longLabel)).toEqual(['Monday', 'Wednesday', 'Friday']);
     expect(result.lastCompleted).toBe('Never completed');
     expect(result.description).toBe('No description yet.');
   });

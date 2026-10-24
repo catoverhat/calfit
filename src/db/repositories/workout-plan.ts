@@ -5,10 +5,9 @@ import type {
   RoutineDetail,
   WorkoutPlanEntryDetail,
   WorkoutPlanEntryRow,
-  WorkoutPlanSettingsRow,
   WorkoutSessionRow,
 } from '../types';
-import { getRoutineDetail, getRoutineSummaries, type RoutineSummary } from './routines';
+import { getRoutineDetail } from './routines';
 import {
   createWorkoutSessionFromRoutine,
   getInProgressWorkoutSession,
@@ -19,11 +18,6 @@ export interface WorkoutPlanUndo {
   affectedDates: string[];
   before: WorkoutPlanEntryRow[];
   userId: string;
-}
-
-export interface LegacyWorkoutPlanDay {
-  date: string;
-  routines: RoutineSummary[];
 }
 
 export async function getWorkoutPlanEntries(
@@ -65,43 +59,6 @@ export async function getWorkoutPlanEntryForDate(
 ): Promise<WorkoutPlanEntryDetail | null> {
   const [entry] = await getWorkoutPlanEntries(db, plannedDate, plannedDate, userId);
   return entry ?? null;
-}
-
-export async function getWorkoutPlanSettings(
-  db: LocalDatabase,
-  userId = LOCAL_USER_ID,
-  now = new Date().toISOString()
-): Promise<WorkoutPlanSettingsRow> {
-  await db.runAsync(
-    `INSERT OR IGNORE INTO workout_plan_settings (
-      user_id_fk, legacy_import_handled, created_at, updated_at
-    ) VALUES (?, ?, ?, ?)`,
-    userId,
-    0,
-    now,
-    now
-  );
-  const settings = await db.getFirstAsync<WorkoutPlanSettingsRow>(
-    'SELECT * FROM workout_plan_settings WHERE user_id_fk = ?',
-    userId
-  );
-  if (!settings) throw new Error('Workout plan settings could not be loaded.');
-  return settings;
-}
-
-export async function markLegacyWorkoutPlanImportHandled(
-  db: LocalDatabase,
-  userId = LOCAL_USER_ID,
-  now = new Date().toISOString()
-): Promise<void> {
-  await getWorkoutPlanSettings(db, userId, now);
-  await db.runAsync(
-    `UPDATE workout_plan_settings
-    SET legacy_import_handled = 1, updated_at = ?
-    WHERE user_id_fk = ?`,
-    now,
-    userId
-  );
 }
 
 export async function assignWorkoutToDate(
@@ -302,47 +259,6 @@ export async function undoWorkoutPlanChange(db: LocalDatabase, undo: WorkoutPlan
   });
 }
 
-export async function getLegacyWorkoutPlanDays(
-  db: LocalDatabase,
-  dates: string[],
-  today: string,
-  userId = LOCAL_USER_ID
-): Promise<LegacyWorkoutPlanDay[]> {
-  const routines = (await getRoutineSummaries(db, userId)).filter((routine) => routine.active === 1);
-  return dates
-    .filter((date) => date >= today)
-    .map((date) => ({
-      date,
-      routines: routines.filter((routine) => routine.schedule_days.includes(localWeekday(date))),
-    }))
-    .filter((day) => day.routines.length > 0);
-}
-
-export async function importLegacyWorkoutPlan(
-  db: LocalDatabase,
-  input: { selections: { date: string; routineId: string }[]; userId?: string; now?: string }
-): Promise<WorkoutPlanUndo> {
-  const userId = input.userId ?? LOCAL_USER_ID;
-  const now = input.now ?? new Date().toISOString();
-  const dates = [...new Set(input.selections.map((selection) => selection.date))];
-  const undo = await mutateDates(db, userId, dates, async (txn) => {
-    for (const selection of input.selections) {
-      assertDateKey(selection.date);
-      await requireActiveRoutine(txn, selection.routineId);
-      if (await getEntryRowForDate(txn, userId, selection.date)) continue;
-      await insertEntry(txn, {
-        id: createLocalId('workout_plan'),
-        plannedDate: selection.date,
-        routineId: selection.routineId,
-        userId,
-        now,
-      });
-    }
-    await markLegacyWorkoutPlanImportHandled(txn, userId, now);
-  });
-  return undo;
-}
-
 export async function removeFutureWorkoutPlanEntriesForRoutine(
   db: LocalDatabase,
   input: { routineId: string; today: string; userId?: string }
@@ -498,11 +414,6 @@ function localDateKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
     date.getDate()
   ).padStart(2, '0')}`;
-}
-
-function localWeekday(dateKey: string): number {
-  const [year, month, day] = dateKey.split('-').map(Number);
-  return new Date(year, month - 1, day, 12).getDay();
 }
 
 async function runInExclusiveTransaction<T>(

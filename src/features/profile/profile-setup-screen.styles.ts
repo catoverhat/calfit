@@ -1,8 +1,9 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
 
-import { ComponentTokens, DesignColors, Fonts, Typography, Spacing, MaxContentWidth, Radius, SemanticColors, TouchTarget, TypeScale } from '@/theme/tokens';
+import { Fonts, Typography, Spacing, MaxContentWidth, Radius, TouchTarget, TypeScale } from '@/theme/tokens';
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, ComponentTokens }) => StyleSheet.create({
   safeArea: {
     backgroundColor: SemanticColors.canvas,
     flex: 1,
@@ -23,104 +24,6 @@ export const styles = StyleSheet.create({
     maxWidth: Math.min(MaxContentWidth, 640),
     width: '100%',
   },
-  brandBar: {
-    alignItems: 'center',
-    backgroundColor: DesignColors.surfaceContainerLowest,
-    borderColor: SemanticColors.border,
-    borderCurve: 'continuous',
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    minHeight: 56,
-    paddingHorizontal: Spacing.two,
-  },
-  brandLeft: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: Spacing.two,
-  },
-  avatar: {
-    borderColor: SemanticColors.borderStrong,
-    borderRadius: 19,
-    borderWidth: 1,
-    height: 38,
-    width: 38,
-  },
-  avatarFallback: {
-    alignItems: 'center',
-    backgroundColor: SemanticColors.actionTint,
-    borderColor: SemanticColors.action,
-    borderRadius: 19,
-    borderWidth: 1,
-    height: 38,
-    justifyContent: 'center',
-    width: 38,
-  },
-  avatarInitials: {
-    color: SemanticColors.textPrimary,
-    fontFamily: Fonts.bodyBold,
-    fontSize: 12,
-  },
-  brandName: {
-    ...Typography.lg,
-    color: SemanticColors.textPrimary,
-    fontFamily: Fonts.heading,
-  },
-  savedStatus: {
-    alignItems: 'center',
-    backgroundColor: DesignColors.surfaceContainerHigh,
-    borderRadius: 16,
-    flexDirection: 'row',
-    gap: Spacing.one,
-    minHeight: 32,
-    paddingHorizontal: Spacing.two,
-  },
-  savedStatusText: {
-    color: SemanticColors.textPrimary,
-    fontFamily: Fonts.bodyBold,
-    fontSize: 11,
-    lineHeight: 14,
-  },
-  cloudIcon: {
-    height: 20,
-    width: 24,
-  },
-  cloudDomeLarge: {
-    borderColor: SemanticColors.action,
-    borderRadius: Radius.md,
-    borderWidth: 1.8,
-    height: 13,
-    left: 5,
-    position: 'absolute',
-    top: 4,
-    width: 14,
-  },
-  cloudDomeSmall: {
-    borderColor: SemanticColors.action,
-    borderRadius: Radius.sm,
-    borderWidth: 1.8,
-    height: 9,
-    left: 2,
-    position: 'absolute',
-    top: 8,
-    width: 10,
-  },
-  cloudBase: {
-    backgroundColor: DesignColors.onPrimaryContainer,
-    borderBottomColor: SemanticColors.action,
-    borderBottomWidth: 1.8,
-    borderLeftColor: SemanticColors.action,
-    borderLeftWidth: 1.8,
-    borderRightColor: SemanticColors.action,
-    borderRightWidth: 1.8,
-    borderRadius: Radius.sm,
-    bottom: 3,
-    height: 8,
-    left: 2,
-    position: 'absolute',
-    width: 20,
-  },
   heroCopy: {
     gap: Spacing.one,
     paddingTop: Spacing.two,
@@ -136,6 +39,8 @@ export const styles = StyleSheet.create({
     color: SemanticColors.textSecondary,
     fontFamily: Fonts.bodyMedium,
   },
+  appearanceSection: { gap: Spacing.two },
+  appearanceHelper: { ...Typography.sm, color: SemanticColors.textSecondary, fontFamily: Fonts.body },
   formStack: {
     gap: Spacing.two,
     marginTop: Spacing.one,
@@ -180,53 +85,11 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  calendarIcon: {
-    height: 18,
-    width: 18,
-  },
-  calendarTop: {
-    borderColor: SemanticColors.textPrimary,
-    borderTopLeftRadius: 2,
-    borderTopRightRadius: 2,
-    borderWidth: 1.5,
-    height: 6,
-    left: 3,
-    position: 'absolute',
-    top: 3,
-    width: 12,
-  },
-  calendarBody: {
-    borderBottomColor: SemanticColors.textPrimary,
-    borderBottomLeftRadius: 2,
-    borderBottomRightRadius: 2,
-    borderBottomWidth: 1.5,
-    borderLeftColor: SemanticColors.textPrimary,
-    borderLeftWidth: 1.5,
-    borderRightColor: SemanticColors.textPrimary,
-    borderRightWidth: 1.5,
-    height: 10,
-    left: 3,
-    position: 'absolute',
-    top: 7,
-    width: 12,
-  },
   sectionHeader: {
     alignItems: 'center',
     flexDirection: 'row',
     gap: Spacing.one,
     marginTop: Spacing.one,
-  },
-  gearIcon: {
-    alignItems: 'center',
-    height: 18,
-    justifyContent: 'center',
-    width: 18,
-  },
-  gearText: {
-    color: SemanticColors.action,
-    fontFamily: Fonts.bodyBold,
-    fontSize: 20,
-    lineHeight: 20,
   },
   sectionTitle: {
     ...Typography.sm,
@@ -288,44 +151,6 @@ export const styles = StyleSheet.create({
   segmentTextSelected: {
     color: DesignColors.onPrimaryContainer,
   },
-  launchCard: {
-    backgroundColor: DesignColors.surfaceContainer,
-    borderColor: SemanticColors.border,
-    borderCurve: 'continuous',
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    height: 164,
-    justifyContent: 'flex-end',
-    marginTop: Spacing.one,
-    overflow: 'hidden',
-    padding: Spacing.three,
-  },
-  launchOverlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.42)',
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  launchBadge: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: Spacing.one,
-  },
-  launchDot: {
-    backgroundColor: SemanticColors.action,
-    borderRadius: 3,
-    height: 6,
-    width: 6,
-  },
-  launchText: {
-    color: SemanticColors.textPrimary,
-    fontFamily: Fonts.bodyBold,
-    fontSize: 12,
-    lineHeight: 16,
-    textTransform: 'uppercase',
-  },
   saveButton: {
     alignItems: 'center',
     backgroundColor: SemanticColors.action,
@@ -358,12 +183,6 @@ export const styles = StyleSheet.create({
     color: DesignColors.onPrimaryContainer,
     fontFamily: Fonts.bodyBold,
     fontSize: 16,
-    lineHeight: 22,
-  },
-  saveArrow: {
-    color: DesignColors.onPrimaryContainer,
-    fontFamily: Fonts.bodyBold,
-    fontSize: 18,
     lineHeight: 22,
   },
   securitySection: {
@@ -416,4 +235,4 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-});
+}));

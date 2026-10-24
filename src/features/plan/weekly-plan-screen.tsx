@@ -1,3 +1,4 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -14,10 +15,10 @@ import { Header } from '@/components/layout/header';
 import { TabScreen } from '@/components/layout/tab-screen';
 import { AppIcon } from '@/components/ui/app-icon';
 import { ThemedText } from '@/components/ui/themed-text';
-import { DesignColors, SemanticColors } from '@/theme/tokens';
+
 import { DayCard } from './weekly-plan-day-card';
 import { formatWeekRange, getIsoWeek, parseLocalDateKey } from './plan-calendar';
-import { styles } from './weekly-plan-screen.styles';
+import { useStyles } from './weekly-plan-screen.styles';
 import { useWeeklyPlan } from './use-weekly-plan';
 import type { WorkoutDefinition, WorkoutPlanDay } from './weekly-plan.viewmodel';
 
@@ -29,6 +30,8 @@ type TargetState =
   | null;
 
 export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const planner = useWeeklyPlan(initialDate);
   const { width } = useWindowDimensions();
   const wide = width >= 960;
@@ -37,7 +40,6 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
   const [change, setChange] = useState<ChangeState>(null);
   const [target, setTarget] = useState<TargetState>(null);
   const [swapTarget, setSwapTarget] = useState<WorkoutPlanDay | null>(null);
-  const [legacySelections, setLegacySelections] = useState<Record<string, string>>({});
 
   const weeks = useMemo(
     () => Array.from({ length: planner.maxWeek }, (_, index) => index + 1),
@@ -265,23 +267,6 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
         }}
       />
 
-      <LegacyImportSheet
-        days={planner.legacyDays}
-        onDismiss={() => void planner.dismissLegacyImport()}
-        onImport={() =>
-          void planner.importLegacy(
-            planner.legacyDays.map((day) => ({
-              date: day.date,
-              routineId: legacySelections[day.date] ?? day.routines[0]?.routine_id ?? '',
-            }))
-          )
-        }
-        onSelect={(date, routineId) =>
-          setLegacySelections((current) => ({ ...current, [date]: routineId }))
-        }
-        open={planner.legacyImportPending}
-        selections={legacySelections}
-      />
     </>
   );
 }
@@ -294,6 +279,9 @@ function WorkoutPicker({ onClose, onCreate, onSelect, open, title, workouts }: {
   title: string;
   workouts: WorkoutDefinition[];
 }) {
+  const { scheme } = useAppTheme();
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   const [query, setQuery] = useState('');
   const visible = workouts.filter((workout) =>
     `${workout.title} ${workout.description}`.toLowerCase().includes(query.trim().toLowerCase())
@@ -302,7 +290,7 @@ function WorkoutPicker({ onClose, onCreate, onSelect, open, title, workouts }: {
     <Sheet onClose={onClose} open={open} title={title}>
       <View style={styles.searchBox}>
         <AppIcon color={SemanticColors.textMuted} name="search" size={18} />
-        <TextInput
+        <TextInput keyboardAppearance={scheme}
           accessibilityLabel="Search workouts"
           onChangeText={setQuery}
           placeholder="Search workouts"
@@ -343,6 +331,8 @@ function ChoiceSheet({ change, onClose, onMoveOriginal, onReplace }: {
   onMoveOriginal: () => void;
   onReplace: () => void;
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <Sheet onClose={onClose} open={Boolean(change)} title="How should this change work?">
       <ThemedText style={styles.sheetDescription}>
@@ -372,6 +362,8 @@ function TargetSheet({ allowOccupied, onClose, onConfirmSwap, onNextWeek, onPrev
   swapTarget: WorkoutPlanDay | null;
   week: { days: WorkoutPlanDay[]; week: number; year: number };
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <Sheet onClose={onClose} open={open} title={swapTarget ? 'Preview swap' : 'Choose destination'}>
       {swapTarget ? (
@@ -408,39 +400,8 @@ function TargetSheet({ allowOccupied, onClose, onConfirmSwap, onNextWeek, onPrev
   );
 }
 
-function LegacyImportSheet({ days, onDismiss, onImport, onSelect, open, selections }: {
-  days: ReturnType<typeof useWeeklyPlan>['legacyDays'];
-  onDismiss: () => void;
-  onImport: () => void;
-  onSelect: (date: string, routineId: string) => void;
-  open: boolean;
-  selections: Record<string, string>;
-}) {
-  return (
-    <Sheet onClose={onDismiss} open={open} title="Import your old schedule?">
-      <ThemedText style={styles.sheetDescription}>Your recurring training days can become one-time assignments for the remaining days of this week.</ThemedText>
-      <ScrollView contentContainerStyle={styles.sheetList}>
-        {days.map((day) => {
-          const selected = selections[day.date] ?? day.routines[0]?.routine_id;
-          return <View key={day.date} style={styles.importDay}>
-            <ThemedText style={styles.optionTitle}>{parseLocalDateKey(day.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</ThemedText>
-            <View style={styles.importOptions}>
-              {day.routines.map((routine) => (
-                <Pressable accessibilityLabel={`Choose ${routine.name}`} accessibilityRole="button" accessibilityState={{ selected: selected === routine.routine_id }} key={routine.routine_id} onPress={() => onSelect(day.date, routine.routine_id)} style={[styles.importChip, selected === routine.routine_id && styles.importChipSelected]}>
-                  <ThemedText style={[styles.importChipText, selected === routine.routine_id && styles.importChipTextSelected]}>{routine.name}</ThemedText>
-                </Pressable>
-              ))}
-            </View>
-          </View>;
-        })}
-      </ScrollView>
-      <Pressable accessibilityRole="button" onPress={onImport} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Import selections</ThemedText></Pressable>
-      <Pressable accessibilityRole="button" onPress={onDismiss} style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}><ThemedText style={styles.secondaryButtonText}>Start with an empty plan</ThemedText></Pressable>
-    </Sheet>
-  );
-}
-
 function Sheet({ children, onClose, open, title }: { children: React.ReactNode; onClose: () => void; open: boolean; title: string }) {
+  const styles = useStyles();
   return (
     <Modal animationType="slide" onRequestClose={onClose} presentationStyle="overFullScreen" transparent visible={open}>
       <View style={styles.modalBackdrop}>
@@ -455,6 +416,8 @@ function Sheet({ children, onClose, open, title }: { children: React.ReactNode; 
 }
 
 function IconButton({ label, name, onPress }: { label: string; name: 'chevronLeft' | 'chevronRight' | 'close'; onPress: () => void }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return <Pressable accessibilityLabel={label} accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}><AppIcon color={SemanticColors.textPrimary} name={name} size={20} /></Pressable>;
 }
 

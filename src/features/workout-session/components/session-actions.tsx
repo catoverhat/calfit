@@ -1,10 +1,13 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Pressable, Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { DesignColors } from '@/theme/tokens';
-import { styles } from '../active-workout-session-screen.styles';
+
+import { useStyles } from '../active-workout-session-screen.styles';
 
 export function SessionActions({ busy, disabled, onFinish }: { busy: boolean; disabled: boolean; onFinish: () => void }) {
+  const styles = useStyles();
+  const { DesignColors } = useAppTheme();
   return (
     <View style={styles.bottomActions}>
       <Pressable

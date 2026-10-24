@@ -1,7 +1,7 @@
 import type { LocalDatabase } from './types';
 
 export const DATABASE_NAME = 'calfit.db';
-export const DATABASE_VERSION = 5;
+export const DATABASE_VERSION = 8;
 export const LOCAL_USER_ID = 'local-user';
 
 export const STARTER_CATEGORIES = [
@@ -20,12 +20,10 @@ export const EXPECTED_TABLES = [
   'routines',
   'routine_exercises',
   'routine_exercise_targets',
-  'routine_schedules',
   'workout_sessions',
   'workout_exercises',
   'workout_sets',
   'workout_plan_entries',
-  'workout_plan_settings',
   'body_measurements',
 ] as const;
 
@@ -33,6 +31,7 @@ export const CREATE_TABLE_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS users (
     user_id TEXT PRIMARY KEY NOT NULL,
     username TEXT NOT NULL,
+    theme_preference TEXT NOT NULL DEFAULT 'system' CHECK (theme_preference IN ('system', 'light', 'dark')),
     email TEXT,
     dob TEXT,
     height REAL,
@@ -96,20 +95,6 @@ export const CREATE_TABLE_STATEMENTS = [
     FOREIGN KEY (routine_exercise_id_fk) REFERENCES routine_exercises(routine_exercise_id) ON DELETE CASCADE,
     UNIQUE (routine_exercise_id_fk, set_number)
   )`,
-  `CREATE TABLE IF NOT EXISTS routine_schedules (
-    routine_schedule_id TEXT PRIMARY KEY NOT NULL,
-    user_id_fk TEXT NOT NULL,
-    routine_id_fk TEXT NOT NULL,
-    day_of_week INTEGER NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
-    start_date TEXT NOT NULL,
-    end_date TEXT,
-    recurrent INTEGER NOT NULL DEFAULT 1,
-    active INTEGER NOT NULL DEFAULT 1,
-    created_at TEXT NOT NULL,
-    FOREIGN KEY (user_id_fk) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (routine_id_fk) REFERENCES routines(routine_id) ON DELETE CASCADE,
-    UNIQUE (routine_id_fk, day_of_week)
-  )`,
   `CREATE TABLE IF NOT EXISTS workout_sessions (
     workout_session_id TEXT PRIMARY KEY NOT NULL,
     user_id_fk TEXT NOT NULL,
@@ -117,7 +102,7 @@ export const CREATE_TABLE_STATEMENTS = [
     scheduled_for TEXT,
     started_at TEXT,
     completed_at TEXT,
-    status TEXT NOT NULL CHECK (status IN ('scheduled', 'in_progress', 'completed', 'skipped')),
+    status TEXT NOT NULL CHECK (status IN ('in_progress', 'completed')),
     created_at TEXT NOT NULL,
     FOREIGN KEY (user_id_fk) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (routine_id_fk) REFERENCES routines(routine_id) ON DELETE SET NULL
@@ -161,13 +146,6 @@ export const CREATE_TABLE_STATEMENTS = [
     FOREIGN KEY (workout_session_id_fk) REFERENCES workout_sessions(workout_session_id) ON DELETE SET NULL,
     UNIQUE (user_id_fk, planned_date)
   )`,
-  `CREATE TABLE IF NOT EXISTS workout_plan_settings (
-    user_id_fk TEXT PRIMARY KEY NOT NULL,
-    legacy_import_handled INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    FOREIGN KEY (user_id_fk) REFERENCES users(user_id) ON DELETE CASCADE
-  )`,
   `CREATE TABLE IF NOT EXISTS body_measurements (
     body_measurement_id TEXT PRIMARY KEY NOT NULL,
     user_id_fk TEXT NOT NULL,
@@ -184,8 +162,6 @@ export const CREATE_INDEX_STATEMENTS = [
   'CREATE INDEX IF NOT EXISTS idx_routines_user ON routines(user_id_fk)',
   'CREATE INDEX IF NOT EXISTS idx_routine_exercises_routine ON routine_exercises(routine_id_fk, order_index)',
   'CREATE INDEX IF NOT EXISTS idx_routine_targets_exercise ON routine_exercise_targets(routine_exercise_id_fk, set_number)',
-  'CREATE INDEX IF NOT EXISTS idx_routine_schedules_routine ON routine_schedules(routine_id_fk, day_of_week)',
-  'CREATE INDEX IF NOT EXISTS idx_routine_schedules_user ON routine_schedules(user_id_fk, active, day_of_week)',
   'CREATE INDEX IF NOT EXISTS idx_workout_sessions_user ON workout_sessions(user_id_fk, started_at)',
   'CREATE INDEX IF NOT EXISTS idx_workout_exercises_session ON workout_exercises(workout_session_id_fk, order_index)',
   'CREATE INDEX IF NOT EXISTS idx_workout_sets_exercise ON workout_sets(workout_exercise_id_fk, set_number)',
@@ -194,67 +170,50 @@ export const CREATE_INDEX_STATEMENTS = [
   'CREATE INDEX IF NOT EXISTS idx_body_measurements_user ON body_measurements(user_id_fk, created_at)',
 ] as const;
 
+const pendingMigrations = new WeakMap<LocalDatabase, Promise<void>>();
+
 export async function migrateDbIfNeeded(db: LocalDatabase): Promise<void> {
+  let migration = pendingMigrations.get(db);
+  if (!migration) {
+    migration = initializeSchema(db);
+    pendingMigrations.set(db, migration);
+  }
+  try {
+    await migration;
+  } finally {
+    if (pendingMigrations.get(db) === migration) pendingMigrations.delete(db);
+  }
+}
+
+async function initializeSchema(db: LocalDatabase): Promise<void> {
   const versionRow = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   const currentVersion = versionRow?.user_version ?? 0;
-
-  if (currentVersion > DATABASE_VERSION) {
-    throw new Error(`Unsupported local database version: ${currentVersion}`);
-  }
-
-  if (currentVersion >= DATABASE_VERSION) {
-    await db.execAsync('PRAGMA foreign_keys = ON');
-    return;
-  }
-
-  await db.execAsync('PRAGMA journal_mode = WAL');
+  if (currentVersion > DATABASE_VERSION) throw new Error(`Unsupported local database version: ${currentVersion}`);
   await db.execAsync('PRAGMA foreign_keys = ON');
+  if (currentVersion === DATABASE_VERSION) return;
+  await db.execAsync('PRAGMA journal_mode = WAL');
 
-  if (currentVersion < 1) {
-    for (const statement of CREATE_TABLE_STATEMENTS) {
-      await db.execAsync(statement);
+  const rebuild = async (txn: LocalDatabase) => {
+    // Pre-release baseline: discard all old development records, child tables first.
+    if (currentVersion > 0) {
+      for (const table of [...EXPECTED_TABLES, 'routine_schedules', 'workout_plan_settings'].reverse()) await txn.execAsync(`DROP TABLE IF EXISTS ${table}`);
+    }
+    for (const statement of CREATE_TABLE_STATEMENTS) await txn.execAsync(statement);
+    for (const statement of CREATE_INDEX_STATEMENTS) await txn.execAsync(statement);
+    await txn.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+  };
+  if (db.withExclusiveTransactionAsync) {
+    await db.withExclusiveTransactionAsync(rebuild);
+  } else {
+    await db.execAsync('BEGIN IMMEDIATE');
+    try {
+      await rebuild(db);
+      await db.execAsync('COMMIT');
+    } catch (error) {
+      await db.execAsync('ROLLBACK');
+      throw error;
     }
   }
-
-  if (currentVersion === 1) {
-    const bodyMeasurementsStatement = CREATE_TABLE_STATEMENTS.find((statement) =>
-      statement.includes('CREATE TABLE IF NOT EXISTS body_measurements')
-    );
-
-    if (bodyMeasurementsStatement) {
-      await db.execAsync(bodyMeasurementsStatement);
-    }
-  }
-
-  if (currentVersion < 3) {
-    const routineSchedulesStatement = CREATE_TABLE_STATEMENTS.find((statement) =>
-      statement.includes('CREATE TABLE IF NOT EXISTS routine_schedules')
-    );
-
-    if (routineSchedulesStatement) {
-      await db.execAsync(routineSchedulesStatement);
-    }
-  }
-
-  if (currentVersion > 0 && currentVersion < 4) {
-    await db.execAsync('ALTER TABLE workout_sets ADD COLUMN completed_at TEXT');
-    await db.runAsync("UPDATE users SET distance_unit = 'km' WHERE distance_unit = 'm'");
-  }
-
-  if (currentVersion > 0 && currentVersion < 5) {
-    for (const tableName of ['workout_plan_entries', 'workout_plan_settings']) {
-      const statement = CREATE_TABLE_STATEMENTS.find((candidate) =>
-        candidate.includes(`CREATE TABLE IF NOT EXISTS ${tableName}`)
-      );
-      if (statement) await db.execAsync(statement);
-    }
-  }
-
-  for (const statement of CREATE_INDEX_STATEMENTS) {
-    await db.execAsync(statement);
-  }
-
-  await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
 export async function seedStarterData(db: LocalDatabase, now = new Date().toISOString()): Promise<void> {
@@ -262,6 +221,7 @@ export async function seedStarterData(db: LocalDatabase, now = new Date().toISOS
     `INSERT OR IGNORE INTO users (
       user_id,
       username,
+      theme_preference,
       email,
       dob,
       height,
@@ -271,9 +231,10 @@ export async function seedStarterData(db: LocalDatabase, now = new Date().toISOS
       distance_unit,
       created_at,
       updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     LOCAL_USER_ID,
     'Local Athlete',
+    'system',
     null,
     null,
     null,

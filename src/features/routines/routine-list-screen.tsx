@@ -1,3 +1,4 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Link, type Href } from "expo-router";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
@@ -5,9 +6,9 @@ import { Header } from "@/components/layout/header";
 import { TabScreen } from "@/components/layout/tab-screen";
 import { AppIcon } from "@/components/ui/app-icon";
 import { ThemedText } from "@/components/ui/themed-text";
-import { DesignColors, SemanticColors } from "@/theme/tokens";
+
 import { RoutineCard } from "./components/routine-card";
-import { styles } from "./routine-list-screen.styles";
+import { useStyles } from "./routine-list-screen.styles";
 import { useRoutineList } from "./use-routine-list";
 
 const ErrorState = ({
@@ -17,6 +18,8 @@ const ErrorState = ({
   error: string;
   reload: () => void;
 }) => {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <View style={styles.stateCard}>
       <View style={styles.stateIcon}>
@@ -37,6 +40,8 @@ const ErrorState = ({
 };
 
 export function RoutineListScreen() {
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   const { error, isLoading, profileName, reload, routines } = useRoutineList();
 
   return (
@@ -103,7 +108,7 @@ export function RoutineListScreen() {
             <View style={styles.stateIcon}>
               <AppIcon
                 color={SemanticColors.actionSoft}
-                name="routines"
+                name="strength"
                 size={24}
               />
             </View>

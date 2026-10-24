@@ -1,15 +1,16 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
 import { ThemedText } from '@/components/ui/themed-text';
-import { DesignColors, SemanticColors } from '@/theme/tokens';
+
 import type {
   RoutineDraft,
   RoutineExerciseDraft,
   RoutineTargetDraft,
   RoutineUnits,
 } from '../routine-draft-context';
-import { styles } from '../routine-editor-screen.styles';
+import { useStyles } from '../routine-editor-screen.styles';
 import { RoutineExerciseCard } from './routine-exercise-card';
 
 type SetDraftField = <Key extends 'active' | 'description' | 'name'>(
@@ -22,6 +23,9 @@ export function RoutineIdentitySection({ draft, mode, setDraftField }: {
   mode: 'create' | 'edit';
   setDraftField: SetDraftField;
 }) {
+  const { scheme } = useAppTheme();
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   return (
     <View style={styles.section}>
       <View style={styles.titleRow}>
@@ -45,7 +49,7 @@ export function RoutineIdentitySection({ draft, mode, setDraftField }: {
       </View>
       <View style={styles.fieldGroup}>
         <ThemedText style={styles.label}>Workout name</ThemedText>
-        <TextInput
+        <TextInput keyboardAppearance={scheme}
           accessibilityLabel="Workout name"
           onChangeText={(value) => setDraftField('name', value)}
           placeholder="e.g. Upper Body Power"
@@ -57,7 +61,7 @@ export function RoutineIdentitySection({ draft, mode, setDraftField }: {
       </View>
       <View style={styles.fieldGroup}>
         <ThemedText style={styles.label}>Description</ThemedText>
-        <TextInput
+        <TextInput keyboardAppearance={scheme}
           accessibilityLabel="Workout description"
           multiline
           onChangeText={(value) => setDraftField('description', value)}
@@ -97,6 +101,8 @@ export function RoutineExerciseSection({
     value: string
   ) => void;
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <View style={styles.section}>
       <View style={styles.exerciseHeader}>
@@ -144,6 +150,8 @@ export function RoutineExerciseSection({
 }
 
 export function RoutineEditorFooter({ isSaving, onSave }: { isSaving: boolean; onSave: () => void }) {
+  const styles = useStyles();
+  const { DesignColors } = useAppTheme();
   return (
     <Pressable
       accessibilityLabel="Save workout"

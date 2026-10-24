@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import type { ExerciseEditorCategoryOption } from '../exercise-catalog.viewmodel';
-import { styles } from './exercise-editor-form.styles';
+import { useStyles } from './exercise-editor-form.styles';
 
 export function ExerciseCategoryPicker({
   categories,
@@ -12,6 +12,7 @@ export function ExerciseCategoryPicker({
   onSelect: (categoryId: string) => void;
   selectedId: string | null;
 }) {
+  const styles = useStyles();
   return (
     <View style={styles.categoryGroup}>
       <Text style={styles.inputLabel}>Category</Text>

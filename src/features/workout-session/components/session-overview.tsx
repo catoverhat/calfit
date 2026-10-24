@@ -1,9 +1,10 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { SemanticColors } from '@/theme/tokens';
 
-import { styles } from '../active-workout-session-screen.styles';
+
+import { useStyles } from '../active-workout-session-screen.styles';
 
 export function SessionOverview({
   completedSets,
@@ -18,6 +19,8 @@ export function SessionOverview({
   title: string;
   totalSets: number;
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const progress = totalSets > 0 ? completedSets / totalSets : 0;
 
   return (

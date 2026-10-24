@@ -1,7 +1,8 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { ScrollView, StyleSheet, type ScrollViewProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useTheme } from "@/theme/use-theme";
+
 
 export type TabScreenProps = Omit<
   ScrollViewProps,
@@ -15,8 +16,8 @@ export type TabScreenProps = Omit<
  * scrollable content never renders behind Android's edge-to-edge status bar.
  */
 export function TabScreen({ style, ...props }: TabScreenProps) {
-  const theme = useTheme();
-  const backgroundStyle = { backgroundColor: theme.background };
+  const { SemanticColors } = useAppTheme();
+  const backgroundStyle = { backgroundColor: SemanticColors.canvas };
 
   return (
     <SafeAreaView

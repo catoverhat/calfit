@@ -1,8 +1,9 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
 
-import { DesignColors, SemanticColors, Fonts, Typography, TypeScale, Spacing, Radius, TouchTarget, MaxContentWidth } from '@/theme/tokens';
+import { Fonts, Typography, TypeScale, Spacing, Radius, TouchTarget, MaxContentWidth } from '@/theme/tokens';
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors }) => StyleSheet.create({
   scrollContent: {
     alignItems: 'center',
     flexGrow: 1,
@@ -305,4 +306,4 @@ export const styles = StyleSheet.create({
   statusCard: { backgroundColor: DesignColors.surfaceContainerLow, borderColor: SemanticColors.border, borderRadius: Radius.md, borderWidth: 1, gap: Spacing.one, padding: Spacing.three },
   statusTitle: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold, fontSize: 14, lineHeight: 19 },
   statusBody: { color: SemanticColors.textSecondary, fontFamily: Fonts.bodyMedium, fontSize: 12, lineHeight: 17 },
-});
+}));

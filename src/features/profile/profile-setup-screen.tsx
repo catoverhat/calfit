@@ -1,9 +1,11 @@
+import { ProfileAppearanceSection } from './components/profile-appearance-section';
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAppLock } from '@/features/auth/app-lock-context';
 import { AppIcon } from '@/components/ui/app-icon';
-import { DesignColors, SemanticColors } from '@/theme/tokens';
+
 import {
   CalendarIcon,
   GearIcon,
@@ -15,10 +17,12 @@ import {
   ProfileHeader,
   ProfileSecuritySection,
 } from './components/profile-sections';
-import { styles } from './profile-setup-screen.styles';
+import { useStyles } from './profile-setup-screen.styles';
 import { useProfile } from './use-profile';
 
 export function ProfileSetupScreen() {
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   const { capability, lock } = useAppLock();
   const {
     changeHeightUnit,
@@ -49,6 +53,8 @@ export function ProfileSetupScreen() {
               Keep your measurements and training units accurate across the app.
             </Text>
           </View>
+
+          <ProfileAppearanceSection />
 
           <View style={styles.formStack}>
             <SetupField

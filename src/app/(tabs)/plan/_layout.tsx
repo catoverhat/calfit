@@ -1,18 +1,24 @@
-import { Stack } from 'expo-router/stack';
+import { useAppTheme } from "@/theme/app-theme-provider";
+import { Stack } from "expo-router/stack";
 
-import { Fonts, SemanticColors } from '@/theme/tokens';
+import { Fonts } from "@/theme/tokens";
 
 export default function PlanLayout() {
+  const { SemanticColors } = useAppTheme();
   return (
     <Stack
       screenOptions={{
         contentStyle: { backgroundColor: SemanticColors.canvas },
-        headerBackButtonDisplayMode: 'minimal',
+        headerBackButtonDisplayMode: "minimal",
         headerShadowVisible: false,
         headerStyle: { backgroundColor: SemanticColors.canvas },
         headerTintColor: SemanticColors.textPrimary,
-        headerTitleStyle: { color: SemanticColors.actionSoft, fontFamily: Fonts.heading },
-      }}>
+        headerTitleStyle: {
+          color: SemanticColors.actionSoft,
+          fontFamily: Fonts.heading,
+        },
+      }}
+    >
       <Stack.Screen name="index" options={{ headerShown: false }} />
     </Stack>
   );

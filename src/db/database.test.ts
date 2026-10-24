@@ -4,7 +4,7 @@ import { DATABASE_VERSION, EXPECTED_TABLES, LOCAL_USER_ID, migrateDbIfNeeded, se
 import { MemoryDb } from './testing/memory-database';
 
 describe('database initialization', () => {
-  it('migrates the v1 schema and seeds local starter data', async () => {
+  it('creates the current schema and seeds local starter data', async () => {
     const db = new MemoryDb();
 
     await migrateDbIfNeeded(db);
@@ -17,7 +17,7 @@ describe('database initialization', () => {
     );
     expect(db.tables.get('categories')).toHaveLength(STARTER_CATEGORIES.length);
     expect(db.createdTables.has('body_measurements')).toBe(true);
-    expect(db.createdTables.has('routine_schedules')).toBe(true);
+    expect(db.createdTables.has('routine_schedules')).toBe(false);
   });
 
 });

@@ -1,12 +1,13 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
 import type { ExerciseEditorData, ExerciseEditorSaveInput } from '../exercise-catalog.viewmodel';
-import { DesignColors, SemanticColors } from '@/theme/tokens';
+
 
 import { ExerciseCategoryPicker } from './exercise-category-picker';
-import { styles } from './exercise-editor-form.styles';
+import { useStyles } from './exercise-editor-form.styles';
 
 export function ExerciseEditorForm({
   data,
@@ -23,6 +24,9 @@ export function ExerciseEditorForm({
   mode: 'create' | 'edit';
   saveExercise: (input: ExerciseEditorSaveInput) => Promise<void>;
 }) {
+  const { scheme } = useAppTheme();
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   const [active, setActive] = useState(data.initialValues.active);
   const [categoryId, setCategoryId] = useState<string | null>(data.initialValues.categoryId);
   const [description, setDescription] = useState(data.initialValues.description);
@@ -74,7 +78,7 @@ export function ExerciseEditorForm({
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Exercise Name</Text>
-            <TextInput
+            <TextInput keyboardAppearance={scheme}
               accessibilityLabel="Exercise Name"
               onChangeText={setName}
               placeholder="Exercise name"
@@ -87,7 +91,7 @@ export function ExerciseEditorForm({
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Description & Coaching Cues</Text>
-            <TextInput
+            <TextInput keyboardAppearance={scheme}
               accessibilityLabel="Description and Coaching Cues"
               multiline
               onChangeText={setDescription}
@@ -102,7 +106,7 @@ export function ExerciseEditorForm({
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Image URL (Optional)</Text>
-            <TextInput
+            <TextInput keyboardAppearance={scheme}
               accessibilityLabel="Exercise image URL"
               autoCapitalize="none"
               autoCorrect={false}
@@ -118,7 +122,7 @@ export function ExerciseEditorForm({
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Video URL (Optional)</Text>
-            <TextInput
+            <TextInput keyboardAppearance={scheme}
               accessibilityLabel="Exercise video URL"
               autoCapitalize="none"
               autoCorrect={false}
@@ -176,6 +180,8 @@ export function ExerciseEditorForm({
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <View
       accessibilityLabel={`${label}: ${value}`}
@@ -192,6 +198,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 function StatusCard({ body, title }: { body: string; title: string }) {
+  const styles = useStyles();
   return (
     <View style={styles.statusMessage}>
       <Text style={styles.statusMessageTitle}>{title}</Text>

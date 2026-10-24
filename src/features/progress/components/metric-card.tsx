@@ -1,9 +1,10 @@
 import { Text, View } from 'react-native';
 
 import type { ProgressMetric } from '../progress.viewmodel';
-import { styles } from '../progress-dashboard-screen.styles';
+import { useStyles } from '../progress-dashboard-screen.styles';
 
 export function MetricCard({ metric }: { metric: ProgressMetric }) {
+  const styles = useStyles();
   return (
     <View accessible accessibilityLabel={`${metric.label}: ${metric.value}. ${metric.helper}`} style={styles.metricCard}>
       <Text style={styles.metricLabel}>{metric.label}</Text>

@@ -1,3 +1,4 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Linking, Modal, Pressable, ScrollView, Text, View } from 'react-native';
@@ -5,16 +6,18 @@ import { useState } from 'react';
 
 import { AppIcon } from '@/components/ui/app-icon';
 import { completeWorkoutSession, initializeLocalDatabase } from '@/db';
-import { SemanticColors } from '@/theme/tokens';
+
 import { SessionActions } from './components/session-actions';
 import { SessionOverview } from './components/session-overview';
 import { SessionRestCard } from './components/session-rest-card';
 import { SessionSetEditor } from './components/session-set-editor';
-import { styles } from './active-workout-session-screen.styles';
+import { useStyles } from './active-workout-session-screen.styles';
 import { useActiveWorkout } from './use-active-workout';
 import type { WorkoutSessionViewModel } from './workout-session.viewmodel';
 
 export function ActiveWorkoutSessionScreen({ workout }: { workout: WorkoutSessionViewModel }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const active = useActiveWorkout(workout);
   const [finishError, setFinishError] = useState<string | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
@@ -121,6 +124,8 @@ export function ActiveWorkoutSessionScreen({ workout }: { workout: WorkoutSessio
 }
 
 function ExerciseDetails({ exercise }: { exercise: WorkoutSessionViewModel['exercises'][number] }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const safeVideoUrl = exercise.videoUrl && /^https?:\/\//i.test(exercise.videoUrl) ? exercise.videoUrl : null;
   return (
     <View style={styles.exerciseDetails}>

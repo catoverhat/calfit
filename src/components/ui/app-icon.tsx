@@ -47,7 +47,6 @@ export type AppIconName =
   | "body"
   | "running"
   | "today"
-  | "routines"
   | "exercises"
   | "home"
   | "workouts"
@@ -113,7 +112,6 @@ const icons: Record<AppIconName, LucideIconName> = {
   body: "biceps-flexed",
   running: "activity",
   today: "calendar",
-  routines: "route",
   exercises: "list",
   home: "house",
   workouts: "dumbbell",

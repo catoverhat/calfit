@@ -1,14 +1,15 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { ComponentTokens, DesignColors, SemanticColors } from '@/theme/tokens';
+
 import type {
   WorkoutMetricField,
   WorkoutSessionExerciseViewModel,
   WorkoutSessionSetViewModel,
   WorkoutSessionViewModel,
 } from '../workout-session.viewmodel';
-import { styles } from '../active-workout-session-screen.styles';
+import { useStyles } from '../active-workout-session-screen.styles';
 
 export function SessionSetEditor({
   exercise,
@@ -27,6 +28,8 @@ export function SessionSetEditor({
   sets: Record<string, WorkoutSessionSetViewModel>;
   units: Pick<WorkoutSessionViewModel, 'distanceUnit' | 'speedUnit' | 'weightUnit'>;
 }) {
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   return (
     <View style={styles.setList}>
       {exercise.sets.map((sourceSet) => {
@@ -82,6 +85,9 @@ function MetricInput({ field, onBlur, onChange, set, units }: {
   set: WorkoutSessionSetViewModel;
   units: Pick<WorkoutSessionViewModel, 'distanceUnit' | 'speedUnit' | 'weightUnit'>;
 }) {
+  const { scheme } = useAppTheme();
+  const styles = useStyles();
+  const { SemanticColors, ComponentTokens } = useAppTheme();
   const labels: Record<WorkoutMetricField, string> = {
     reps: 'Reps',
     weight: `Weight (${units.weightUnit})`,
@@ -92,7 +98,7 @@ function MetricInput({ field, onBlur, onChange, set, units }: {
   return (
     <View style={styles.dynamicField}>
       <Text style={styles.dynamicFieldLabel}>{labels[field]}</Text>
-      <TextInput
+      <TextInput keyboardAppearance={scheme}
         accessibilityLabel={`${labels[field]} for set ${set.setNumber}`}
         keyboardType={field === 'reps' || field === 'duration' ? 'number-pad' : 'decimal-pad'}
         onBlur={onBlur}

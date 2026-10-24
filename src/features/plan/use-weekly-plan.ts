@@ -4,21 +4,16 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import {
   assignWorkoutToDate,
   copyWorkoutPlanWeek,
-  getLegacyWorkoutPlanDays,
   getLocalUserProfile,
   getRoutineSummaries,
   getWorkoutPlanEntries,
-  getWorkoutPlanSettings,
-  importLegacyWorkoutPlan,
   initializeLocalDatabase,
-  markLegacyWorkoutPlanImportHandled,
   moveWorkoutPlanEntry,
   removeWorkoutPlanEntry,
   replaceAndMoveWorkoutPlanEntry,
   seedDemoRoutinesIfEmpty,
   startOrResumeWorkoutFromPlanEntry,
   undoWorkoutPlanChange,
-  type LegacyWorkoutPlanDay,
   type WorkoutPlanEntryDetail,
   type WorkoutPlanUndo,
 } from "@/db";
@@ -45,8 +40,6 @@ interface PlanState {
   isSaving: boolean;
   savingDates: string[];
   loadedYear: number | null;
-  legacyDays: LegacyWorkoutPlanDay[];
-  legacyImportPending: boolean;
   notice: string | null;
   profileName: string;
   undo: WorkoutPlanUndo | null;
@@ -66,8 +59,6 @@ export function useWeeklyPlan(initialDate?: string) {
     isSaving: false,
     savingDates: [],
     loadedYear: null,
-    legacyDays: [],
-    legacyImportPending: false,
     notice: null,
     profileName: "Local Athlete",
     undo: null,
@@ -99,26 +90,11 @@ export function useWeeklyPlan(initialDate?: string) {
           const db = await initializeLocalDatabase();
           await seedDemoRoutinesIfEmpty(db);
           const range = getIsoYearDateRange(year);
-          const [entries, routines, user, settings] = await Promise.all([
+          const [entries, routines, user] = await Promise.all([
             getWorkoutPlanEntries(db, range.startDate, range.endDate),
             getRoutineSummaries(db),
             getLocalUserProfile(db),
-            getWorkoutPlanSettings(db),
           ]);
-          let legacyDays: LegacyWorkoutPlanDay[] = [];
-          let legacyImportPending = settings.legacy_import_handled === 0;
-          if (legacyImportPending) {
-            const current = getIsoWeek(new Date());
-            legacyDays = await getLegacyWorkoutPlanDays(
-              db,
-              getIsoWeekDateKeys(current.year, current.week),
-              today,
-            );
-            if (legacyDays.length === 0) {
-              await markLegacyWorkoutPlanImportHandled(db);
-              legacyImportPending = false;
-            }
-          }
           if (!active || version !== loadVersion.current) return;
           setState((current) => ({
             ...current,
@@ -126,8 +102,6 @@ export function useWeeklyPlan(initialDate?: string) {
             error: null,
             isLoading: false,
             loadedYear: year,
-            legacyDays,
-            legacyImportPending,
             profileName: user.username,
             workouts: mapWorkoutDefinitions(routines),
           }));
@@ -255,20 +229,6 @@ export function useWeeklyPlan(initialDate?: string) {
             : "Previous week copied.",
           undo: result.undo,
         };
-      }),
-    dismissLegacyImport: () =>
-      mutate(async () => {
-        const db = await initializeLocalDatabase();
-        await markLegacyWorkoutPlanImportHandled(db);
-        setState((current) => ({ ...current, legacyImportPending: false }));
-        return { notice: "Started with an empty plan." };
-      }),
-    importLegacy: (selections: { date: string; routineId: string }[]) =>
-      mutate(async () => {
-        const db = await initializeLocalDatabase();
-        const undo = await importLegacyWorkoutPlan(db, { selections });
-        setState((current) => ({ ...current, legacyImportPending: false }));
-        return { notice: "Legacy schedule imported.", undo };
       }),
     move: (entryId: string, targetDate: string) =>
       mutate(async () => {

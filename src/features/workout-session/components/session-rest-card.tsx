@@ -1,8 +1,9 @@
 import { Pressable, Text, View } from 'react-native';
 
-import { styles } from '../active-workout-session-screen.styles';
+import { useStyles } from '../active-workout-session-screen.styles';
 
 export function SessionRestCard({ onAdd, onSkip, seconds }: { onAdd: () => void; onSkip: () => void; seconds: number }) {
+  const styles = useStyles();
   return (
     <View style={styles.restCard}>
       <View style={styles.restRing}>

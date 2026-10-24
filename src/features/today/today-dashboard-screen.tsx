@@ -1,6 +1,6 @@
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { styles } from "./today-dashboard-screen.styles";
+import { useStyles } from "./today-dashboard-screen.styles";
 
 import {
   ProgressSummary,
@@ -11,6 +11,7 @@ import {
 import { useTodayDashboard } from "./use-today-dashboard";
 
 export function TodayDashboardScreen() {
+  const styles = useStyles();
   const {
     data: todayDashboard,
     error,

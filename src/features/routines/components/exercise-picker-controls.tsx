@@ -1,9 +1,10 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { DesignColors, SemanticColors } from '@/theme/tokens';
-import { styles } from '../add-exercise-screen.styles';
+
+import { useStyles } from '../add-exercise-screen.styles';
 
 export function ExercisePickerFilters({
   filters,
@@ -18,11 +19,14 @@ export function ExercisePickerFilters({
   query: string;
   selectedFilter: string;
 }) {
+  const { scheme } = useAppTheme();
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   return (
     <>
       <View style={styles.searchBox}>
         <AppIcon color={DesignColors.onSurfaceVariant} name="search" size={18} />
-        <TextInput
+        <TextInput keyboardAppearance={scheme}
           accessibilityLabel="Search exercises"
           onChangeText={onQueryChange}
           placeholder="Search exercises..."
@@ -70,6 +74,8 @@ export function ExercisePickerFooter({
   routineName: string;
   selectedCount: number;
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <>
       <Pressable

@@ -1,11 +1,12 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
 import type { ExerciseCatalogRow } from '@/db';
-import { DesignColors, SemanticColors } from '@/theme/tokens';
 
-import { styles } from '../add-exercise-screen.styles';
+
+import { useStyles } from '../add-exercise-screen.styles';
 export function ExercisePickerRow({
   exercise,
   onToggle,
@@ -15,6 +16,8 @@ export function ExercisePickerRow({
   onToggle: () => void;
   selected: boolean;
 }) {
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   return (
     <View style={[styles.exerciseRow, selected && styles.exerciseRowSelected]}>
       <Image

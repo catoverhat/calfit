@@ -3,19 +3,12 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { TabScreen } from '@/components/layout/tab-screen';
 import { WorkoutHistoryCard } from './components/workout-history-card';
-import { createHistoryGroups, type ProgressHistoryFilter } from './progress.viewmodel';
-import { styles } from './workout-history-screen.styles';
+import { HISTORY_FILTERS, createHistoryGroups, type ProgressHistoryFilter } from './progress.viewmodel';
+import { useStyles } from './workout-history-screen.styles';
 import { useWorkoutHistory } from './use-workout-history';
 
-const filters = [
-  { id: 'all', label: 'All' },
-  { id: 'completed', label: 'Completed' },
-  { id: 'in_progress', label: 'In Progress' },
-  { id: 'scheduled', label: 'Scheduled' },
-  { id: 'skipped', label: 'Skipped' },
-] satisfies { id: ProgressHistoryFilter; label: string }[];
-
 export function WorkoutHistoryScreen() {
+  const styles = useStyles();
   const { error, history, isLoading, weightUnit } = useWorkoutHistory();
   const [selectedFilter, setSelectedFilter] = useState<ProgressHistoryFilter>('all');
   const groups = useMemo(() => createHistoryGroups(history, selectedFilter, weightUnit), [history, selectedFilter, weightUnit]);
@@ -27,8 +20,8 @@ export function WorkoutHistoryScreen() {
           <Text style={styles.title}>Workout History</Text>
           <Text style={styles.subtitle}>Review every locally saved workout session.</Text>
         </View>
-        <ScrollView horizontal contentContainerStyle={styles.filterContent} showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-          {filters.map((filter) => {
+        <ScrollView accessibilityLabel="Workout history filters" horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.filterContent}>
+          {HISTORY_FILTERS.map((filter) => {
             const selected = filter.id === selectedFilter;
             return (
               <Pressable accessibilityLabel={`Filter by ${filter.label}`} accessibilityRole="button" accessibilityState={{ selected }} key={filter.id} onPress={() => setSelectedFilter(filter.id)} style={({ pressed }) => [styles.filterChip, selected && styles.filterChipSelected, pressed && styles.pressed]}>
@@ -54,5 +47,6 @@ export function WorkoutHistoryScreen() {
 }
 
 function StatusCard({ body, title }: { body: string; title: string }) {
+  const styles = useStyles();
   return <View style={styles.statusCard}><Text style={styles.statusTitle}>{title}</Text><Text style={styles.statusBody}>{body}</Text></View>;
 }

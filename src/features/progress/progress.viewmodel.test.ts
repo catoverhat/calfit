@@ -3,6 +3,7 @@
 import type { BodyMeasurementRow, UserRow, WorkoutHistoryItem } from '@/db';
 import {
   createHistoryGroups,
+  HISTORY_FILTERS,
   createMeasurementViewItems,
   createProgressDashboardData,
   createWorkoutSummaryData,
@@ -10,8 +11,9 @@ import {
 } from './progress.viewmodel';
 
 const user: UserRow = {
+  theme_preference: 'system',
   user_id: 'local-user', username: 'Local Athlete', email: null, dob: null, height: null,
-  height_unit: 'cm', weight_unit: 'kg', speed_unit: 'kmh', distance_unit: 'm',
+  height_unit: 'cm', weight_unit: 'kg', speed_unit: 'kmh', distance_unit: 'km',
   created_at: '2026-07-01T12:00:00.000Z', updated_at: '2026-07-01T12:00:00.000Z',
 };
 
@@ -40,7 +42,11 @@ describe('progress view models', () => {
     const groups = createHistoryGroups(history, 'completed', 'kg');
     expect(groups).toHaveLength(1);
     expect(groups[0].workouts[0]).toEqual(expect.objectContaining({ completion: 50, duration: '60m', statusLabel: 'Completed', volume: '500 kg' }));
-    expect(createHistoryGroups(history, 'skipped', 'kg')).toEqual([]);
+    expect(createHistoryGroups(history, 'in_progress', 'kg')).toEqual([]);
+  });
+
+  it('exposes only supported session filters', () => {
+    expect(HISTORY_FILTERS.map((filter) => filter.id)).toEqual(['all', 'completed', 'in_progress']);
   });
 
   it('creates a real summary from one persisted session', () => {

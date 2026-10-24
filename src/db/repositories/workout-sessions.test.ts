@@ -12,7 +12,6 @@ import {
   startOrResumeWorkoutFromRoutine,
   startWorkoutFromRoutine,
   updateRoutine,
-  updateRoutineExerciseTarget,
 } from '@/db';
 import { MemoryDb } from '../testing/memory-database';
 
@@ -80,13 +79,8 @@ describe('workout session repository', () => {
       routineId: routine.routine_id,
       name: 'Strength A Edited',
       description: 'Edited later',
+      exercises: [{ exerciseId: squat.exercise_id, targets: [{ targetReps: 3, targetWeight: 160, restTimeSeconds: 240 }] }],
       now: '2026-07-07T09:00:00.000Z',
-    });
-    await updateRoutineExerciseTarget(db, {
-      routineExerciseTargetId: 'target-squat-1',
-      targetReps: 3,
-      targetWeight: 160,
-      restTimeSeconds: 240,
     });
 
     history = await getWorkoutHistory(db);
@@ -119,18 +113,7 @@ describe('workout session repository', () => {
     );
     expect(sessionDetail).toEqual(expect.objectContaining({ workout_session_id: 'session-strength', status: 'completed' }));
 
-    await startWorkoutFromRoutine(db, {
-      id: 'session-scheduled',
-      routineId: routine.routine_id,
-      scheduledFor: '2026-07-08T13:00:00.000Z',
-      now: '2026-07-07T10:00:00.000Z',
-      status: 'scheduled',
-    });
-    history = await getWorkoutHistory(db);
-    expect(history.map((item) => item.status)).toEqual(expect.arrayContaining(['completed', 'scheduled']));
-    expect(await getWorkoutSessionDetail(db, 'session-scheduled')).toEqual(
-      expect.objectContaining({ started_at: null, status: 'scheduled' })
-    );
+
   });
 
   it('resumes an active session and timestamps completed sets', async () => {

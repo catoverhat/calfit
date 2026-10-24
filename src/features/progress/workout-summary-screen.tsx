@@ -2,10 +2,11 @@ import { Text, View } from 'react-native';
 
 import { TabScreen } from '@/components/layout/tab-screen';
 import { WorkoutSummaryActions, WorkoutSummaryHero, WorkoutSummaryStats } from './components/workout-summary-sections';
-import { styles } from './workout-summary-screen.styles';
+import { useStyles } from './workout-summary-screen.styles';
 import { useWorkoutSummary } from './use-workout-summary';
 
 export function WorkoutSummaryScreen({ sessionId }: { sessionId?: string }) {
+  const styles = useStyles();
   const { data, error, isLoading } = useWorkoutSummary(sessionId);
 
   return (
@@ -20,5 +21,6 @@ export function WorkoutSummaryScreen({ sessionId }: { sessionId?: string }) {
 }
 
 function StatusCard({ body, title }: { body: string; title: string }) {
+  const styles = useStyles();
   return <View style={styles.statusCard}><Text style={styles.statusTitle}>{title}</Text><Text style={styles.statusBody}>{body}</Text></View>;
 }

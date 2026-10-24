@@ -8,7 +8,6 @@ import type {
   RoutineExerciseTargetRow,
   RoutineExerciseWithTargets,
   RoutineRow,
-  RoutineScheduleRow,
 } from '../types';
 import { seedBuiltInExercisesIfEmpty } from './exercises';
 
@@ -36,7 +35,6 @@ export interface CreateRoutineInput {
   description?: string | null;
   active?: boolean;
   exercises: CreateRoutineExerciseInput[];
-  scheduleDays?: number[];
   now?: string;
 }
 
@@ -46,24 +44,12 @@ export interface UpdateRoutineInput {
   description?: string | null;
   active?: boolean;
   exercises?: CreateRoutineExerciseInput[];
-  scheduleDays?: number[];
   now?: string;
-}
-
-export interface UpdateRoutineTargetInput {
-  routineExerciseTargetId: string;
-  targetReps?: number | null;
-  targetWeight?: number | null;
-  targetSpeed?: number | null;
-  targetDurationSeconds?: number | null;
-  targetDistance?: number | null;
-  restTimeSeconds?: number | null;
 }
 
 export interface RoutineSummary extends RoutineRow {
   exercise_count: number;
   set_count: number;
-  schedule_days: number[];
   last_completed_at: string | null;
   image_url: string | null;
   focus: 'cardio' | 'strength';
@@ -87,7 +73,6 @@ const DEMO_ROUTINES: readonly CreateRoutineInput[] = [
     id: 'push-day',
     name: 'Push Day',
     description: 'Focus on chest, shoulders, and triceps with heavy compound movements.',
-    scheduleDays: [1, 3, 5],
     exercises: [
       strengthExercise('bench-press', 4, 8, 70),
       strengthExercise('shoulder-press', 3, 10, 35),
@@ -98,7 +83,6 @@ const DEMO_ROUTINES: readonly CreateRoutineInput[] = [
     id: 'leg-day',
     name: 'Leg Day',
     description: 'High volume hypertrophy for quads, hamstrings, and calves.',
-    scheduleDays: [2],
     exercises: [
       strengthExercise('squat', 4, 8, 80),
       strengthExercise('romanian-deadlift', 4, 10, 70),
@@ -109,7 +93,6 @@ const DEMO_ROUTINES: readonly CreateRoutineInput[] = [
     id: 'full-body-power',
     name: 'Full Body',
     description: 'Efficient full body conditioning for busy days.',
-    scheduleDays: [5],
     exercises: [
       strengthExercise('goblet-squat', 4, 10, 28),
       strengthExercise('dumbbell-press', 4, 8, 24),
@@ -120,7 +103,6 @@ const DEMO_ROUTINES: readonly CreateRoutineInput[] = [
     id: 'running-day',
     name: 'Running Day',
     description: 'Tempo running and intervals for cardiovascular endurance.',
-    scheduleDays: [3, 6],
     exercises: [
       cardioExercise('warm-up-jog', { targetDurationSeconds: 480, targetSpeed: 8 }),
       cardioExercise('tempo-run', { targetDistance: 5000, targetSpeed: 11 }),
@@ -163,7 +145,6 @@ export async function getRoutineSummaries(
         ...routine,
         exercise_count: exercises.length,
         set_count: targets.length,
-        schedule_days: (detail?.schedules ?? []).map((schedule) => schedule.day_of_week),
         last_completed_at: completed?.completed_at ?? null,
         image_url: exercises.find((exercise) => exercise.exercise.image_url)?.exercise.image_url ?? null,
         focus: isCardio ? 'cardio' : 'strength',
@@ -191,7 +172,6 @@ export async function createRoutine(db: LocalDatabase, input: CreateRoutineInput
       now
     );
     await insertRoutineExercises(txn, routineId, input.exercises, now);
-    await insertRoutineSchedules(txn, routineId, userId, input.scheduleDays ?? [], now);
   });
 
   const routine = await getRoutineDetail(db, routineId);
@@ -232,36 +212,7 @@ export async function updateRoutine(db: LocalDatabase, input: UpdateRoutineInput
       await insertRoutineExercises(txn, input.routineId, input.exercises, now);
     }
 
-    if (input.scheduleDays) {
-      await txn.runAsync('DELETE FROM routine_schedules WHERE routine_id_fk = ?', input.routineId);
-      await insertRoutineSchedules(
-        txn,
-        input.routineId,
-        existing.user_id_fk,
-        input.scheduleDays,
-        now
-      );
-    }
   });
-}
-
-export async function updateRoutineExerciseTarget(
-  db: LocalDatabase,
-  input: UpdateRoutineTargetInput
-): Promise<void> {
-  await db.runAsync(
-    `UPDATE routine_exercise_targets
-    SET target_reps = ?, target_weight = ?, target_speed = ?, target_duration_seconds = ?,
-      target_distance = ?, rest_time_seconds = ?
-    WHERE routine_exercise_target_id = ?`,
-    input.targetReps ?? null,
-    input.targetWeight ?? null,
-    input.targetSpeed ?? null,
-    input.targetDurationSeconds ?? null,
-    input.targetDistance ?? null,
-    input.restTimeSeconds ?? null,
-    input.routineExerciseTargetId
-  );
 }
 
 export async function getRoutineDetail(
@@ -313,26 +264,7 @@ export async function getRoutineDetail(
     });
   }
 
-  const schedules = await db.getAllAsync<RoutineScheduleRow>(
-    `SELECT * FROM routine_schedules
-    WHERE routine_id_fk = ? AND active = 1
-    ORDER BY day_of_week ASC`,
-    routineId
-  );
-  return { ...routine, exercises, schedules };
-}
-
-export async function getTodayRoutine(
-  db: LocalDatabase,
-  userId = LOCAL_USER_ID,
-  asOf = new Date()
-): Promise<RoutineDetail | null> {
-  const active = (await getRoutineSummaries(db, userId)).filter((routine) => routine.active === 1);
-  const weekday = asOf.getDay();
-  const due = active.filter((routine) => routine.schedule_days.includes(weekday));
-  const selected = due.sort(compareDueRoutines)[0] ?? active.sort(compareFallbackRoutines)[0];
-
-  return selected ? getRoutineDetail(db, selected.routine_id) : null;
+  return { ...routine, exercises };
 }
 
 export async function seedDemoRoutinesIfEmpty(
@@ -359,9 +291,6 @@ export async function seedDemoRoutinesIfEmpty(
   if (!routine) throw new Error('A starter workout could not be loaded.');
   return routine;
 }
-
-/** Kept for compatibility with the Today feature. */
-export const seedStarterRoutineIfEmpty = seedDemoRoutinesIfEmpty;
 
 async function insertRoutineExercises(
   db: LocalDatabase,
@@ -403,36 +332,6 @@ async function insertRoutineExercises(
   }
 }
 
-async function insertRoutineSchedules(
-  db: LocalDatabase,
-  routineId: string,
-  userId: string,
-  scheduleDays: number[],
-  now: string
-): Promise<void> {
-  const uniqueDays = [...new Set(scheduleDays)].sort((left, right) => left - right);
-  for (const day of uniqueDays) {
-    if (!Number.isInteger(day) || day < 0 || day > 6) {
-      throw new Error(`Invalid routine schedule day: ${day}`);
-    }
-    await db.runAsync(
-      `INSERT INTO routine_schedules (
-        routine_schedule_id, user_id_fk, routine_id_fk, day_of_week, start_date,
-        end_date, recurrent, active, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      createLocalId('routine_schedule'),
-      userId,
-      routineId,
-      day,
-      now.slice(0, 10),
-      null,
-      1,
-      1,
-      now
-    );
-  }
-}
-
 async function runInExclusiveTransaction<T>(
   db: LocalDatabase,
   task: (txn: LocalDatabase) => Promise<T>
@@ -459,20 +358,6 @@ function mapExerciseFromRoutineJoin(row: RoutineExerciseQueryRow): ExerciseRow {
     created_at: row.exercise_created_at,
     updated_at: row.exercise_updated_at,
   };
-}
-
-function compareDueRoutines(left: RoutineSummary, right: RoutineSummary): number {
-  if (left.last_completed_at === null && right.last_completed_at !== null) return -1;
-  if (left.last_completed_at !== null && right.last_completed_at === null) return 1;
-  const completionCompare = String(left.last_completed_at ?? '').localeCompare(
-    String(right.last_completed_at ?? '')
-  );
-  return completionCompare !== 0 ? completionCompare : compareFallbackRoutines(left, right);
-}
-
-function compareFallbackRoutines(left: RoutineSummary, right: RoutineSummary): number {
-  const updatedCompare = right.updated_at.localeCompare(left.updated_at);
-  return updatedCompare !== 0 ? updatedCompare : left.routine_id.localeCompare(right.routine_id);
 }
 
 function strengthExercise(

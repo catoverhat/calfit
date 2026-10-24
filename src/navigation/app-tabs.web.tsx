@@ -1,3 +1,5 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import type { Href } from 'expo-router';
 import {
   TabList,
@@ -11,8 +13,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
 import { ThemedText } from '@/components/ui/themed-text';
-import { ThemedView } from '@/components/ui/themed-view';
-import { DesignColors, Fonts, MaxContentWidth, Radius, SemanticColors, Spacing, Typography } from '@/theme/tokens';
+import { Fonts, MaxContentWidth, Radius, Spacing, Typography } from '@/theme/tokens';
 
 const WEB_TAB_BAR_SPACE = 92;
 
@@ -32,6 +33,7 @@ type TabButtonProps = TabTriggerSlotProps & {
 };
 
 export default function AppTabs() {
+  const styles = useStyles();
   return (
     <Tabs>
       <TabSlot style={styles.tabSlot} />
@@ -59,6 +61,8 @@ export default function AppTabs() {
 }
 
 function TabButton({ icon, isFocused, label, ...props }: TabButtonProps) {
+  const styles = useStyles();
+  const { DesignColors } = useAppTheme();
   const color = isFocused ? DesignColors.primaryContainer : DesignColors.secondary;
 
   return (
@@ -76,16 +80,17 @@ function TabButton({ icon, isFocused, label, ...props }: TabButtonProps) {
 }
 
 function CustomTabList(props: TabListProps) {
+  const styles = useStyles();
   return (
     <View {...props} style={styles.tabListContainer}>
-      <ThemedView style={styles.innerContainer}>
+      <View style={styles.innerContainer}>
         {props.children}
-      </ThemedView>
+      </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles(({ DesignColors, SemanticColors }) => StyleSheet.create({
   tabSlot: {
     height: '100%',
     paddingBottom: WEB_TAB_BAR_SPACE,
@@ -137,4 +142,4 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.58,
   },
-});
+}));

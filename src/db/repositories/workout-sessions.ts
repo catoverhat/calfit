@@ -11,7 +11,6 @@ import type {
   WorkoutHistoryItem,
   WorkoutSessionDetail,
   WorkoutSessionRow,
-  WorkoutSessionStatus,
   WorkoutSetRow,
 } from '../types';
 
@@ -22,7 +21,6 @@ export interface StartWorkoutFromRoutineInput {
   scheduledFor?: string | null;
   startedAt?: string;
   now?: string;
-  status?: Extract<WorkoutSessionStatus, 'scheduled' | 'in_progress'>;
 }
 
 export interface LogWorkoutSetInput {
@@ -76,7 +74,6 @@ export async function createWorkoutSessionFromRoutine(
   const now = input.now ?? new Date().toISOString();
   const startedAt = input.startedAt ?? now;
   const userId = input.userId ?? LOCAL_USER_ID;
-  const status = input.status ?? 'in_progress';
 
   const routineExercises = await db.getAllAsync<RoutineExerciseRow>(
     `SELECT *
@@ -105,9 +102,9 @@ export async function createWorkoutSessionFromRoutine(
       userId,
       input.routineId,
       input.scheduledFor ?? null,
-      status === 'in_progress' ? startedAt : null,
+      startedAt,
       null,
-      status,
+      'in_progress',
     now
   );
 

@@ -1,10 +1,11 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import { Header } from "@/components/layout/header";
 import { AppIcon } from "@/components/ui/app-icon";
-import { DesignColors, SemanticColors } from "@/theme/tokens";
-import { styles } from "../today-dashboard-screen.styles";
+
+import { useStyles } from "../today-dashboard-screen.styles";
 import type {
   TodayDashboardData,
   TodayDashboardRoutine,
@@ -41,6 +42,8 @@ export function TodayRoutineCard({
   onStart: () => void;
   routine: TodayDashboardRoutine | null;
 }) {
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   const startDisabled = isLoading || isStarting || !canStart || routine?.state === 'completed' || routine?.state === 'unavailable';
 
   return (
@@ -130,6 +133,8 @@ export function ProgressSummary({
 }: {
   progress: TodayDashboardData["progress"];
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeading}>
@@ -174,6 +179,8 @@ export function ProgressSummary({
 }
 
 export function TrainingTip({ tip }: { tip: string }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <View style={styles.tipCard}>
       <View style={styles.tipIcon}>
@@ -185,6 +192,7 @@ export function TrainingTip({ tip }: { tip: string }) {
 }
 
 export function StatusCard({ body, title }: { body: string; title: string }) {
+  const styles = useStyles();
   return (
     <View accessibilityLiveRegion="polite" style={styles.statusCard}>
       <Text style={styles.statusTitle}>{title}</Text>

@@ -1,7 +1,8 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
-import { ComponentTokens, DesignColors, Fonts, MaxContentWidth, Radius, SemanticColors, Spacing, TypeScale, Typography } from '@/theme/tokens';
+import { Fonts, MaxContentWidth, Radius, Spacing, TypeScale, Typography } from '@/theme/tokens';
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, ComponentTokens }) => StyleSheet.create({
   screen: { backgroundColor: SemanticColors.canvas, flex: 1 },
   scrollContent: { alignItems: 'center', flexGrow: 1, paddingBottom: 112, paddingHorizontal: Spacing.three, paddingTop: Spacing.two },
   content: { gap: Spacing.four, maxWidth: Math.min(MaxContentWidth, 640), width: '100%' },
@@ -18,12 +19,6 @@ export const styles = StyleSheet.create({
   label: { ...TypeScale.labelMd, color: SemanticColors.textPrimary, letterSpacing: 0.4, textTransform: 'uppercase' },
   nameInput: { ...Typography.lg, backgroundColor: ComponentTokens.input.background, borderColor: ComponentTokens.input.borderColor, borderRadius: Radius.md, borderWidth: 1, color: SemanticColors.textPrimary, fontFamily: Fonts.heading, minHeight: 56, paddingHorizontal: Spacing.three },
   descriptionInput: { ...Typography.sm, backgroundColor: ComponentTokens.input.background, borderColor: ComponentTokens.input.borderColor, borderRadius: Radius.md, borderWidth: 1, color: SemanticColors.textPrimary, fontFamily: Fonts.body, minHeight: 104, padding: Spacing.three },
-  weekdayRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  weekdayButton: { alignItems: 'center', backgroundColor: DesignColors.surfaceContainerLow, borderColor: SemanticColors.border, borderRadius: Radius.full, borderWidth: 1, height: 42, justifyContent: 'center', width: 42 },
-  weekdayButtonSelected: { backgroundColor: SemanticColors.action, borderColor: SemanticColors.action },
-  weekdayText: { ...Typography.sm, color: SemanticColors.textSecondary, fontFamily: Fonts.bodyBold },
-  weekdayTextSelected: { color: DesignColors.onPrimaryContainer },
-  fieldHint: { ...Typography.xs, color: SemanticColors.textMuted, fontFamily: Fonts.body },
   exerciseHeader: { alignItems: 'flex-end', flexDirection: 'row', justifyContent: 'space-between' },
   sectionTitle: { ...TypeScale.headlineMd, color: SemanticColors.textPrimary },
   exerciseCount: { ...Typography.xs, color: SemanticColors.textMuted, fontFamily: Fonts.bodyBold },
@@ -60,4 +55,4 @@ export const styles = StyleSheet.create({
   stateContent: { alignItems: 'center', flexGrow: 1, gap: Spacing.three, justifyContent: 'center', padding: Spacing.four },
   stateText: { ...Typography.sm, color: SemanticColors.textSecondary, fontFamily: Fonts.body, textAlign: 'center' },
   pressed: { opacity: 0.7, transform: [{ scale: 0.99 }] },
-});
+}));

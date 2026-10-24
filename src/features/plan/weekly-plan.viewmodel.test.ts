@@ -33,7 +33,7 @@ function planEntry(): WorkoutPlanEntryDetail {
     routine: {
       routine_id: 'workout-1', user_id_fk: 'local-user', name: 'Push Day', description: null,
       active: 1, created_at: '2026-10-01T12:00:00.000Z', updated_at: '2026-10-01T12:00:00.000Z',
-      exercises: [], schedules: [],
+      exercises: [],
     },
   };
 }

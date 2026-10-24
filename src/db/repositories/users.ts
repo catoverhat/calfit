@@ -1,6 +1,6 @@
 import { LOCAL_USER_ID } from '../schema';
 import { createLocalId } from '../id';
-import type { LocalDatabase, UserRow } from '../types';
+import type { LocalDatabase, ThemePreference, UserRow } from '../types';
 import type { DistanceUnit, HeightUnit, SpeedUnit, WeightUnit } from '../units';
 
 export interface SaveLocalProfileInput {
@@ -81,4 +81,10 @@ async function runInExclusiveTransaction<T>(
     result = await task(txn);
   });
   return result;
+}
+
+export async function saveThemePreference(db: LocalDatabase, preference: ThemePreference, userId = LOCAL_USER_ID): Promise<void> {
+  if (!['system', 'light', 'dark'].includes(preference)) throw new Error('Invalid appearance preference.');
+  const result = await db.runAsync('UPDATE users SET theme_preference = ?, updated_at = ? WHERE user_id = ?', preference, new Date().toISOString(), userId);
+  if (result.changes === 0) throw new Error('Local user profile not found.');
 }

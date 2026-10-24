@@ -1,8 +1,9 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
 
-import { DesignColors, SemanticColors, Fonts, Typography, Spacing, Radius, ComponentTokens, MaxContentWidth } from '@/theme/tokens';
+import { Fonts, Typography, Spacing, Radius, MaxContentWidth } from '@/theme/tokens';
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, ComponentTokens }) => StyleSheet.create({
   scrollContent: {
     alignItems: 'center',
     flexGrow: 1,
@@ -31,15 +32,18 @@ export const styles = StyleSheet.create({
     lineHeight: 18,
     maxWidth: 280,
   },
-  filterScroll: {
-    marginHorizontal: -Spacing.three,
-  },
+  filterScroll: { flexGrow: 0, flexShrink: 0 },
   filterContent: {
+    alignItems: 'center',
     gap: Spacing.two,
-    paddingHorizontal: Spacing.three,
+    paddingRight: Spacing.two,
   },
   filterChip: {
     alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 88,
+    flexShrink: 0,
+    paddingVertical: Spacing.two,
     backgroundColor: DesignColors.surfaceContainerLow,
     borderColor: SemanticColors.border,
     borderCurve: 'continuous',
@@ -53,10 +57,10 @@ export const styles = StyleSheet.create({
     borderColor: SemanticColors.action,
   },
   filterText: {
+    ...Typography.xs,
+    textAlign: 'center',
     color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 11,
-    lineHeight: 16,
   },
   filterTextSelected: {
     color: DesignColors.onPrimaryContainer,
@@ -184,4 +188,4 @@ export const styles = StyleSheet.create({
   statusCard: { backgroundColor: DesignColors.surfaceContainerLow, borderColor: SemanticColors.border, borderRadius: Radius.md, borderWidth: 1, gap: Spacing.one, padding: Spacing.three },
   statusTitle: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold, fontSize: 14, lineHeight: 19 },
   statusBody: { color: SemanticColors.textSecondary, fontFamily: Fonts.bodyMedium, fontSize: 12, lineHeight: 17 },
-});
+}));

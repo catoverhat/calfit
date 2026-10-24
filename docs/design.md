@@ -116,7 +116,7 @@ Calfit is a wellness app supporting sustainable movement, training, and personal
 
 ## Colors
 
-The October 2026 wellness palette supersedes the earlier neutral-charcoal, neon-green, and blue accent combination. Dark mode remains the supported appearance; light-system settings deliberately use the same dark palette.
+The October 2026 wellness palette supersedes the earlier neutral-charcoal, neon-green, and blue accent combination. Appearance defaults to System and follows device changes live. Profile also offers explicit Light and Dark choices, stored locally and applied immediately. Dark and light palettes share the same semantic roles; styles and navigation must consume the active theme.
 
 - **Electric Orange (#FF854D):** A softer orange reserved for primary actions and active navigation. Pair filled actions with deep brown #29180F, never white. Pale peach #FFBC99 supports text-only secondary actions.
 - **Canvas (#141918), cards (#202925), elevated (#2B3631):** Low-chroma green-charcoal surfaces provide tonal depth without heavy shadows or large saturated fields.
@@ -126,6 +126,12 @@ The October 2026 wellness palette supersedes the earlier neutral-charcoal, neon-
 - **Rose (#FFB4AF):** Errors and destructive meaning; pair with explicit labels and recovery guidance.
 - **Sand (#E5C580):** Personal records and milestones; avoid using achievement color to imply a health assessment.
 - **Borders:** #2B3631 is decorative grouping only. Controls requiring visible boundaries use #71867A. Focus uses teal, and selected states also expose labels or accessibility state.
+
+### Light appearance
+
+Use canvas #F4F7F2, white cards, elevated sage-white #E8EFE7, and ink #1C2B23. Secondary text is #40574A and muted/placeholder text #4C6354. Use terracotta #B94717 with white labels for filled primary actions; it provides contrast on light surfaces while preserving the orange brand family. Text-only actions use #A84010, information/focus uses teal #17655E, success uses #2F6945, and errors use #AF2639. Do not reuse dark-mode translucent containers behind light-mode text.
+
+Palette definitions, semantic roles, and component color roles live in `src/theme/palettes.ts`. Platform-independent spacing, typography, fonts, and geometry remain in `src/theme/tokens.ts`. Components read `useAppTheme()` and themed stylesheet hooks, so already mounted screens update when appearance changes. Only the dark startup image treatment is photographic; its overlay and control surfaces adapt to the active palette.
 
 Research, contrast measurements, implementation status, and remaining visual checks are tracked in [uiUxAudit.md](uiUxAudit.md).
 

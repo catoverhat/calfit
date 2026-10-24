@@ -1,11 +1,14 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Link } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
-import { DesignColors, SemanticColors } from '@/theme/tokens';
+
 import type { ProgressHistoryCard } from '../progress.viewmodel';
-import { styles } from '../workout-history-screen.styles';
+import { useStyles } from '../workout-history-screen.styles';
 
 export function WorkoutHistoryCard({ workout }: { workout: ProgressHistoryCard }) {
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   const completed = workout.status === 'completed';
   const ringColor = completed ? SemanticColors.action : DesignColors.secondary;
 
@@ -37,5 +40,6 @@ export function WorkoutHistoryCard({ workout }: { workout: ProgressHistoryCard }
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
+  const styles = useStyles();
   return <View style={styles.metric}><Text style={styles.metricLabel}>{label}</Text><Text style={styles.metricValue}>{value}</Text></View>;
 }

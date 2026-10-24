@@ -5,10 +5,11 @@ import { TabScreen } from '@/components/layout/tab-screen';
 import { BodyMeasurementForm, BodyMeasurementHistory } from './components/body-measurement-sections';
 import { LinePlot } from './components/line-plot';
 import { todayDateInput } from './progress.viewmodel';
-import { styles } from './body-measurements-screen.styles';
+import { useStyles } from './body-measurements-screen.styles';
 import { useBodyMeasurements } from './use-body-measurements';
 
 export function BodyMeasurementsScreen() {
+  const styles = useStyles();
   const { addMeasurement, error, history, isLoading, isSaving, latestWeight, trendSegments, weightUnit } = useBodyMeasurements();
   const [date, setDate] = useState(todayDateInput);
   const [weight, setWeight] = useState('');

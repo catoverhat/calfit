@@ -1,5 +1,5 @@
 :root {
-  /* Matches SemanticColors.focus and hover in src/theme/tokens.ts. */
+  /* Initial focus color; AppThemeProvider updates it from the active palette. */
   --color-focus: #8dd5ce;
   --font-display:
     Montserrat, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,

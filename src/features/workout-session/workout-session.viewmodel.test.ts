@@ -42,6 +42,7 @@ const session: WorkoutSessionDetail = {
 };
 
 const user: UserRow = {
+  theme_preference: 'system',
   user_id: 'local-user', username: 'Local Athlete', email: null, dob: null, height: null,
   height_unit: 'cm', weight_unit: 'kg', speed_unit: 'kmh', distance_unit: 'km',
   created_at: '2026-07-06T12:00:00.000Z', updated_at: '2026-07-06T12:00:00.000Z',

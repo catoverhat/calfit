@@ -1,3 +1,5 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import {
@@ -10,15 +12,7 @@ import {
 } from 'react-native';
 
 import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
-import {
-  DesignColors,
-  Fonts,
-  Radius,
-  SemanticColors,
-  Space,
-  TouchTarget,
-  Typography,
-} from '@/theme/tokens';
+import { Fonts, Radius, Space, TouchTarget, Typography } from '@/theme/tokens';
 
 type HeaderProps = {
   actionAccessibilityLabel?: string;
@@ -38,7 +32,7 @@ type HeaderProps = {
 export function Header({
   actionAccessibilityLabel = 'Open notifications',
   actionIcon = 'bell',
-  actionIconColor = SemanticColors.textPrimary,
+  actionIconColor,
   avatarUrl,
   onNotificationsPress,
   onProfilePress,
@@ -49,6 +43,8 @@ export function Header({
   style,
   title = 'Kinetic Pulse',
 }: HeaderProps) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const initials = (profileName.trim() || 'Local Athlete').slice(0, 2).toUpperCase();
   const avatar = avatarUrl ? (
     <Image contentFit="cover" source={avatarUrl} style={styles.avatar} transition={150} />
@@ -88,7 +84,7 @@ export function Header({
           onPress={onNotificationsPress}>
           {({ pressed }) => (
             <View style={[styles.sideSlot, pressed && styles.pressed]}>
-              <AppIcon color={actionIconColor} name={actionIcon} size={20} />
+              <AppIcon color={actionIconColor ?? SemanticColors.textPrimary} name={actionIcon} size={20} />
             </View>
           )}
         </Pressable>
@@ -97,7 +93,7 @@ export function Header({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles(({ DesignColors, SemanticColors }) => StyleSheet.create({
   container: {
     alignItems: 'center',
     borderBottomColor: SemanticColors.border,
@@ -144,4 +140,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   pressed: { backgroundColor: SemanticColors.hover, opacity: 0.72 },
-});
+}));

@@ -1,7 +1,8 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { useState } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { Radius, SemanticColors } from '@/theme/tokens';
+import { Radius } from '@/theme/tokens';
 import { layoutTrendSegment, type LineSegment } from '../trend-chart';
 
 type LinePlotProps = {
@@ -11,6 +12,7 @@ type LinePlotProps = {
 };
 
 export function LinePlot({ accessibilityLabel, segments, style }: LinePlotProps) {
+  const styles = useStyles();
   const [size, setSize] = useState({ height: 0, width: 0 });
   const points = segments.length ? [
     { x: segments[0].x1, y: segments[0].y1 },
@@ -51,7 +53,7 @@ export function LinePlot({ accessibilityLabel, segments, style }: LinePlotProps)
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles(({ SemanticColors }) => StyleSheet.create({
   plot: { minHeight: 96, overflow: 'hidden', position: 'relative' },
   gridLine: { backgroundColor: SemanticColors.border, height: 1, left: 0, position: 'absolute', right: 0 },
   segment: {
@@ -61,4 +63,4 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   point: { backgroundColor: SemanticColors.action, borderRadius: Radius.full, height: 6, position: 'absolute', width: 6 },
-});
+}));

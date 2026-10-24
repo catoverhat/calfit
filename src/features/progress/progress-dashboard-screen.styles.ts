@@ -1,19 +1,9 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
 
-import {
-  ComponentTokens,
-  DesignColors,
-  Fonts,
-  MaxContentWidth,
-  Radius,
-  SemanticColors,
-  Space,
-  TouchTarget,
-  TypeScale,
-  Typography,
-} from '@/theme/tokens';
+import { Fonts, MaxContentWidth, Radius, Space, TouchTarget, TypeScale, Typography } from '@/theme/tokens';
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, ComponentTokens }) => StyleSheet.create({
   scrollContent: {
     alignItems: 'center',
     flexGrow: 1,
@@ -144,4 +134,4 @@ export const styles = StyleSheet.create({
     paddingHorizontal: Space.md,
   },
   pressed: { opacity: 0.72 },
-});
+}));

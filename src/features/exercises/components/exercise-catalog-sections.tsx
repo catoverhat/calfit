@@ -1,12 +1,13 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Image } from 'expo-image';
 import { Link, type Href } from 'expo-router';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { DesignColors, SemanticColors } from '@/theme/tokens';
+
 import type { ExerciseCatalogViewItem } from '../exercise-catalog.viewmodel';
 
-import { styles } from '../exercise-catalog-screen.styles';
+import { useStyles } from '../exercise-catalog-screen.styles';
 
 export function ExerciseCatalogToolbar({
   filters,
@@ -21,6 +22,9 @@ export function ExerciseCatalogToolbar({
   query: string;
   selectedFilter: string;
 }) {
+  const { scheme } = useAppTheme();
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   return (
     <>
       <View style={styles.heroRow}>
@@ -41,7 +45,7 @@ export function ExerciseCatalogToolbar({
       </View>
       <View style={styles.searchBox}>
         <AppIcon color={DesignColors.onSurfaceVariant} name="search" size={16} />
-        <TextInput
+        <TextInput keyboardAppearance={scheme}
           accessibilityLabel="Search exercise catalog"
           onChangeText={onQueryChange}
           placeholder="Search exercise..."
@@ -81,6 +85,8 @@ export function ExerciseCatalogToolbar({
 }
 
 export function ExerciseCatalogCard({ exercise }: { exercise: ExerciseCatalogViewItem }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <View style={styles.exerciseCard}>
       {exercise.imageUrl ? (
@@ -135,6 +141,7 @@ export function ExerciseCatalogCard({ exercise }: { exercise: ExerciseCatalogVie
 }
 
 export function StatusCard({ body, title }: { body: string; title: string }) {
+  const styles = useStyles();
   return (
     <View style={styles.emptyState}>
       <Text style={styles.emptyTitle}>{title}</Text>

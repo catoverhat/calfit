@@ -55,7 +55,7 @@ src/
 │   ├── today/
 │   ├── plan/                   # ISO-week planner UI, calendar rules, and view models
 │   ├── exercises/              # Exercise management owned by the Workouts product area
-│   ├── routines/               # Workout library/builder; legacy internal persistence naming
+│   ├── routines/               # Workout library/builder and definitions
 │   ├── workout-session/
 │   ├── progress/
 │   └── profile/
@@ -100,13 +100,15 @@ src/
 │
 ├── theme/                      # Design tokens and theme utilities
 │   ├── tokens.ts
-│   └── use-theme.ts
+│   ├── navigation-theme.ts
+│   ├── palettes.ts
+│   ├── appearance.ts
+│   ├── app-theme-provider.tsx
+│   └── create-themed-styles.ts
 │
 ├── hooks/                      # App-wide hooks only, never feature-specific hooks
 │   ├── use-app-fonts.ts
-│   ├── use-app-fonts.web.ts
-│   ├── use-color-scheme.ts
-│   └── use-color-scheme.web.ts
+│   └── use-app-fonts.web.ts
 │
 └── global.css
 ```
@@ -117,11 +119,11 @@ The tree describes active ownership boundaries, not a requirement to create ever
 
 ### Plan and Workouts ownership
 
-The five top-level destinations are Today, Plan, Workouts, Progress, and Profile on both native and web. `src/features/plan` owns date-based ISO-week planning. The Workouts product area owns reusable workout definitions and the nested exercise catalog. Its implementation remains in `src/features/routines` and `src/features/exercises` so the existing SQLite `routines` identifiers and established feature modules remain compatible; no user-facing screen should call a workout a routine.
+The five top-level destinations are Today, Plan, Workouts, Progress, and Profile on both native and web. `src/features/plan` owns date-based ISO-week planning. The Workouts product area owns reusable workout definitions and the nested exercise catalog. Its implementation remains in `src/features/routines` and `src/features/exercises` to match the SQLite `routines` domain and feature ownership; no user-facing screen should call a workout a routine.
 
 The retired `/routines` and `/exercises` URL aliases are not registered in `src/app`. New navigation and links must use `/workouts` and `/workouts/exercises` exclusively.
 
-Date assignments belong to `db/repositories/workout-plan.ts`. Legacy `routine_schedules` data is read only by the one-time planner import and must not be used as Today's scheduling source or exposed in the workout editor.
+Date assignments belong exclusively to `db/repositories/workout-plan.ts`. Workouts are reusable definitions with no weekday schedule; Today reads the date-based plan. The retired recurring-schedule tables, import UI, and compatibility APIs are removed.
 
 ## Folder Responsibilities
 
@@ -214,9 +216,9 @@ Feature UI must not contain raw SQL. Feature hooks or data adapters may call the
 
 ### `src/theme`
 
-All design tokens and theme utilities live here. Colors, spacing, typography, font families, radii, and other design values must be imported from the shared theme rather than duplicated or hard-coded in feature code.
+All design tokens and theme utilities live here. `palettes.ts` defines both color schemes; `app-theme-provider.tsx` resolves the saved profile preference against the device scheme, `appearance.ts` contains the selection rules, and `create-themed-styles.ts` keeps component styles reactive. Navigation themes are derived from the same active palette. Colors, spacing, typography, font families, radii, and other design values must be imported from the shared theme rather than duplicated or hard-coded in feature code.
 
-`docs/design.md` remains the visual source of truth; `src/theme/tokens.ts` is its code representation.
+`docs/design.md` remains the visual source of truth; `src/theme/tokens.ts` and `src/theme/palettes.ts` are its code representation.
 
 ### `src/hooks`
 

@@ -1,19 +1,9 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from "react-native";
 
-import {
-  ComponentTokens,
-  DesignColors,
-  Fonts,
-  MaxContentWidth,
-  Radius,
-  SemanticColors,
-  Space,
-  Spacing,
-  TypeScale,
-  Typography,
-} from "@/theme/tokens";
+import { Fonts, MaxContentWidth, Radius, Space, Spacing, TypeScale, Typography } from "@/theme/tokens";
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, ComponentTokens }) => StyleSheet.create({
   screen: { backgroundColor: SemanticColors.canvas },
   scrollContent: {
     alignItems: "center",
@@ -168,31 +158,6 @@ export const styles = StyleSheet.create({
     color: SemanticColors.textMuted,
     fontFamily: Fonts.bodyMedium,
   },
-  scheduleBlock: { gap: Spacing.two },
-  metaLabel: {
-    ...TypeScale.labelMd,
-    color: SemanticColors.textMuted,
-    textTransform: "uppercase",
-  },
-  scheduleRow: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two },
-  scheduleChip: {
-    alignItems: "center",
-    backgroundColor: SemanticColors.action,
-    borderRadius: Radius.full,
-    height: 28,
-    justifyContent: "center",
-    minWidth: 28,
-  },
-  scheduleText: {
-    ...Typography.xs,
-    color: DesignColors.onPrimaryContainer,
-    fontFamily: Fonts.bodyBold,
-  },
-  unscheduledText: {
-    ...Typography.sm,
-    color: SemanticColors.textSecondary,
-    fontFamily: Fonts.bodyMedium,
-  },
   cardFooter: {
     alignItems: "center",
     flexDirection: "row",
@@ -286,4 +251,4 @@ export const styles = StyleSheet.create({
     fontFamily: Fonts.bodyBold,
   },
   pressed: { opacity: 0.68, transform: [{ scale: 0.95 }] },
-});
+}));

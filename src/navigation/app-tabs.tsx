@@ -1,8 +1,10 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 
-import { DesignColors, Fonts, Typography } from "@/theme/tokens";
+import { Fonts, Typography } from "@/theme/tokens";
 
 export default function AppTabs() {
+  const { DesignColors } = useAppTheme();
   return (
     <NativeTabs
       backgroundColor={DesignColors.surfaceContainer}

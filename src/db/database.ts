@@ -19,7 +19,3 @@ export async function initializeLocalDatabase(db?: LocalDatabase): Promise<Local
 
   return database;
 }
-
-export function resetLocalDatabaseCache(): void {
-  databasePromise = null;
-}

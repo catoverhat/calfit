@@ -1,14 +1,15 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Pressable, TextInput, View } from "react-native";
 
 import { AppIcon } from "@/components/ui/app-icon";
 import { ThemedText } from "@/components/ui/themed-text";
-import { DesignColors, SemanticColors } from "@/theme/tokens";
+
 import type {
   RoutineExerciseDraft,
   RoutineTargetDraft,
   RoutineUnits,
 } from "../routine-draft-context";
-import { styles } from "../routine-editor-screen.styles";
+import { useStyles } from "../routine-editor-screen.styles";
 
 export function RoutineExerciseCard({
   addTarget,
@@ -37,6 +38,8 @@ export function RoutineExerciseCard({
     value: string,
   ) => void;
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <View style={styles.exerciseCard}>
       <View style={styles.exerciseTitleRow}>
@@ -167,10 +170,13 @@ function TargetInput({
     value: string,
   ) => void;
 }) {
+  const { scheme } = useAppTheme();
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   return (
     <View style={styles.targetField}>
       <ThemedText style={styles.targetLabel}>{label}</ThemedText>
-      <TextInput
+      <TextInput keyboardAppearance={scheme}
         accessibilityLabel={label}
         keyboardType={decimal ? "decimal-pad" : "number-pad"}
         onChangeText={(value) => updateTarget(target.id, field, value)}
@@ -197,6 +203,8 @@ function IconButton({
   onPress: () => void;
   tone?: "danger";
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <Pressable
       accessibilityLabel={label}

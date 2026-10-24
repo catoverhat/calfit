@@ -1,19 +1,9 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
 
-import {
-  ComponentTokens,
-  DesignColors,
-  Fonts,
-  MaxContentWidth,
-  Radius,
-  SemanticColors,
-  Space,
-  TouchTarget,
-  TypeScale,
-  Typography,
-} from '@/theme/tokens';
+import { Fonts, MaxContentWidth, Radius, Space, TouchTarget, TypeScale, Typography } from '@/theme/tokens';
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, ComponentTokens }) => StyleSheet.create({
   safeArea: { backgroundColor: SemanticColors.canvas, flex: 1 },
   screen: { backgroundColor: SemanticColors.canvas, flex: 1 },
   scrollContent: {
@@ -146,4 +136,4 @@ export const styles = StyleSheet.create({
   tipIcon: { paddingTop: Space.xs },
   tipText: { ...Typography.sm, color: SemanticColors.textMuted, flex: 1, fontFamily: Fonts.body },
   pressed: { opacity: 0.72 },
-});
+}));

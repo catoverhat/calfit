@@ -1,11 +1,14 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { ComponentTokens, DesignColors, SemanticColors } from '@/theme/tokens';
+
 import type { MeasurementViewItem } from '../progress.viewmodel';
-import { styles } from '../body-measurements-screen.styles';
+import { useStyles } from '../body-measurements-screen.styles';
 
 export function BodyMeasurementForm({ bmi, bodyFat, date, disabled, isSaving, onAdd, onBmiChange, onBodyFatChange, onDateChange, onWeightChange, weight, weightUnit }: { bmi: string; bodyFat: string; date: string; disabled: boolean; isSaving: boolean; onAdd: () => void; onBmiChange: (value: string) => void; onBodyFatChange: (value: string) => void; onDateChange: (value: string) => void; onWeightChange: (value: string) => void; weight: string; weightUnit: string }) {
+  const styles = useStyles();
+  const { DesignColors } = useAppTheme();
   return (
     <View style={styles.formCard}>
       <Text style={styles.formTitle}>Add Measurement</Text>
@@ -24,6 +27,7 @@ export function BodyMeasurementForm({ bmi, bodyFat, date, disabled, isSaving, on
 }
 
 export function BodyMeasurementHistory({ history }: { history: MeasurementViewItem[] }) {
+  const styles = useStyles();
   return (
     <View style={styles.historyBlock}>
       <Text style={styles.historyTitle}>History</Text>
@@ -33,9 +37,14 @@ export function BodyMeasurementHistory({ history }: { history: MeasurementViewIt
 }
 
 function MeasurementInput({ accessibilityLabel, icon = false, keyboardType = 'default', label, onChangeText, placeholder, value }: { accessibilityLabel: string; icon?: boolean; keyboardType?: 'decimal-pad' | 'default'; label: string; onChangeText: (value: string) => void; placeholder?: string; value: string }) {
-  return <View style={styles.fieldBlock}><Text style={styles.inputLabel}>{label}</Text><View style={styles.inputShell}>{icon ? <AppIcon color={SemanticColors.action} name="today" size={16} /> : null}<TextInput accessibilityLabel={accessibilityLabel} keyboardType={keyboardType} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={SemanticColors.textMuted} selectionColor={ComponentTokens.input.selectionColor} style={[styles.input, icon && styles.inputWithIcon]} value={value} /></View></View>;
+  const { scheme } = useAppTheme();
+  const styles = useStyles();
+  const { SemanticColors, ComponentTokens } = useAppTheme();
+  return <View style={styles.fieldBlock}><Text style={styles.inputLabel}>{label}</Text><View style={styles.inputShell}>{icon ? <AppIcon color={SemanticColors.action} name="today" size={16} /> : null}<TextInput keyboardAppearance={scheme} accessibilityLabel={accessibilityLabel} keyboardType={keyboardType} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={SemanticColors.textMuted} selectionColor={ComponentTokens.input.selectionColor} style={[styles.input, icon && styles.inputWithIcon]} value={value} /></View></View>;
 }
 
 function HistoryRow({ measurement }: { measurement: MeasurementViewItem }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return <View accessibilityLabel={`${measurement.date}, ${measurement.weight}, body fat ${measurement.bodyFat}`} style={styles.historyRow}><View style={styles.historyIcon}><AppIcon color={SemanticColors.actionSoft} name="body" size={17} /></View><View style={styles.historyCopy}><Text style={styles.historyDate}>{measurement.date}</Text><Text style={styles.historyWeight}>Weight: {measurement.weight}</Text></View><View style={styles.historyStats}><Text style={styles.bodyFat}>BF%: {measurement.bodyFat}</Text><Text style={styles.bmi}>BMI: {measurement.bmi}</Text></View></View>;
 }

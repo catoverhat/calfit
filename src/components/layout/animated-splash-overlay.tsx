@@ -1,14 +1,16 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import Animated, { Easing, Keyframe } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import { SemanticColors } from '@/theme/tokens';
+
 
 const INITIAL_SCALE_FACTOR = Dimensions.get('screen').height / 90;
 const DURATION = 600;
 
 export function AnimatedSplashOverlay() {
+  const styles = useStyles();
   const [visible, setVisible] = useState(true);
 
   if (!visible) return null;
@@ -45,10 +47,10 @@ export function AnimatedSplashOverlay() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles(({ SemanticColors }) => StyleSheet.create({
   backgroundSolidColor: {
     ...StyleSheet.absoluteFill,
     backgroundColor: SemanticColors.canvas,
     zIndex: 1000,
   },
-});
+}));

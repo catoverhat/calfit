@@ -20,8 +20,9 @@ describe('measurement units', () => {
     expect(distanceToCanonical(distanceFromCanonical(5000, 'mi'), 'mi')).toBeCloseTo(5000);
   });
 
-  it('normalizes the legacy metre preference to metric kilometres', () => {
-    expect(normalizeDistanceUnit('m')).toBe('km');
+  it('uses supported distance display units', () => {
+    expect(normalizeDistanceUnit('km')).toBe('km');
+    expect(normalizeDistanceUnit('mi')).toBe('mi');
     expect(distanceFromCanonical(5000, 'km')).toBe(5);
   });
 });

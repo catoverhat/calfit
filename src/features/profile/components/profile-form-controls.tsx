@@ -1,10 +1,11 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import type { ReactNode } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { ComponentTokens, SemanticColors } from '@/theme/tokens';
 
-import { styles } from '../profile-setup-screen.styles';
+
+import { useStyles } from '../profile-setup-screen.styles';
 
 type SegmentOption<T extends string> = {
   label: string;
@@ -29,11 +30,14 @@ export function SetupField({
   placeholder,
   value,
 }: SetupFieldProps) {
+  const { scheme } = useAppTheme();
+  const styles = useStyles();
+  const { SemanticColors, ComponentTokens } = useAppTheme();
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <View style={styles.fieldRow}>
-        <TextInput
+        <TextInput keyboardAppearance={scheme}
           accessibilityLabel={label}
           autoCapitalize="none"
           keyboardType={keyboardType}
@@ -62,6 +66,7 @@ export function UnitCard<T extends string>({
   options: SegmentOption<T>[];
   value: T;
 }) {
+  const styles = useStyles();
   return (
     <View style={styles.unitCard}>
       <Text style={styles.unitLabel}>{label}</Text>
@@ -75,12 +80,15 @@ export function SegmentedControl<T extends string>({
   options,
   value,
   variant = 'compact',
+  disabled = false,
 }: {
   onChange: (value: T) => void;
   options: SegmentOption<T>[];
   value: T;
   variant?: 'compact' | 'wide';
+  disabled?: boolean;
 }) {
+  const styles = useStyles();
   return (
     <View style={[styles.segmented, variant === 'wide' && styles.segmentedWide]}>
       {options.map((option) => {
@@ -90,7 +98,8 @@ export function SegmentedControl<T extends string>({
           <Pressable
             accessibilityLabel={`Select ${option.label}`}
             accessibilityRole="button"
-            accessibilityState={{ selected }}
+            accessibilityState={{ selected, disabled }}
+            disabled={disabled}
             key={option.value}
             onPress={() => onChange(option.value)}
             style={({ pressed }) => [
@@ -110,12 +119,14 @@ export function SegmentedControl<T extends string>({
 }
 
 export function CalendarIcon() {
+  const { SemanticColors } = useAppTheme();
   return (
     <AppIcon color={SemanticColors.textPrimary} name="calendar" size={18} />
   );
 }
 
 export function GearIcon() {
+  const { SemanticColors } = useAppTheme();
   return (
     <AppIcon color={SemanticColors.action} name="settings" size={18} />
   );

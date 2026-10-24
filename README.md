@@ -31,3 +31,11 @@ pnpm exec expo export --platform web  # Validate the production web bundle
 - [Design system](docs/design.md) — visual language, spacing, typography, colors, and component guidance.
 
 Expo Router owns navigation under `src/app`; product screens, hooks, components, and view models live under `src/features`. Database consumers import the stable public API from `@/db` rather than individual repository modules.
+
+## Development database
+
+The current pre-release schema is version 8. Opening an older local database clears its development records and recreates the current tables. New records persist after the reset. Older recurring schedules and their import flow are removed; date assignments belong only to the planner.
+
+## Appearance
+
+Profile > Appearance offers System (default), Light, and Dark. The selection applies immediately and saves to the local profile. System follows changes to the device/browser theme. Navigation, status bar, forms, and already mounted screens share the selected palette. The native splash now has light/dark backgrounds; rebuild the development client to apply that native configuration.

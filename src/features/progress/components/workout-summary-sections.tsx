@@ -1,17 +1,22 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Link } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
 import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
-import { DesignColors, SemanticColors } from '@/theme/tokens';
+
 import type { WorkoutSummaryData } from '../progress.viewmodel';
-import { styles } from '../workout-summary-screen.styles';
+import { useStyles } from '../workout-summary-screen.styles';
 
 export function WorkoutSummaryHero({ summary }: { summary: WorkoutSummaryData }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const completed = summary.status === 'completed';
   return <View style={styles.heroBlock}><View style={styles.endedPill}><AppIcon color={SemanticColors.action} name={completed ? 'trophy' : 'info'} size={14} /><Text style={styles.endedText}>{summary.statusLabel}</Text></View><Text style={styles.title}>{summary.title}</Text><View style={styles.checkRing}><AppIcon color={SemanticColors.action} name={completed ? 'check' : 'history'} size={26} /></View><Text style={styles.subtitle}>{completed ? 'Workout saved locally.' : 'Current locally saved session state.'}</Text></View>;
 }
 
 export function WorkoutSummaryStats({ summary }: { summary: WorkoutSummaryData }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const stats = [
     { icon: 'timer', label: 'Duration', value: summary.duration },
     { icon: 'strength', label: 'Exercises', value: `${summary.exerciseCount}` },
@@ -22,9 +27,12 @@ export function WorkoutSummaryStats({ summary }: { summary: WorkoutSummaryData }
 }
 
 export function WorkoutSummaryActions() {
+  const styles = useStyles();
   return <View style={styles.actions}><SummaryLink href="/(tabs)" icon="check" label="Done" primary /><SummaryLink href="/progress/history" icon="history" label="View History" /></View>;
 }
 
 function SummaryLink({ href, icon, label, primary = false }: { href: '/(tabs)' | '/progress/history'; icon: AppIconName; label: string; primary?: boolean }) {
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   return <Link href={href} replace={primary} push={!primary} asChild><Pressable accessibilityLabel={label} accessibilityRole="button">{({ pressed }) => <View style={[primary ? styles.saveButton : styles.historyButton, pressed && (primary ? styles.saveButtonPressed : styles.pressed)]}><AppIcon color={primary ? DesignColors.onPrimaryContainer : SemanticColors.action} name={icon} size={17} /><Text style={primary ? styles.saveText : styles.historyText}>{label}</Text></View>}</Pressable></Link>;
 }

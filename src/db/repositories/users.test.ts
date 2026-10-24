@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { getLatestBodyMeasurement, getLocalUserProfile, initializeLocalDatabase, LOCAL_USER_ID, saveLocalProfile } from '@/db';
+import { getLatestBodyMeasurement, getLocalUserProfile, initializeLocalDatabase, LOCAL_USER_ID, saveLocalProfile, saveThemePreference } from '@/db';
 import { MemoryDb } from '../testing/memory-database';
 
 describe('users repository', () => {
@@ -13,6 +13,7 @@ describe('users repository', () => {
       expect.objectContaining({
         user_id: LOCAL_USER_ID,
         username: 'Local Athlete',
+        theme_preference: 'system',
       })
     );
   });
@@ -33,5 +34,17 @@ describe('users repository', () => {
     });
     expect(saved).toEqual(expect.objectContaining({ username: 'IronPulse', height: 180, weight_unit: 'lb' }));
     await expect(getLatestBodyMeasurement(db)).resolves.toEqual(expect.objectContaining({ weight: 81.5 }));
+  });
+  it('persists appearance independently of other profile fields and keeps it on later profile saves', async () => {
+    const db = new MemoryDb();
+    await initializeLocalDatabase(db);
+    await saveThemePreference(db, 'dark');
+    expect((await getLocalUserProfile(db)).theme_preference).toBe('dark');
+    const saved = await saveLocalProfile(db, {
+      username: 'Athlete', dob: null, distanceUnit: 'km', heightCm: null, heightUnit: 'cm', speedUnit: 'kmh', weightUnit: 'kg',
+    });
+    expect(saved.theme_preference).toBe('dark');
+    await saveThemePreference(db, 'system');
+    expect((await getLocalUserProfile(db)).theme_preference).toBe('system');
   });
 });

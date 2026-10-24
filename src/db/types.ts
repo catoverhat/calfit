@@ -15,9 +15,12 @@ export interface LocalDatabase {
   withExclusiveTransactionAsync?(task: (txn: LocalDatabase) => Promise<void>): Promise<void>;
 }
 
-export type WorkoutSessionStatus = 'scheduled' | 'in_progress' | 'completed' | 'skipped';
+export type WorkoutSessionStatus = 'in_progress' | 'completed';
+
+export type ThemePreference = 'system' | 'light' | 'dark';
 
 export interface UserRow {
+  theme_preference: ThemePreference;
   user_id: string;
   username: string;
   email: string | null;
@@ -26,7 +29,7 @@ export interface UserRow {
   height_unit: HeightUnit;
   weight_unit: WeightUnit;
   speed_unit: SpeedUnit;
-  distance_unit: DistanceUnit | 'm';
+  distance_unit: DistanceUnit;
   created_at: string;
   updated_at: string;
 }
@@ -81,18 +84,6 @@ export interface RoutineExerciseTargetRow {
   created_at: string;
 }
 
-export interface RoutineScheduleRow {
-  routine_schedule_id: string;
-  user_id_fk: string;
-  routine_id_fk: string;
-  day_of_week: number;
-  start_date: string;
-  end_date: string | null;
-  recurrent: number;
-  active: number;
-  created_at: string;
-}
-
 export interface WorkoutSessionRow {
   workout_session_id: string;
   user_id_fk: string;
@@ -137,13 +128,6 @@ export interface WorkoutPlanEntryRow {
   updated_at: string;
 }
 
-export interface WorkoutPlanSettingsRow {
-  user_id_fk: string;
-  legacy_import_handled: number;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface BodyMeasurementRow {
   body_measurement_id: string;
   user_id_fk: string;
@@ -160,7 +144,6 @@ export interface RoutineExerciseWithTargets extends RoutineExerciseRow {
 
 export interface RoutineDetail extends RoutineRow {
   exercises: RoutineExerciseWithTargets[];
-  schedules: RoutineScheduleRow[];
 }
 
 export interface WorkoutExerciseWithSets extends WorkoutExerciseRow {
@@ -182,9 +165,6 @@ export interface WorkoutPlanEntryDetail extends WorkoutPlanEntryRow {
   routine: RoutineDetail;
   session: WorkoutSessionRow | null;
 }
-
-/** User-plan domain name; persisted workout identifiers still reference `routines`. */
-export type WorkoutPlanEntry = WorkoutPlanEntryDetail;
 
 export interface DashboardSnapshot {
   activeSession: WorkoutSessionRow | null;

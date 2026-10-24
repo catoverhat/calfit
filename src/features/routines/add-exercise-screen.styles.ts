@@ -1,8 +1,9 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
 
-import { DesignColors, SemanticColors, Fonts, Typography, TypeScale, Spacing, Space, Radius, ComponentTokens, MaxContentWidth } from '@/theme/tokens';
+import { Fonts, Typography, TypeScale, Spacing, Space, Radius, MaxContentWidth } from '@/theme/tokens';
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, ComponentTokens }) => StyleSheet.create({
   screen: {
     backgroundColor: SemanticColors.canvas,
     flex: 1,
@@ -139,16 +140,6 @@ export const styles = StyleSheet.create({
   addButtonSelected: {
     backgroundColor: SemanticColors.action,
   },
-  emptyState: {
-    alignItems: 'center',
-    backgroundColor: ComponentTokens.card.background,
-    borderColor: ComponentTokens.card.borderColor,
-    borderCurve: 'continuous',
-    borderRadius: ComponentTokens.card.radius,
-    borderWidth: ComponentTokens.card.borderWidth,
-    gap: Space.xs,
-    padding: Spacing.four,
-  },
   stateCard: {
     alignItems: 'center',
     backgroundColor: ComponentTokens.card.background,
@@ -250,4 +241,4 @@ export const styles = StyleSheet.create({
   pressed: {
     opacity: 0.72,
   },
-});
+}));

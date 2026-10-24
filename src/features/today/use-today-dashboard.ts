@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import {
   getTodayDashboardSnapshot,
   initializeLocalDatabase,
-  seedStarterRoutineIfEmpty,
+  seedDemoRoutinesIfEmpty,
   startOrResumeWorkoutFromPlanEntry,
 } from '@/db';
 import {
@@ -39,7 +39,7 @@ export function useTodayDashboard(): TodayDashboardState & {
         setState((current) => ({ ...current, error: null, isLoading: !hasLoaded.current }));
         try {
           const db = await initializeLocalDatabase();
-          await seedStarterRoutineIfEmpty(db);
+          await seedDemoRoutinesIfEmpty(db);
           const snapshot = await getTodayDashboardSnapshot(db);
           if (active) {
             hasLoaded.current = true;

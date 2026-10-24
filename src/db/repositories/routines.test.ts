@@ -3,41 +3,39 @@
 import {
   completeWorkoutSession,
   createRoutine,
-  getTodayRoutine,
+  getRoutineDetail,
   getRoutineSummaries,
   getWorkoutSessionDetail,
   initializeLocalDatabase,
   seedBuiltInExercisesIfEmpty,
   seedDemoRoutinesIfEmpty,
-  seedStarterRoutineIfEmpty,
   startWorkoutFromRoutine,
   updateRoutine,
 } from '@/db';
 import { MemoryDb } from '../testing/memory-database';
 
 describe('routine repository', () => {
-  it('seeds a starter routine once and can load today/session detail', async () => {
+  it('seeds a demo workouts once and loads session detail', async () => {
     const db = new MemoryDb();
 
     await initializeLocalDatabase(db);
 
-    const seededRoutine = await seedStarterRoutineIfEmpty(db, undefined, '2026-07-06T12:00:00.000Z');
-    const seededAgain = await seedStarterRoutineIfEmpty(db, undefined, '2026-07-06T12:00:00.000Z');
-    const todayRoutine = await getTodayRoutine(db, undefined, new Date('2026-07-06T12:00:00.000Z'));
+    const seededRoutine = await seedDemoRoutinesIfEmpty(db, undefined, '2026-07-06T12:00:00.000Z');
+    const seededAgain = await seedDemoRoutinesIfEmpty(db, undefined, '2026-07-06T12:00:00.000Z');
+    const routine = await getRoutineDetail(db, 'push-day');
 
     expect(seededRoutine.routine_id).toBe(seededAgain.routine_id);
     expect(db.tables.get('routines')).toHaveLength(4);
-    expect(todayRoutine?.exercises.map((exercise) => exercise.exercise.name)).toEqual([
+    expect(routine?.exercises.map((exercise) => exercise.exercise.name)).toEqual([
       'Bench Press',
       'Shoulder Press',
       'Push-ups',
     ]);
-    expect(todayRoutine?.schedules.map((schedule) => schedule.day_of_week)).toEqual([1, 3, 5]);
 
     const summaries = await getRoutineSummaries(db);
     expect(summaries).toHaveLength(4);
     expect(summaries.find((routine) => routine.routine_id === 'running-day')).toEqual(
-      expect.objectContaining({ focus: 'cardio', schedule_days: [3, 6] })
+      expect.objectContaining({ focus: 'cardio' })
     );
 
     const session = await startWorkoutFromRoutine(db, {
@@ -66,7 +64,7 @@ describe('routine repository', () => {
       .toBe('2026-07-06T16:00:00.000Z');
   });
 
-  it('replaces ordered exercises, targets, and schedules without duplicating seed data', async () => {
+  it('replaces ordered exercises and targets without duplicating seed data', async () => {
     const db = new MemoryDb();
     await initializeLocalDatabase(db);
     await seedDemoRoutinesIfEmpty(db, undefined, '2026-07-06T12:00:00.000Z');
@@ -76,7 +74,6 @@ describe('routine repository', () => {
       name: 'Push Day Updated',
       description: 'A smaller push session.',
       active: true,
-      scheduleDays: [0, 6],
       exercises: [
         {
           exerciseId: 'bench-press',
@@ -89,11 +86,10 @@ describe('routine repository', () => {
       now: '2026-07-07T12:00:00.000Z',
     });
 
-    const updated = await getTodayRoutine(db, undefined, new Date(2026, 6, 12, 12));
+    const updated = await getRoutineDetail(db, 'push-day');
     expect(updated).toEqual(
       expect.objectContaining({
         name: 'Push Day Updated',
-        schedules: [expect.objectContaining({ day_of_week: 0 }), expect.objectContaining({ day_of_week: 6 })],
       })
     );
     expect(updated?.exercises).toHaveLength(1);
@@ -118,24 +114,6 @@ describe('routine repository', () => {
 
     expect(result.routine_id).toBe('my-routine');
     expect(db.tables.get('routines')).toHaveLength(1);
-  });
-
-  it('prioritizes a due routine that has not been completed', async () => {
-    const db = new MemoryDb();
-    const friday = new Date('2026-07-10T12:00:00.000Z');
-    await initializeLocalDatabase(db);
-    await seedDemoRoutinesIfEmpty(db, undefined, friday.toISOString());
-
-    const first = await getTodayRoutine(db, undefined, friday);
-    expect(first?.routine_id).toBe('full-body-power');
-    const session = await startWorkoutFromRoutine(db, {
-      routineId: 'full-body-power', now: '2026-07-10T13:00:00.000Z',
-    });
-    await completeWorkoutSession(db, session.workout_session_id, '2026-07-10T14:00:00.000Z');
-
-    await expect(getTodayRoutine(db, undefined, friday)).resolves.toEqual(
-      expect.objectContaining({ routine_id: 'push-day' })
-    );
   });
 
 });

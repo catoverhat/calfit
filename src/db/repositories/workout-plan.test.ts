@@ -4,11 +4,8 @@ import {
   assignWorkoutToDate,
   completeWorkoutSession,
   copyWorkoutPlanWeek,
-  getLegacyWorkoutPlanDays,
   getWorkoutPlanEntries,
-  getWorkoutPlanSettings,
   getWorkoutSessionDetail,
-  importLegacyWorkoutPlan,
   initializeLocalDatabase,
   moveWorkoutPlanEntry,
   removeWorkoutPlanEntry,
@@ -153,34 +150,6 @@ describe('workout plan repository', () => {
       targetDate: '2026-10-23',
       today: TODAY,
     })).rejects.toThrow('cannot be changed');
-  });
-
-  it('imports one selected legacy workout per date once and rolls back failed imports', async () => {
-    const db = await createDb();
-    const days = await getLegacyWorkoutPlanDays(
-      db,
-      ['2026-10-19', '2026-10-20', '2026-10-21', '2026-10-22', '2026-10-23', '2026-10-24', '2026-10-25'],
-      TODAY
-    );
-    expect(days.find((day) => day.date === '2026-10-23')?.routines.map((routine) => routine.routine_id))
-      .toEqual(expect.arrayContaining(['push-day', 'full-body-power']));
-
-    await updateRoutine(db, { routineId: 'leg-day', name: 'Leg Day', active: false });
-    await expect(importLegacyWorkoutPlan(db, {
-      selections: [
-        { date: '2026-10-23', routineId: 'push-day' },
-        { date: '2026-10-24', routineId: 'leg-day' },
-      ],
-    })).rejects.toThrow('active workout');
-    expect(await getWorkoutPlanEntries(db, '2026-10-23', '2026-10-24')).toHaveLength(0);
-    expect((await getWorkoutPlanSettings(db)).legacy_import_handled).toBe(0);
-
-    await importLegacyWorkoutPlan(db, {
-      selections: [{ date: '2026-10-23', routineId: 'full-body-power' }],
-    });
-    expect((await getWorkoutPlanSettings(db)).legacy_import_handled).toBe(1);
-    expect((await getWorkoutPlanEntries(db, '2026-10-23', '2026-10-23'))[0].routine_id_fk)
-      .toBe('full-body-power');
   });
 
   it('rejects changes to past dates', async () => {

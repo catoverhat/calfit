@@ -12,7 +12,6 @@ export interface TodayDashboardRoutine {
   planEntryId: string;
   title: string;
   focus: string;
-  scheduledTime: string;
   exercises: number;
   duration: string;
   state: 'assigned' | 'completed' | 'in_progress' | 'unavailable';
@@ -25,8 +24,6 @@ export interface TodayDashboardData {
   dateLabel: string;
   greeting: string;
   name: string;
-  weekDays: { date: string; day: string }[];
-  selectedDate: string;
   syncLabel: string;
   routine: TodayDashboardRoutine | null;
   progress: {
@@ -59,8 +56,6 @@ export function createTodayDashboardData(snapshot: DashboardSnapshot | null, dat
     dateLabel: formatDashboardDate(date),
     greeting: createGreeting(date),
     name: user.username,
-    weekDays: createWeekDays(date),
-    selectedDate: formatDayNumber(date),
     syncLabel: 'Saved locally',
     routine: planEntry ? mapPlanEntryToDashboardRoutine(planEntry) : null,
     progress,
@@ -80,7 +75,6 @@ export function mapRoutineToDashboardRoutine(routine: RoutineDetail): Omit<Today
     id: routine.routine_id,
     title: routine.name,
     focus: routine.description ?? buildFocusLabel(routine),
-    scheduledTime: 'Ready now',
     exercises: routine.exercises.length,
     duration: estimateRoutineDuration(routine),
   };
@@ -98,21 +92,6 @@ function mapPlanEntryToDashboardRoutine(
         ? 'in_progress'
         : 'assigned';
   return { ...routine, planEntryId: entry.workout_plan_entry_id, state };
-}
-
-function createWeekDays(date: Date): { date: string; day: string }[] {
-  const start = new Date(date);
-  start.setDate(date.getDate() - 3);
-
-  return Array.from({ length: 7 }, (_, index) => {
-    const itemDate = new Date(start);
-    itemDate.setDate(start.getDate() + index);
-
-    return {
-      date: formatDayNumber(itemDate),
-      day: itemDate.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 1),
-    };
-  });
 }
 
 function formatDashboardDate(date: Date): string {
@@ -181,6 +160,7 @@ function createFallbackUser(): UserRow {
   const now = new Date(0).toISOString();
 
   return {
+    theme_preference: 'system',
     user_id: 'local-user',
     username: 'Local Athlete',
     email: null,
@@ -199,9 +179,6 @@ function formatMeasurement(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
-function formatDayNumber(date: Date): string {
-  return date.toLocaleDateString('en-US', { day: '2-digit' });
-}
 
 function estimateRoutineDuration(routine: RoutineDetail): string {
   const setCount = routine.exercises.reduce((count, exercise) => count + exercise.targets.length, 0);

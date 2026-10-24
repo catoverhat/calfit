@@ -21,7 +21,6 @@ jest.mock('@/db', () => ({
   getWorkoutPlanEntries: jest.fn().mockResolvedValue([]),
   getRoutineSummaries: jest.fn().mockResolvedValue([]),
   getLocalUserProfile: jest.fn().mockResolvedValue({ username: 'Athlete' }),
-  getWorkoutPlanSettings: jest.fn().mockResolvedValue({ legacy_import_handled: 1 }),
   assignWorkoutToDate: jest.fn(),
 }));
 

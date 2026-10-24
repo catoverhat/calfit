@@ -1,17 +1,9 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from "react-native";
 
-import {
-  ComponentTokens,
-  DesignColors,
-  Fonts,
-  Radius,
-  SemanticColors,
-  Spacing,
-  TypeScale,
-  Typography,
-} from "@/theme/tokens";
+import { Fonts, Radius, Spacing, TypeScale, Typography } from "@/theme/tokens";
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, ComponentTokens }) => StyleSheet.create({
   screen: { backgroundColor: SemanticColors.canvas },
   scrollContent: {
     alignItems: "center",
@@ -313,16 +305,6 @@ export const styles = StyleSheet.create({
     color: SemanticColors.actionSoft,
     fontFamily: Fonts.bodyBold,
   },
-  loadingCard: {
-    alignItems: "center",
-    backgroundColor: ComponentTokens.card.background,
-    borderColor: ComponentTokens.card.borderColor,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    gap: Spacing.three,
-    justifyContent: "center",
-    minHeight: 260,
-  },
   muted: {
     ...Typography.sm,
     color: SemanticColors.textMuted,
@@ -431,20 +413,6 @@ export const styles = StyleSheet.create({
     color: DesignColors.onPrimaryContainer,
     fontFamily: Fonts.bodyBold,
   },
-  secondaryButton: {
-    alignItems: "center",
-    borderColor: SemanticColors.actionSoft,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: Spacing.three,
-  },
-  secondaryButtonText: {
-    ...Typography.sm,
-    color: SemanticColors.actionSoft,
-    fontFamily: Fonts.bodyBold,
-  },
   choiceCard: {
     alignItems: "center",
     backgroundColor: DesignColors.surfaceContainerLow,
@@ -497,24 +465,5 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     padding: Spacing.four,
   },
-  importDay: { gap: Spacing.two },
-  importOptions: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two },
-  importChip: {
-    borderColor: SemanticColors.border,
-    borderRadius: Radius.full,
-    borderWidth: 1,
-    minHeight: 48,
-    justifyContent: "center",
-    paddingHorizontal: Spacing.three,
-  },
-  importChipSelected: {
-    backgroundColor: SemanticColors.action,
-    borderColor: SemanticColors.action,
-  },
-  importChipText: {
-    ...Typography.xs,
-    color: SemanticColors.textSecondary,
-    fontFamily: Fonts.bodySemiBold,
-  },
-  importChipTextSelected: { color: DesignColors.onPrimaryContainer },
-});
+
+}));

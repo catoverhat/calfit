@@ -1,34 +1,14 @@
-import { Image } from 'expo-image';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useAppTheme } from '@/theme/app-theme-provider';
+import { Pressable, Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
 import { Header } from '@/components/layout/header';
-import { SemanticColors } from '@/theme/tokens';
-import { styles } from '../profile-setup-screen.styles';
 
-const launchImage = require('@/assets/images/login-runner-bg.png');
+import { useStyles } from '../profile-setup-screen.styles';
+
 
 export function ProfileHeader({ name }: { name: string }) {
   return <Header profileIsInteractive={false} profileName={name} showAction={false} statusLabel="Your profile" />;
-}
-
-export function ProfileLaunchCard() {
-  return (
-    <View style={styles.launchCard}>
-      <Image
-        accessibilityLabel="Runner ready to launch"
-        contentFit="cover"
-        contentPosition="center"
-        source={launchImage}
-        style={StyleSheet.absoluteFill}
-      />
-      <View style={styles.launchOverlay} />
-      <View style={styles.launchBadge}>
-        <View style={styles.launchDot} />
-        <Text style={styles.launchText}>READY TO LAUNCH</Text>
-      </View>
-    </View>
-  );
 }
 
 interface ProfileSecuritySectionProps {
@@ -37,6 +17,8 @@ interface ProfileSecuritySectionProps {
 }
 
 export function ProfileSecuritySection({ isWebSession, onLock }: ProfileSecuritySectionProps) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return (
     <View style={styles.securitySection}>
       <View style={styles.sectionHeader}>

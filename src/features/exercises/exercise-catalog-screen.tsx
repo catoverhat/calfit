@@ -1,4 +1,5 @@
-import { styles } from './exercise-catalog-screen.styles';
+import { useAppTheme } from '@/theme/app-theme-provider';
+import { useStyles } from './exercise-catalog-screen.styles';
 import { Link } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -6,7 +7,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Header } from '@/components/layout/header';
 import { TabScreen } from '@/components/layout/tab-screen';
 import { AppIcon } from '@/components/ui/app-icon';
-import { SemanticColors } from '@/theme/tokens';
+
 import { filterExerciseCatalogItems } from '@/features/exercises/exercise-catalog.viewmodel';
 import { useExerciseCatalog } from '@/features/exercises/use-exercise-catalog';
 import {
@@ -16,6 +17,8 @@ import {
 } from './components/exercise-catalog-sections';
 
 export function ExerciseCatalogScreen({ nested = false }: { nested?: boolean }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const { data, error, isLoading } = useExerciseCatalog();
   const [query, setQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('All Categories');

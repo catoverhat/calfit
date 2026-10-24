@@ -1,3 +1,4 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Image } from 'expo-image';
 import { Link, type Href } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
@@ -5,12 +6,14 @@ import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { AppIcon } from '@/components/ui/app-icon';
 import { ThemedText } from '@/components/ui/themed-text';
 import { distanceFromCanonical, formatUnitNumber, speedFromCanonical, weightFromCanonical, type RoutineExerciseTargetRow } from '@/db';
-import { DesignColors, SemanticColors } from '@/theme/tokens';
+
 import { getRoutineTotals } from './routine.viewmodel';
-import { styles } from './routine-detail-screen.styles';
+import { useStyles } from './routine-detail-screen.styles';
 import { useRoutineDetail } from './use-routine-detail';
 
 export function RoutineDetailScreen({ routineId }: { routineId?: string }) {
+  const styles = useStyles();
+  const { DesignColors, SemanticColors } = useAppTheme();
   const { activeSessionId, error, isLoading, isStarting, reload, routine, startWorkout, units } = useRoutineDetail(routineId);
 
   if (isLoading) {
@@ -64,14 +67,18 @@ export function RoutineDetailScreen({ routineId }: { routineId?: string }) {
 }
 
 function StateScreen({ loading, message }: { loading: boolean; message: string }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   return <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.stateContent} style={styles.screen}>{loading ? <ActivityIndicator color={SemanticColors.action} size="large" /> : null}<ThemedText style={styles.stateText}>{message}</ThemedText></ScrollView>;
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
+  const styles = useStyles();
   return <View style={styles.stat}><ThemedText style={styles.statValue}>{value}</ThemedText><ThemedText style={styles.statLabel}>{label}</ThemedText></View>;
 }
 
 function TargetRow({ target, units }: { target: RoutineExerciseTargetRow; units: { distanceUnit: 'km' | 'mi'; speedUnit: 'kmh' | 'mph'; weightUnit: 'kg' | 'lb' } }) {
+  const styles = useStyles();
   const values = [target.target_reps !== null ? `${target.target_reps} reps` : null, target.target_weight !== null ? `${formatUnitNumber(weightFromCanonical(target.target_weight, units.weightUnit))} ${units.weightUnit}` : null, target.target_speed !== null ? `${formatUnitNumber(speedFromCanonical(target.target_speed, units.speedUnit))} ${units.speedUnit === 'kmh' ? 'km/h' : 'mph'}` : null, target.target_duration_seconds !== null ? formatDuration(target.target_duration_seconds) : null, target.target_distance !== null ? `${formatUnitNumber(distanceFromCanonical(target.target_distance, units.distanceUnit), 2)} ${units.distanceUnit}` : null, target.rest_time_seconds !== null ? `${target.rest_time_seconds}s rest` : null].filter(Boolean);
   return <View style={styles.targetRow}><ThemedText style={styles.setNumber}>SET {target.set_number}</ThemedText><ThemedText style={styles.targetText}>{values.join('  ·  ') || 'Open target'}</ThemedText></View>;
 }

@@ -1,3 +1,4 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { ActivityIndicator, Pressable, View } from "react-native";
 import Animated, {
   LinearTransition,
@@ -6,8 +7,8 @@ import Animated, {
 
 import { AppIcon } from "@/components/ui/app-icon";
 import { ThemedText } from "@/components/ui/themed-text";
-import { SemanticColors } from "@/theme/tokens";
-import { styles } from "./weekly-plan-screen.styles";
+
+import { useStyles } from "./weekly-plan-screen.styles";
 import type { WorkoutPlanDay } from "./weekly-plan.viewmodel";
 
 export function DayCard({
@@ -35,6 +36,8 @@ export function DayCard({
   onView: () => void;
   wide: boolean;
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const canStart =
     day.entryId &&
     (day.state === "assigned" || day.state === "in_progress") &&
@@ -58,7 +61,7 @@ export function DayCard({
         </View>
         <View
           accessibilityLiveRegion="polite"
-          style={[styles.statePill, statusStyle(day)]}
+          style={[styles.statePill, statusStyle(day, styles)]}
         >
           {busy && !initialLoading ? (
             <ActivityIndicator color={SemanticColors.actionSoft} size="small" />
@@ -155,6 +158,8 @@ function SmallAction({
   onPress: () => void;
   primary?: boolean;
 }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const assign = label === "Assign workout";
   return (
     <Pressable
@@ -192,7 +197,7 @@ function SmallAction({
   );
 }
 
-function statusStyle(day: WorkoutPlanDay) {
+function statusStyle(day: WorkoutPlanDay, styles: ReturnType<typeof useStyles>) {
   if (day.state === "completed") return styles.stateCompleted;
   if (day.state === "missed" || day.state === "unavailable")
     return styles.stateDanger;

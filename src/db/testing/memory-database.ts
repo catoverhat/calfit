@@ -9,12 +9,10 @@ const PRIMARY_KEYS: Record<string, string> = {
   routines: 'routine_id',
   routine_exercises: 'routine_exercise_id',
   routine_exercise_targets: 'routine_exercise_target_id',
-  routine_schedules: 'routine_schedule_id',
   workout_sessions: 'workout_session_id',
   workout_exercises: 'workout_exercise_id',
   workout_sets: 'workout_set_id',
   workout_plan_entries: 'workout_plan_entry_id',
-  workout_plan_settings: 'user_id_fk',
   body_measurements: 'body_measurement_id',
 };
 
@@ -25,6 +23,12 @@ export class MemoryDb implements LocalDatabase {
 
   async execAsync(source: string): Promise<void> {
     const normalized = normalizeSql(source);
+    const dropMatch = normalized.match(/^drop table if exists (\w+)/);
+    if (dropMatch) {
+      this.tables.delete(dropMatch[1]);
+      this.createdTables.delete(dropMatch[1]);
+      return;
+    }
     const createMatch = normalized.match(/^create table if not exists (\w+)/);
     const versionMatch = normalized.match(/^pragma user_version = (\d+)/);
 
@@ -39,11 +43,6 @@ export class MemoryDb implements LocalDatabase {
       return;
     }
 
-    if (normalized === 'alter table workout_sets add column completed_at text') {
-      this.ensureTable('workout_sets').forEach((row) => {
-        row.completed_at = null;
-      });
-    }
   }
 
   async getAllAsync<T>(source: string, ...params: SqlValue[]): Promise<T[]> {
@@ -89,14 +88,6 @@ export class MemoryDb implements LocalDatabase {
         .slice(0, 1) as T[];
     }
 
-    if (
-      normalized ===
-      'select * from routine_schedules where routine_id_fk = ? and active = 1 order by day_of_week asc'
-    ) {
-      return this.selectBy('routine_schedules', 'routine_id_fk', params[0])
-        .filter((row) => row.active === 1)
-        .sort(byNumber('day_of_week')) as T[];
-    }
 
     if (
       normalized ===
@@ -166,9 +157,6 @@ export class MemoryDb implements LocalDatabase {
       return this.selectBy('workout_plan_entries', 'workout_plan_entry_id', params[0]) as T[];
     }
 
-    if (normalized === 'select * from workout_plan_settings where user_id_fk = ?') {
-      return this.selectBy('workout_plan_settings', 'user_id_fk', params[0]) as T[];
-    }
 
     if (
       normalized ===
@@ -275,9 +263,6 @@ export class MemoryDb implements LocalDatabase {
       return this.deleteWhere('routine_exercises', (row) => row.routine_id_fk === params[0]);
     }
 
-    if (normalized === 'delete from routine_schedules where routine_id_fk = ?') {
-      return this.deleteWhere('routine_schedules', (row) => row.routine_id_fk === params[0]);
-    }
 
     if (normalized.startsWith('update routines')) {
       return this.updateById('routines', 'routine_id', params[4], {
@@ -286,6 +271,10 @@ export class MemoryDb implements LocalDatabase {
         active: params[2],
         updated_at: params[3],
       });
+    }
+
+    if (normalized.startsWith('update users set theme_preference')) {
+      return this.updateById('users', 'user_id', params[2], { theme_preference: params[0], updated_at: params[1] });
     }
 
     if (normalized.startsWith('update users set username')) {
@@ -301,16 +290,6 @@ export class MemoryDb implements LocalDatabase {
       });
     }
 
-    if (normalized === "update users set distance_unit = 'km' where distance_unit = 'm'") {
-      let changes = 0;
-      this.ensureTable('users').forEach((row) => {
-        if (row.distance_unit === 'm') {
-          row.distance_unit = 'km';
-          changes += 1;
-        }
-      });
-      return { changes };
-    }
 
     if (normalized.startsWith('update exercises')) {
       return this.updateById('exercises', 'exercise_id', params[7], {
@@ -324,16 +303,6 @@ export class MemoryDb implements LocalDatabase {
       });
     }
 
-    if (normalized.startsWith('update routine_exercise_targets')) {
-      return this.updateById('routine_exercise_targets', 'routine_exercise_target_id', params[6], {
-        target_reps: params[0],
-        target_weight: params[1],
-        target_speed: params[2],
-        target_duration_seconds: params[3],
-        target_distance: params[4],
-        rest_time_seconds: params[5],
-      });
-    }
 
     if (normalized.startsWith('update workout_sets')) {
       return this.updateById('workout_sets', 'workout_set_id', params[8], {
@@ -355,12 +324,6 @@ export class MemoryDb implements LocalDatabase {
       });
     }
 
-    if (normalized.startsWith('update workout_plan_settings')) {
-      return this.updateById('workout_plan_settings', 'user_id_fk', params[1], {
-        legacy_import_handled: 1,
-        updated_at: params[0],
-      });
-    }
 
     if (normalized.startsWith('update workout_plan_entries set routine_id_fk')) {
       return this.updateById('workout_plan_entries', 'workout_plan_entry_id', params[2], {

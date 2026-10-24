@@ -11,10 +11,11 @@ import {
   TrainingChart,
   WeightTrendCard,
 } from './components/progress-dashboard-sections';
-import { styles } from './progress-dashboard-screen.styles';
+import { useStyles } from './progress-dashboard-screen.styles';
 import { useProgressDashboard } from './use-progress-dashboard';
 
 export function ProgressDashboardScreen() {
+  const styles = useStyles();
   const { data, error, isLoading, period, setPeriod, reload } = useProgressDashboard();
 
   return (

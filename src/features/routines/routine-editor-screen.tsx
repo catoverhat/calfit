@@ -1,13 +1,16 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { router } from 'expo-router';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 
 import { ThemedText } from '@/components/ui/themed-text';
-import { SemanticColors } from '@/theme/tokens';
+
 import { RoutineEditorFooter, RoutineExerciseSection, RoutineIdentitySection } from './components/routine-editor-sections';
-import { styles } from './routine-editor-screen.styles';
+import { useStyles } from './routine-editor-screen.styles';
 import { useRoutineEditor } from './use-routine-editor';
 
 export function RoutineEditorScreen({ mode, plannedDate, routineId }: { mode: 'create' | 'edit'; plannedDate?: string; routineId?: string }) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const editor = useRoutineEditor({ mode, plannedDate, routineId });
 
   if (editor.isLoading || !editor.draft) {

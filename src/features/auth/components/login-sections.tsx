@@ -1,17 +1,19 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
-import { SemanticColors } from '@/theme/tokens';
+
 import type {
   AppLockFeedback,
   AppLockStatus,
   AuthenticationKind,
   DeviceAuthenticationCapability,
 } from '../app-lock.types';
-import { styles } from '../login-screen.styles';
+import { useStyles } from '../login-screen.styles';
 import { LightningMark } from './login-icons';
 
 export function LoginBrandSection() {
+  const styles = useStyles();
   return (
     <View style={styles.brandBlock}>
       <View style={styles.logoTile}>
@@ -27,6 +29,7 @@ export function LoginBrandSection() {
 }
 
 export function LoginMessageSection({ compact }: { compact: boolean }) {
+  const styles = useStyles();
   return (
     <View style={[styles.messagePanel, compact && styles.messagePanelCompact]}>
       <Text style={[styles.messageText, compact && styles.messageTextCompact]}>
@@ -51,6 +54,8 @@ export function LoginActionsSection({
   onUnlock,
   status,
 }: LoginActionsSectionProps) {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const isBusy = status === 'authenticating' || capability.availability === 'checking';
   const buttonLabel = status === 'authenticating'
     ? 'Authenticating…'

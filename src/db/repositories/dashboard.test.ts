@@ -5,11 +5,11 @@ import {
   assignWorkoutToDate,
   createBodyMeasurement,
   getTodayDashboardSnapshot,
-  getTodayRoutine,
+  getRoutineDetail,
   getWorkoutStreak,
   initializeLocalDatabase,
   LOCAL_USER_ID,
-  seedStarterRoutineIfEmpty,
+  seedDemoRoutinesIfEmpty,
   startWorkoutFromRoutine,
 } from '@/db';
 import { MemoryDb } from '../testing/memory-database';
@@ -19,7 +19,7 @@ describe('dashboard repository', () => {
     const db = new MemoryDb();
 
     await initializeLocalDatabase(db);
-    await seedStarterRoutineIfEmpty(db);
+    await seedDemoRoutinesIfEmpty(db);
 
     const emptySnapshot = await getTodayDashboardSnapshot(db, LOCAL_USER_ID, new Date('2026-07-06T12:00:00.000Z'));
 
@@ -38,7 +38,7 @@ describe('dashboard repository', () => {
       createdAt: '2026-07-06T08:00:00.000Z',
     });
 
-    const routine = await getTodayRoutine(db);
+    const routine = await getRoutineDetail(db, 'push-day');
     if (!routine) throw new Error('Expected seeded routine');
 
     await assignWorkoutToDate(db, {

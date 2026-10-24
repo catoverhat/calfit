@@ -1,16 +1,19 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { router } from 'expo-router';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 import { useMemo, useState } from 'react';
 
 import { ThemedText } from '@/components/ui/themed-text';
-import { SemanticColors } from '@/theme/tokens';
-import { styles } from './add-exercise-screen.styles';
+
+import { useStyles } from './add-exercise-screen.styles';
 import { ExercisePickerFilters, ExercisePickerFooter } from './components/exercise-picker-controls';
 import { ExercisePickerRow } from './components/exercise-picker-row';
 import { useRoutineDraft } from './routine-draft-context';
 import { useRoutineExercisePicker } from './use-routine-exercise-picker';
 
 export function AddExerciseScreen() {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
   const { draft, setSelectedExercises } = useRoutineDraft();
   const { categories, error, exercises, isLoading, reload } = useRoutineExercisePicker();
   const [query, setQuery] = useState('');

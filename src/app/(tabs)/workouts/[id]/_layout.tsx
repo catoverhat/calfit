@@ -1,8 +1,10 @@
+import { useAppTheme } from '@/theme/app-theme-provider';
 import { Stack } from 'expo-router/stack';
 
-import { Fonts, SemanticColors } from '@/theme/tokens';
+import { Fonts } from '@/theme/tokens';
 
 export default function WorkoutDetailLayout() {
+  const { SemanticColors } = useAppTheme();
   return (
     <Stack
       screenOptions={{

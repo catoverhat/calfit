@@ -134,3 +134,60 @@ Reviewed the supplied screen recording and the planner render path. The earlier 
 - [x] TypeScript and ESLint passed; both day-card component tests and both planner hook tests passed. Animation timing and final appearance still require device review; no dev server was started.
 
 This supersedes the earlier full-body per-day save spinner and 144 px assign-button treatment.
+
+History filter fix: center labels vertically and horizontally, use consistent minimum chip widths and 48 px touch targets, increase filter type to the shared 12 px scale, and wrap all five options within the content width instead of clipping the last option in a horizontal rail. TypeScript and lint verification recorded for this change; device visual review remains pending.
+
+History filter follow-up: user prefers a compact, single horizontal scrolling row. Removed wrapping while retaining centered labels, consistent minimum widths, and 48 px touch targets. This supersedes the wrapping choice above.
+
+
+History status investigation: there is no current workout-skip action or repository write to skipped; Skip Rest only ends the rest timer. Planner assignments live in workout_plan_entries and create an in_progress session on start. Removed unconditional Scheduled/Skipped history filters; they now appear only when saved sessions contain those statuses. Keep database status compatibility and all historical records accessible. Added coverage for current filters and older-record discovery.
+
+
+## Development data reset and obsolete session status removal
+
+User authorized clearing all old local records because the app is still in development. Database version 6 now replaces versions 1-5 with a clean schema in one transaction, dropping known tables in child-first order and reseeding the default profile/categories. This deletes previous local profiles/preferences, exercises, workouts, assignments, session history, and measurements on the next initialization. Current-version databases keep new data on subsequent launches. Initialization serializes concurrent migrations per database connection; failures roll back the rebuild.
+
+Removed scheduled/skipped session statuses from TypeScript and SQLite constraints, the repository option for creating scheduled sessions, and history compatibility filters/tests. Sessions now start in_progress and finish completed. Planned dates and rest-timer skipping remain current functionality. Historical migration branches were replaced by the pre-release reset baseline. This supersedes the previous compatibility-preservation decision.
+
+Verification: TypeScript and ESLint passed; all 24 Jest suites / 94 tests passed, including resets from versions 1-5 and retention after the reset. An in-memory SQLite check verified schema creation, obsolete-status rejection, and child-first reset/recreation. Device storage was not directly accessed: cleanup takes effect when the updated app initializes its database. This pass covers the obsolete session lifecycle and stored development data, not an assertion that every legacy module elsewhere has been removed.
+
+
+## Legacy-code audit and removal
+
+Scope: repository code, navigation, database schema/repositories, feature drafts/view models, theme scaffolding, and retired UI. The app is pre-release and the user authorized discarding old data, so no record-preserving compatibility is needed.
+
+Removed:
+
+- Recurring weekday schedules from schema/indexes, repository inputs/queries, demo seeds, workout drafts, summary types, and unused editor/library/detail styles.
+- Planner schedule import UI, selection state, load/save actions, import repositories, settings table, and tests that exercised the retired import.
+- Unused getTodayRoutine fallback/rotation logic; Today now relies exclusively on dated plan entries. Replaced the seedStarterRoutineIfEmpty alias with seedDemoRoutinesIfEmpty.
+- Obsolete metre profile type/test fixtures and migration-specific test SQL; stored distance preferences are km/mi, while canonical exercise distances remain metres.
+- Unused per-target repository update API; snapshot tests now edit workouts through the current whole-draft update path.
+- Duplicate light/dark color maps, unused old palette ramps, system-color-scheme hooks, the theme wrapper, and unused light/dark override props. Shared text and screen shells consume the current dark semantic tokens directly.
+- Retired Profile launch card, hand-drawn icon/header styles, Today calendar-strip fields and helper, obsolete loading/import styles, and the routines icon alias.
+- Temporary Figma capture-script injection in the route layout and an unused database-cache reset export.
+
+The schema is version 7. Older development databases are rebuilt and the two retired tables are dropped, never recreated. Their names intentionally remain only in the reset drop list and cleanup tests. Current workout/session history, date planning, ad-hoc workout starts, rest skipping, demo definitions, native/web behavior, and unit conversion functions remain active features. Internal routines module/table names remain the current workout-definition domain specified in folderStructure.md; they are not a second routing or scheduling system.
+
+Documentation updated in folderStructure.md and README.md. Repository searches found no active legacy schedule/import APIs, old unit fixtures, old theme hooks, or retired routes. Initial verification: TypeScript and ESLint passed; all 24 Jest suites / 93 tests passed. Web production export passed to dist/legacy-cleanup. A real in-memory SQLite check rebuilt the staged previous schema, confirmed removal of retired tables, and passed foreign_key_check. Device visual interaction remains unverified; no Expo dev server was started.
+
+Final cleanup verification: TypeScript, ESLint, and all 24 suites / 93 tests passed after removal of the temporary capture script and unused cache export.
+
+
+## Profile appearance preference
+
+User direction supersedes the earlier dark-only decision: retain real Light and Dark themes and default to System. Profile > Appearance now offers all three choices, applies a selection immediately, and saves it independently to users.theme_preference so ordinary profile saves cannot overwrite it. System follows live device/browser changes; explicit selections override them. Failed saves restore the previous preference with retry feedback.
+
+- [x] Add a genuine light wellness palette and keep the established dark palette; validate primary/secondary/muted/action/error text pairs at 4.5:1 or better in both.
+- [x] Convert static color-bearing style definitions and consumers to active-theme hooks. Already mounted tabs, cards, forms, planner sheets, charts, headers, and controls update without resetting their feature state.
+- [x] Derive navigation theme, native tab colors, status-bar text, keyboard appearance, system background, web color-scheme, and keyboard focus color from the same resolved theme.
+- [x] Adapt the login photo overlay and control surfaces for readable light mode. Hold the native splash while loading the saved preference; configure native splash backgrounds for light/dark system appearance.
+- [x] Store the preference in the profile with a constrained System default. Schema version 8 follows the existing pre-release reset policy: databases below version 8 are cleared/recreated once; new records and appearance choices then persist.
+- [x] Verify live System changes, explicit override, relaunch persistence, automatic style updates, failure rollback, profile-save independence, default values, and palette contrast.
+- [x] TypeScript, ESLint, and all 26 Jest suites / 101 tests passed. Web production export passed to dist/appearance-preview. In-memory SQLite verified preference defaults, all three saved choices, and rejection of invalid values; git diff --check passed.
+- [ ] Native/browser visual QA remains manual. Rebuild the development client for the changed native splash configuration. No fonts were changed and no Expo development server was started.
+
+Architecture and design documentation now describe the real appearance system. This supersedes the previous removal of duplicate, nonfunctional light/dark maps; both new palettes are distinct and reactive.
+
+
+Expo color-themes guide verification: re-read https://docs.expo.dev/develop/user-interface/color-themes/ and compared it to the implementation. Confirmed automatic userInterfaceStyle, installed expo-system-ui, and React Native useColorScheme as the live System-mode source. Ran pnpm exec expo config --type introspect: generated iOS UIUserInterfaceStyle is Automatic; Android MainActivity handles uiMode and AppTheme inherits Theme.AppCompat.DayNight.NoActionBar. Persisted user overrides and theme-aware styles extend the guide's minimal example. This verifies source/native configuration, not physical-device behavior.

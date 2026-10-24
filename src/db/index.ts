@@ -1,4 +1,4 @@
-export { initializeLocalDatabase, openLocalDatabase, resetLocalDatabaseCache } from './database';
+export { initializeLocalDatabase, openLocalDatabase } from './database';
 export { createLocalId } from './id';
 export {
   CREATE_TABLE_STATEMENTS,
@@ -24,7 +24,7 @@ export type {
   ExerciseDetail,
   UpdateExerciseInput,
 } from './repositories/exercises';
-export { getLocalUserProfile, saveLocalProfile } from './repositories/users';
+export { getLocalUserProfile, saveLocalProfile, saveThemePreference } from './repositories/users';
 export type { SaveLocalProfileInput } from './repositories/users';
 export {
   createBodyMeasurement,
@@ -36,12 +36,8 @@ export { getTodayDashboardSnapshot, getWorkoutStreak } from './repositories/dash
 export {
   assignWorkoutToDate,
   copyWorkoutPlanWeek,
-  getLegacyWorkoutPlanDays,
   getWorkoutPlanEntries,
   getWorkoutPlanEntryForDate,
-  getWorkoutPlanSettings,
-  importLegacyWorkoutPlan,
-  markLegacyWorkoutPlanImportHandled,
   moveWorkoutPlanEntry,
   removeWorkoutPlanEntry,
   removeFutureWorkoutPlanEntriesForRoutine,
@@ -50,25 +46,20 @@ export {
   undoWorkoutPlanChange,
 } from './repositories/workout-plan';
 export type {
-  LegacyWorkoutPlanDay,
   WorkoutPlanUndo,
 } from './repositories/workout-plan';
 export {
   createRoutine,
   getRoutineDetail,
   getRoutineSummaries,
-  getTodayRoutine,
   seedDemoRoutinesIfEmpty,
-  seedStarterRoutineIfEmpty,
   updateRoutine,
-  updateRoutineExerciseTarget,
 } from './repositories/routines';
 export type {
   CreateRoutineExerciseInput,
   CreateRoutineInput,
   CreateRoutineTargetInput,
   UpdateRoutineInput,
-  UpdateRoutineTargetInput,
   RoutineSummary,
 } from './repositories/routines';
 export {
@@ -113,17 +104,15 @@ export type {
   RoutineExerciseTargetRow,
   RoutineExerciseWithTargets,
   RoutineRow,
-  RoutineScheduleRow,
   SqlRunResult,
   SqlValue,
   UserRow,
+  ThemePreference,
   WorkoutExerciseRow,
   WorkoutExerciseWithSets,
   WorkoutHistoryItem,
   WorkoutPlanEntryDetail,
-  WorkoutPlanEntry,
   WorkoutPlanEntryRow,
-  WorkoutPlanSettingsRow,
   WorkoutSessionDetail,
   WorkoutSessionRow,
   WorkoutSessionStatus,

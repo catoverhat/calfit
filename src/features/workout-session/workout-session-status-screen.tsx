@@ -1,6 +1,7 @@
+import { createThemedStyles } from '@/theme/create-themed-styles';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Fonts, SemanticColors, Spacing, TypeScale } from '@/theme/tokens';
+import { Fonts, Spacing, TypeScale } from '@/theme/tokens';
 
 type WorkoutSessionStatusScreenProps = {
   body: string;
@@ -10,6 +11,7 @@ type WorkoutSessionStatusScreenProps = {
 };
 
 export function WorkoutSessionStatusScreen({ body, onBack, onRetry, title }: WorkoutSessionStatusScreenProps) {
+  const styles = useStyles();
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -29,7 +31,7 @@ export function WorkoutSessionStatusScreen({ body, onBack, onRetry, title }: Wor
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles(({ SemanticColors }) => StyleSheet.create({
   statusScreen: {
     backgroundColor: SemanticColors.canvas,
     flex: 1,
@@ -63,4 +65,4 @@ const styles = StyleSheet.create({
   secondaryText: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold },
   primaryButton: { backgroundColor: SemanticColors.action, borderRadius: 8, justifyContent: 'center', minHeight: 48, paddingHorizontal: Spacing.two },
   primaryText: { color: SemanticColors.actionText, fontFamily: Fonts.bodyBold },
-});
+}));
