@@ -89,7 +89,7 @@ describe('routine repository', () => {
       now: '2026-07-07T12:00:00.000Z',
     });
 
-    const updated = await getTodayRoutine(db);
+    const updated = await getTodayRoutine(db, undefined, new Date(2026, 6, 12, 12));
     expect(updated).toEqual(
       expect.objectContaining({
         name: 'Push Day Updated',

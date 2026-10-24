@@ -1,7 +1,7 @@
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
-import { Palette } from '@/theme/tokens';
+import { SemanticColors } from '@/theme/tokens';
 import type {
   AppLockFeedback,
   AppLockStatus,
@@ -62,7 +62,7 @@ export function LoginActionsSection({
       <View style={styles.securitySummary}>
         <View style={styles.securityHeading}>
           <AppIcon
-            color={Palette.primary[500]}
+            color={SemanticColors.action}
             name={iconForAuthentication(capability.kind)}
             size={20}
           />
@@ -92,10 +92,10 @@ export function LoginActionsSection({
           pressed && !isBusy && styles.primaryButtonPressed,
         ]}>
         {isBusy ? (
-          <ActivityIndicator color={Palette.secondary[950]} size="small" />
+          <ActivityIndicator color={SemanticColors.canvas} size="small" />
         ) : (
           <AppIcon
-            color={Palette.secondary[950]}
+            color={SemanticColors.canvas}
             name={iconForAuthentication(capability.kind)}
             size={20}
           />

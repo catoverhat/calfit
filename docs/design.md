@@ -1,53 +1,53 @@
 ---
-name: Kinetic Pulse
+name: Grounded Momentum
 colors:
-  surface: "#131313"
-  surface-dim: "#131313"
-  surface-bright: "#393939"
-  surface-container-lowest: "#0e0e0e"
-  surface-container-low: "#1c1b1b"
-  surface-container: "#201f1f"
-  surface-container-high: "#2a2a2a"
-  surface-container-highest: "#353534"
-  on-surface: "#e5e2e1"
-  on-surface-variant: "#e3bfb3"
-  inverse-surface: "#e5e2e1"
-  inverse-on-surface: "#313030"
-  outline: "#aa897f"
-  outline-variant: "#5b4138"
-  surface-tint: "#ffb59c"
-  primary: "#ffb59c"
-  on-primary: "#5c1900"
-  primary-container: "#ff5f1f"
-  on-primary-container: "#561700"
-  inverse-primary: "#ab3600"
-  secondary: "#c8c6c5"
-  on-secondary: "#303030"
-  secondary-container: "#474746"
-  on-secondary-container: "#b6b5b4"
-  tertiary: "#8dcdff"
-  on-tertiary: "#00344f"
-  tertiary-container: "#009de4"
-  on-tertiary-container: "#00304a"
-  error: "#ffb4ab"
-  on-error: "#690005"
-  error-container: "#93000a"
-  on-error-container: "#ffdad6"
-  primary-fixed: "#ffdbcf"
-  primary-fixed-dim: "#ffb59c"
-  on-primary-fixed: "#390c00"
-  on-primary-fixed-variant: "#832700"
-  secondary-fixed: "#e4e2e1"
-  secondary-fixed-dim: "#c8c6c5"
-  on-secondary-fixed: "#1b1c1c"
-  on-secondary-fixed-variant: "#474746"
-  tertiary-fixed: "#cae6ff"
-  tertiary-fixed-dim: "#8dcdff"
-  on-tertiary-fixed: "#001e30"
-  on-tertiary-fixed-variant: "#004b70"
-  background: "#131313"
-  on-background: "#e5e2e1"
-  surface-variant: "#353534"
+  surface: "#141918"
+  surface-dim: "#141918"
+  surface-bright: "#3C4743"
+  surface-container-lowest: "#101513"
+  surface-container-low: "#1A211E"
+  surface-container: "#202925"
+  surface-container-high: "#2B3631"
+  surface-container-highest: "#35423B"
+  on-surface: "#EDF2EC"
+  on-surface-variant: "#C2CFC5"
+  inverse-surface: "#EDF2EC"
+  inverse-on-surface: "#29332D"
+  outline: "#95A99D"
+  outline-variant: "#71867A"
+  surface-tint: "#FFBC99"
+  primary: "#FFBC99"
+  on-primary: "#42200E"
+  primary-container: "#FF854D"
+  on-primary-container: "#29180F"
+  inverse-primary: "#A53F0F"
+  secondary: "#C2CFC5"
+  on-secondary: "#263B30"
+  secondary-container: "#354B3E"
+  on-secondary-container: "#A7B9AD"
+  tertiary: "#8DD5CE"
+  on-tertiary: "#103B37"
+  tertiary-container: "#52B7AD"
+  on-tertiary-container: "#102D29"
+  error: "#FFB4AF"
+  on-error: "#620E18"
+  error-container: "#5C252B"
+  on-error-container: "#FFDAD8"
+  primary-fixed: "#FFDBC7"
+  primary-fixed-dim: "#FFBC99"
+  on-primary-fixed: "#341707"
+  on-primary-fixed-variant: "#7C3616"
+  secondary-fixed: "#D6EBDD"
+  secondary-fixed-dim: "#C2CFC5"
+  on-secondary-fixed: "#152B20"
+  on-secondary-fixed-variant: "#354B3E"
+  tertiary-fixed: "#B5EEE7"
+  tertiary-fixed-dim: "#8DD5CE"
+  on-tertiary-fixed: "#062B27"
+  on-tertiary-fixed-variant: "#23534D"
+  background: "#141918"
+  on-background: "#EDF2EC"
+  surface-variant: "#35423B"
 typography:
   headline-lg:
     fontFamily: Montserrat
@@ -112,18 +112,22 @@ spacing:
 
 ## Brand & Style
 
-The design system is engineered for high-performance workout tracking, prioritizing utility, focus, and physical intensity over social interaction. The aesthetic is "Technical Athleticism": a blend of modern minimalism and high-contrast professional sports equipment.
-
-The target audience is the dedicated athlete who requires a tool that feels as robust and disciplined as their training regimen. The UI evokes a sense of momentum and precision, using a dark-mode-first environment to reduce eye strain in gym lighting and allow the vibrant primary accent to guide the user's focus toward critical actions.
+Calfit is a wellness app supporting sustainable movement, training, and personal progress. The visual direction is grounded technical athleticism: clear data and dependable controls within a softer, nature-tinted dark environment. Color is an interface hierarchy, not a promise of psychological or health outcomes.
 
 ## Colors
 
-The palette is rooted in a deep charcoal/onyx base to create a focused, immersive environment.
+The October 2026 wellness palette supersedes the earlier neutral-charcoal, neon-green, and blue accent combination. Dark mode remains the supported appearance; light-system settings deliberately use the same dark palette.
 
-- **Primary (Electric Orange):** Reserved strictly for high-priority interactive elements like "Start Workout," "Log Set," or "Save." It represents energy and movement.
-- **Background (#121212):** A solid, deep neutral that provides maximum contrast for data visualization.
-- **Surface Container (#1E1E1E):** A slightly elevated charcoal used for cards and grouping elements, providing depth without relying on heavy shadows.
-- **Text:** Primary data points use pure white for immediate legibility, while secondary metadata uses a muted grey to maintain visual hierarchy.
+- **Electric Orange (#FF854D):** A softer orange reserved for primary actions and active navigation. Pair filled actions with deep brown #29180F, never white. Pale peach #FFBC99 supports text-only secondary actions.
+- **Canvas (#141918), cards (#202925), elevated (#2B3631):** Low-chroma green-charcoal surfaces provide tonal depth without heavy shadows or large saturated fields.
+- **Text (#EDF2EC / #C2CFC5 / #A7B9AD):** Off-white primary text and sage-neutral secondary/muted roles preserve hierarchy. Do not reduce placeholder opacity.
+- **Sage (#9CCDAB):** Completion and recorded consistency, with #243C2D containers. Accompany status with words, icons, or counts.
+- **Teal (#8DD5CE):** Information and keyboard focus. Distinct from orange actions; use #52B7AD with #102D29 for filled information elements.
+- **Rose (#FFB4AF):** Errors and destructive meaning; pair with explicit labels and recovery guidance.
+- **Sand (#E5C580):** Personal records and milestones; avoid using achievement color to imply a health assessment.
+- **Borders:** #2B3631 is decorative grouping only. Controls requiring visible boundaries use #71867A. Focus uses teal, and selected states also expose labels or accessibility state.
+
+Research, contrast measurements, implementation status, and remaining visual checks are tracked in [uiUxAudit.md](uiUxAudit.md).
 
 ## Typography
 
@@ -145,9 +149,9 @@ This design system utilizes an 8px rhythmic grid to ensure mathematical consiste
 
 Elevation is achieved through tonal layering rather than heavy shadows, maintaining a clean and professional look.
 
-- **Level 0 (Background):** #121212. Used for the main canvas.
-- **Level 1 (Cards/Containers):** #1E1E1E. Used for exercise cards and list groupings.
-- **Borders:** Instead of shadows, use 1px solid strokes (#2A2A2A) to define the edges of containers. This reinforces the "technical" feel of the interface.
+- **Level 0 (Background):** #141918. Used for the main canvas.
+- **Level 1 (Cards/Containers):** #202925. Used for exercise cards and list groupings.
+- **Borders:** Instead of shadows, use 1px solid strokes (#2B3631) to define the edges of containers. This reinforces the "technical" feel of the interface.
 - **Active State:** When an element is focused or "in-progress" (like an active set), use a thin Electric Orange border to signify the active state.
 
 ## Shapes
@@ -160,7 +164,7 @@ The design system employs a consistent "Rounded Eight" (8px) logic for standard 
 
 ## Components
 
-- **Buttons:** Primary buttons are solid Electric Orange with black text for maximum contrast. Secondary buttons use a ghost style (orange outline, transparent fill).
+- **Buttons:** Primary buttons are solid Electric Orange with deep brown text for maximum contrast. Secondary buttons use a ghost style (orange outline, pale peach text, transparent fill).
 - **Navigation Buttons:** When a button navigates with Expo Router, compose it as `Link` -> `Pressable` -> `View` -> icon or label. Set `asChild` on `Link`, put accessibility props on `Pressable`, and apply the button's visual styles plus the render-prop `pressed` style to the inner `View`. This keeps linked buttons visually and behaviorally consistent across platforms:
 
   ```tsx
@@ -181,8 +185,8 @@ The design system employs a consistent "Rounded Eight" (8px) logic for standard 
     </Pressable>
   </Link>
   ```
-- **Exercise Cards:** Use the Surface Container color with an 8px radius. Titles are bold white. Sub-text (reps/weight) uses the secondary text color.
+- **Exercise Cards:** Use the Surface Container color with an 8px radius. Titles use bold off-white. Sub-text (reps/weight) uses the secondary text color.
 - **Set Logger:** A row-based component with large, accessible input fields. Success states (set completed) should transform the row background to a subtle dark green tint or use a bold checkmark.
 - **Progress Rings:** High-stroke circular indicators for rest timers, using Electric Orange for the active progress and the secondary neutral for the remaining track.
-- **Inputs:** Numeric-first keyboards should be triggered by default for weight/rep entries. Input fields should have a dark, recessed background (#181818).
-- **Chips:** Small, rounded-pill tags used for "Warm-up," "Drop Set," or "PR" (Personal Record) indicators. The PR chip should use a subtle gold or orange glow.
+- **Inputs:** Numeric-first keyboards should be triggered by default for weight/rep entries. Input fields should have a dark, recessed background (#18201C).
+- **Chips:** Small, rounded-pill tags used for "Warm-up," "Drop Set," or "PR" (Personal Record) indicators. The PR chip should use a subtle sand-tinted background.

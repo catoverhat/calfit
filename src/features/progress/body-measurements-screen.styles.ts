@@ -51,8 +51,8 @@ export const styles = StyleSheet.create({
     lineHeight: 18,
   },
   deltaPill: {
-    backgroundColor: 'rgba(255, 95, 31, 0.16)',
-    borderColor: 'rgba(255, 95, 31, 0.32)',
+    backgroundColor: SemanticColors.actionTint,
+    borderColor: SemanticColors.actionBorder,
     borderRadius: Radius.full,
     borderWidth: 1,
     paddingHorizontal: Spacing.two,
@@ -65,8 +65,8 @@ export const styles = StyleSheet.create({
     lineHeight: 14,
   },
   chartCard: {
-    backgroundColor: '#3A2119',
-    borderColor: 'rgba(255, 95, 31, 0.16)',
+    backgroundColor: SemanticColors.actionTint,
+    borderColor: SemanticColors.actionTint,
     borderCurve: 'continuous',
     borderRadius: Radius.md,
     borderWidth: 1,
@@ -224,8 +224,8 @@ export const styles = StyleSheet.create({
   },
   historyIcon: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 95, 31, 0.12)',
-    borderColor: 'rgba(255, 95, 31, 0.24)',
+    backgroundColor: SemanticColors.actionTint,
+    borderColor: SemanticColors.actionBorder,
     borderRadius: Radius.full,
     borderWidth: 1,
     height: 36,

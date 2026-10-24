@@ -1,4 +1,3 @@
-import { Image, type ImageSource } from 'expo-image';
 import type { Href } from 'expo-router';
 import {
   TabList,
@@ -10,19 +9,20 @@ import {
 } from 'expo-router/ui';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
 import { ThemedText } from '@/components/ui/themed-text';
 import { ThemedView } from '@/components/ui/themed-view';
-import { Fonts, MaxContentWidth, Palette, Spacing, Typography } from '@/theme/tokens';
+import { DesignColors, Fonts, MaxContentWidth, Radius, SemanticColors, Spacing, Typography } from '@/theme/tokens';
 
 const WEB_TAB_BAR_SPACE = 92;
 
 const tabIcons = {
-  today: require('@/assets/icons/tabs/today.svg'),
-  plan: require('@/assets/icons/tabs/routines.svg'),
-  workouts: require('@/assets/icons/tabs/exercises.svg'),
-  progress: require('@/assets/icons/tabs/progress.svg'),
-  profile: require('@/assets/icons/tabs/profile.svg'),
-} satisfies Record<string, ImageSource>;
+  today: 'today',
+  plan: 'calendar',
+  workouts: 'strength',
+  progress: 'progress',
+  profile: 'profile',
+} satisfies Record<string, AppIconName>;
 
 type TabIcon = keyof typeof tabIcons;
 
@@ -59,15 +59,18 @@ export default function AppTabs() {
 }
 
 function TabButton({ icon, isFocused, label, ...props }: TabButtonProps) {
-  const color = isFocused ? Palette.primary[500] : Palette.neutral[300];
+  const color = isFocused ? DesignColors.primaryContainer : DesignColors.secondary;
 
   return (
     <Pressable
       {...props}
       accessibilityLabel={label}
+      accessibilityState={{ selected: isFocused }}
       style={({ pressed }) => [styles.tabButton, pressed && styles.pressed]}>
-      <Image contentFit="contain" source={tabIcons[icon]} style={styles.icon} tintColor={color} />
-      <ThemedText style={[styles.label, { color }]}>{label}</ThemedText>
+      <View style={[styles.tabContent, isFocused && styles.tabSelected]}>
+        <AppIcon color={color} name={tabIcons[icon]} size={20} />
+        <ThemedText style={[styles.label, { color }]}>{label}</ThemedText>
+      </View>
     </Pressable>
   );
 }
@@ -100,37 +103,36 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   innerContainer: {
-    backgroundColor: Palette.secondary[950],
-    borderColor: Palette.secondary[800],
+    backgroundColor: DesignColors.surfaceContainer,
+    borderColor: SemanticColors.borderStrong,
     borderCurve: 'continuous',
-    borderRadius: 12,
+    borderRadius: Radius.md,
     borderWidth: 1,
-    boxShadow: '0 4px 18px rgba(0, 0, 0, 0.24)',
     flexDirection: 'row',
-    maxWidth: Math.min(MaxContentWidth, 520),
+    maxWidth: Math.min(MaxContentWidth, 640),
     minHeight: 62,
-    overflow: 'hidden',
     paddingHorizontal: Spacing.two,
     width: '100%',
   },
   tabButton: {
-    alignItems: 'center',
+    borderRadius: Radius.md,
     flex: 1,
-    gap: Spacing.half,
-    justifyContent: 'center',
-    minHeight: 60,
-    minWidth: 52,
-    paddingHorizontal: Spacing.half,
+    minWidth: 0,
     paddingVertical: Spacing.two,
   },
-  icon: {
-    height: 20,
-    width: 20,
+  tabContent: {
+    alignItems: 'center',
+    borderRadius: Radius.md,
+    gap: Spacing.one,
+    justifyContent: 'center',
+    minHeight: 52,
+    paddingHorizontal: Spacing.half,
+    paddingVertical: Spacing.one,
   },
+  tabSelected: { backgroundColor: SemanticColors.actionTint },
   label: {
     ...Typography.xs,
     fontFamily: Fonts.label,
-    fontSize: 11,
   },
   pressed: {
     opacity: 0.58,

@@ -22,8 +22,8 @@ export const styles = StyleSheet.create({
   },
   endedPill: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 95, 31, 0.14)',
-    borderColor: 'rgba(255, 95, 31, 0.34)',
+    backgroundColor: SemanticColors.actionTint,
+    borderColor: SemanticColors.actionBorder,
     borderRadius: Radius.full,
     borderWidth: 1,
     flexDirection: 'row',
@@ -135,8 +135,8 @@ export const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
   },
   prBoxActive: {
-    backgroundColor: 'rgba(255, 95, 31, 0.16)',
-    borderColor: 'rgba(255, 95, 31, 0.35)',
+    backgroundColor: SemanticColors.actionTint,
+    borderColor: SemanticColors.actionBorder,
   },
   prLabel: {
     color: SemanticColors.textSecondary,

@@ -33,7 +33,7 @@ export function ExerciseCatalogToolbar({
             {({ pressed }) => (
               <View style={[styles.createButton, pressed && styles.pressed]}>
                 <AppIcon color={DesignColors.onPrimaryContainer} name="add" size={14} />
-                <Text style={styles.createButtonText}>Create Exercise</Text>
+                <Text style={styles.createButtonText}>Create</Text>
               </View>
             )}
           </Pressable>
@@ -45,7 +45,7 @@ export function ExerciseCatalogToolbar({
           accessibilityLabel="Search exercise catalog"
           onChangeText={onQueryChange}
           placeholder="Search exercise..."
-          placeholderTextColor="rgba(229, 226, 225, 0.32)"
+          placeholderTextColor={SemanticColors.textMuted}
           selectionColor={SemanticColors.action}
           style={styles.searchInput}
           value={query}

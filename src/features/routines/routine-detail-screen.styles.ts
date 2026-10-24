@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
   sectionTitle: { ...TypeScale.headlineMd, color: SemanticColors.textPrimary, marginTop: -Spacing.two },
   exerciseCard: { backgroundColor: ComponentTokens.card.background, borderColor: ComponentTokens.card.borderColor, borderRadius: Radius.lg, borderWidth: 1, gap: Spacing.three, padding: Spacing.three },
   exerciseHeader: { alignItems: 'center', flexDirection: 'row', gap: Spacing.three },
-  exerciseIndex: { alignItems: 'center', backgroundColor: 'rgba(255,95,31,0.14)', borderRadius: Radius.full, height: 40, justifyContent: 'center', width: 40 },
+  exerciseIndex: { alignItems: 'center', backgroundColor: SemanticColors.actionTint, borderRadius: Radius.full, height: 40, justifyContent: 'center', width: 40 },
   exerciseIndexText: { ...Typography.sm, color: SemanticColors.actionSoft, fontFamily: Fonts.bodyBold },
   exerciseCopy: { flex: 1, gap: Spacing.one },
   exerciseName: { ...TypeScale.headlineSm, color: SemanticColors.textPrimary },

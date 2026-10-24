@@ -1,10 +1,10 @@
 import { StyleSheet } from 'react-native';
 
-import { Palette, Fonts, Typography, Spacing } from '@/theme/tokens';
+import { SemanticColors, Fonts, Typography, Spacing } from '@/theme/tokens';
 
 export const styles = StyleSheet.create({
   screen: {
-    backgroundColor: Palette.secondary[950],
+    backgroundColor: SemanticColors.canvas,
     flex: 1,
   },
   scrollContent: {
@@ -38,7 +38,7 @@ export const styles = StyleSheet.create({
   logoTile: {
     alignItems: 'center',
     backgroundColor: 'rgba(17, 19, 21, 0.82)',
-    borderColor: Palette.primary[500],
+    borderColor: SemanticColors.action,
     borderCurve: 'continuous',
     borderRadius: 12,
     borderWidth: 1.5,
@@ -54,7 +54,7 @@ export const styles = StyleSheet.create({
     width: 30,
   },
   lightningTop: {
-    borderBottomColor: Palette.primary[500],
+    borderBottomColor: SemanticColors.action,
     borderBottomWidth: 25,
     borderLeftColor: 'transparent',
     borderLeftWidth: 12,
@@ -71,7 +71,7 @@ export const styles = StyleSheet.create({
     borderLeftWidth: 5,
     borderRightColor: 'transparent',
     borderRightWidth: 12,
-    borderTopColor: Palette.primary[500],
+    borderTopColor: SemanticColors.action,
     borderTopWidth: 25,
     bottom: 0,
     height: 0,
@@ -92,13 +92,13 @@ export const styles = StyleSheet.create({
     lineHeight: 30,
   },
   wordmarkLight: {
-    color: Palette.white,
+    color: SemanticColors.textPrimary,
   },
   wordmarkAccent: {
-    color: Palette.primary[500],
+    color: SemanticColors.action,
   },
   tagline: {
-    color: Palette.primary[500],
+    color: SemanticColors.action,
     fontFamily: Fonts.bodyBold,
     fontSize: 10,
     lineHeight: 14,
@@ -121,7 +121,7 @@ export const styles = StyleSheet.create({
   },
   messageText: {
     ...Typography['2xl'],
-    color: Palette.white,
+    color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
     lineHeight: 30,
     textAlign: 'center',
@@ -131,7 +131,7 @@ export const styles = StyleSheet.create({
     lineHeight: 28,
   },
   messageAccent: {
-    color: Palette.primary[500],
+    color: SemanticColors.action,
   },
   dots: {
     flexDirection: 'row',
@@ -144,7 +144,7 @@ export const styles = StyleSheet.create({
     width: 6,
   },
   dotActive: {
-    backgroundColor: Palette.primary[500],
+    backgroundColor: SemanticColors.action,
   },
   actions: {
     alignSelf: 'stretch',
@@ -166,24 +166,24 @@ export const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   securityTitle: {
-    color: Palette.white,
+    color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
     fontSize: 13,
     lineHeight: 18,
     textTransform: 'uppercase',
   },
   securityDescription: {
-    color: Palette.neutral[200],
+    color: SemanticColors.textSecondary,
     fontFamily: Fonts.bodyMedium,
     fontSize: 12,
     lineHeight: 18,
   },
   securityDescriptionError: {
-    color: '#FFB4AB',
+    color: SemanticColors.danger,
   },
   primaryButton: {
     alignItems: 'center',
-    backgroundColor: Palette.primary[500],
+    backgroundColor: SemanticColors.action,
     borderCurve: 'continuous',
     borderRadius: 7,
     flexDirection: 'row',
@@ -193,14 +193,14 @@ export const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
   },
   primaryButtonPressed: {
-    backgroundColor: Palette.primary[600],
+    backgroundColor: SemanticColors.actionPressed,
     transform: [{ scale: 0.99 }],
   },
   primaryButtonDisabled: {
     opacity: 0.62,
   },
   primaryButtonText: {
-    color: Palette.secondary[950],
+    color: SemanticColors.canvas,
     fontFamily: Fonts.bodyBold,
     fontSize: 14,
     lineHeight: 20,

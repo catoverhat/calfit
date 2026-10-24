@@ -1,6 +1,6 @@
 import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
 
-import { Fonts, Palette, ThemeColor, Typography } from '@/theme/tokens';
+import { Fonts, SemanticColors, ThemeColor, Typography } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 export type ThemedTextProps = TextProps & {
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   linkPrimary: {
     ...Typography.sm,
     fontFamily: Fonts.label,
-    color: Palette.tertiary[500],
+    color: SemanticColors.info,
   },
   code: {
     ...Typography.xs,

@@ -62,5 +62,5 @@ const styles = StyleSheet.create({
   secondaryButton: { borderColor: SemanticColors.border, borderRadius: 8, borderWidth: 1, justifyContent: 'center', minHeight: 48, paddingHorizontal: Spacing.two },
   secondaryText: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold },
   primaryButton: { backgroundColor: SemanticColors.action, borderRadius: 8, justifyContent: 'center', minHeight: 48, paddingHorizontal: Spacing.two },
-  primaryText: { color: '#1A100C', fontFamily: Fonts.bodyBold },
+  primaryText: { color: SemanticColors.actionText, fontFamily: Fonts.bodyBold },
 });

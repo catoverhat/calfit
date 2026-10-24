@@ -6,10 +6,11 @@ import type {
   WorkoutSessionStatus,
 } from '@/db';
 import { normalizeWeightUnit, weightFromCanonical, weightToCanonical } from '@/db';
-import type { LineSegment } from './components/line-plot';
+import { createTrendSegments, type LineSegment } from './trend-chart';
 
 export type ProgressMetric = { helper: string; label: string; value: string };
-export type ChartBar = { label: string; value: number; height: number };
+export type ChartBar = { label: string; description: string; value: number; height: number };
+export type ProgressPeriod = 7 | 30 | 90;
 export type ProgressHistoryFilter = 'all' | WorkoutSessionStatus;
 
 export type ProgressHistoryCard = {
@@ -36,7 +37,15 @@ export type MeasurementViewItem = {
 
 export type ProgressDashboardData = {
   avatarUrl: string | null;
-  consistencyRows: number[][];
+  consistencyRows: (number | null)[][];
+  consistencySummary: string;
+  periodLabel: string;
+  sessionCount: number;
+  sessionSummary: string;
+  trainingMetrics: ProgressMetric[];
+  volumeSummary: string;
+  weightSummary: string;
+  weightRangeLabel: string;
   latestWeight: string;
   metrics: ProgressMetric[];
   profileName: string;
@@ -69,28 +78,55 @@ export function createProgressDashboardData(input: {
   history: WorkoutHistoryItem[];
   measurements: BodyMeasurementRow[];
   now?: Date;
+  period?: ProgressPeriod;
   user: UserRow;
 }): ProgressDashboardData {
   const { history, measurements, user } = input;
   const now = input.now ?? new Date();
   const weightUnit = normalizeWeightUnit(user.weight_unit);
   const latest = measurements[0] ?? null;
-  const completed = history.filter((session) => session.status === 'completed');
-  const weightValues = [...measurements]
-    .reverse()
-    .map((measurement) => measurement.weight === null ? null : weightFromCanonical(measurement.weight, weightUnit))
-    .filter((value): value is number => value !== null)
+  const allCompleted = history.filter((session) => session.status === 'completed');
+  const period = input.period ?? 7;
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - period + 1);
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const completed = allCompleted
+    .filter((session) => sessionDate(session) >= start && sessionDate(session) < end)
+    .sort((left, right) => sessionDate(left).getTime() - sessionDate(right).getTime());
+  const trainingDays = new Set(completed.map((session) => formatDateKey(sessionDate(session)))).size;
+  const weightMeasurements = [...measurements]
+    .filter((measurement) => measurement.weight !== null)
+    .sort((left, right) => new Date(left.created_at).getTime() - new Date(right.created_at).getTime())
     .slice(-6);
-  const volumes = [...completed]
-    .reverse()
-    .map(calculateWorkoutVolume)
-    .filter((volume) => volume > 0)
-    .slice(-6);
+  const latestWeight = weightMeasurements.at(-1);
+  const weightValues = weightMeasurements.map((measurement) => weightFromCanonical(measurement.weight!, weightUnit));
+  const volumes = completed.map(calculateWorkoutVolume).filter((volume) => volume > 0);
+  const totalVolume = volumes.reduce((total, value) => total + value, 0);
+  const periodLabel = `Last ${period} days`;
 
   return {
     avatarUrl: null,
-    consistencyRows: createConsistencyRows(completed, now),
-    latestWeight: latest?.weight === null || latest?.weight === undefined ? '—' : formatNumber(weightFromCanonical(latest.weight, weightUnit)),
+    consistencyRows: createConsistencyRows(allCompleted, now),
+    consistencySummary: createConsistencySummary(allCompleted, now),
+    periodLabel,
+    sessionCount: completed.length,
+    sessionSummary: completed.length === 0
+      ? `No completed workouts in the last ${period} days.`
+      : `${completed.length} completed ${completed.length === 1 ? 'workout' : 'workouts'} across ${trainingDays} training ${trainingDays === 1 ? 'day' : 'days'}.`,
+    trainingMetrics: [
+      { label: 'Workouts', value: String(completed.length), helper: 'Completed in this period' },
+      { label: 'Training days', value: String(trainingDays), helper: `Of ${period} days in this period` },
+    ],
+    latestWeight: latestWeight ? formatNumber(weightFromCanonical(latestWeight.weight!, weightUnit)) : '—',
+    weightSummary: weightValues.length < 2
+      ? 'Add at least two weight measurements to see a trend.'
+      : `From ${formatNumber(weightValues[0])} to ${formatNumber(weightValues.at(-1)!)} ${weightUnit} across ${weightValues.length} measurements.`,
+    weightRangeLabel: weightMeasurements.length > 0
+      ? `${formatDate(weightMeasurements[0].created_at)} – ${formatDate(latestWeight!.created_at)}`
+      : 'No measurements yet',
+    volumeSummary: volumes.length === 0
+      ? 'Complete weighted sets to track your lifting volume.'
+      : `${formatVolume(totalVolume, weightUnit)} lifted across ${volumes.length} weighted ${volumes.length === 1 ? 'workout' : 'workouts'}.`,
+
     metrics: [
       {
         helper: latest ? formatDate(latest.created_at) : 'No measurements yet',
@@ -107,10 +143,10 @@ export function createProgressDashboardData(input: {
       },
     ],
     profileName: user.username,
-    volumeSegments: createLineSegments(volumes),
-    volumeTotal: formatVolume(volumes.reduce((total, value) => total + value, 0), weightUnit),
-    weeklySessions: createWeeklySessionBars(completed, now),
-    weightSegments: createLineSegments(weightValues),
+    volumeSegments: createTrendSegments(volumes),
+    volumeTotal: formatVolume(totalVolume, weightUnit),
+    weeklySessions: createPeriodSessionBars(completed, start, period),
+    weightSegments: createTrendSegments(weightValues),
     weightUnit,
   };
 }
@@ -139,7 +175,7 @@ export function createMeasurementTrendSegments(measurements: BodyMeasurementRow[
     .map((measurement) => measurement.weight === null ? null : weightFromCanonical(measurement.weight, unit))
     .filter((value): value is number => value !== null)
     .slice(-6);
-  return createLineSegments(weights);
+  return createTrendSegments(weights);
 }
 
 export function createHistoryGroups(
@@ -265,48 +301,54 @@ function sessionDate(session: WorkoutHistoryItem | WorkoutSessionDetail): Date {
   return new Date(session.completed_at ?? session.started_at ?? session.scheduled_for ?? session.created_at);
 }
 
-function createWeeklySessionBars(history: WorkoutHistoryItem[], now: Date): ChartBar[] {
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - index));
-    const key = formatDateKey(date);
-    const value = history.filter((session) => formatDateKey(sessionDate(session)) === key).length;
-    return { label: date.toLocaleDateString('en-US', { weekday: 'short' }), value, height: Math.min(152, 20 + value * 32) };
+function createPeriodSessionBars(history: WorkoutHistoryItem[], start: Date, period: ProgressPeriod): ChartBar[] {
+  const bucketSize = period === 7 ? 1 : period === 30 ? 5 : 15;
+  const bars = Array.from({ length: period / bucketSize }, (_, index) => {
+    const bucketStart = new Date(start.getFullYear(), start.getMonth(), start.getDate() + index * bucketSize);
+    const bucketEnd = new Date(bucketStart.getFullYear(), bucketStart.getMonth(), bucketStart.getDate() + bucketSize);
+    const value = history.filter((session) => sessionDate(session) >= bucketStart && sessionDate(session) < bucketEnd).length;
+    const label = bucketStart.toLocaleDateString('en-US', period === 7 ? { weekday: 'short' } : { month: 'short', day: 'numeric' });
+    const lastDate = new Date(bucketEnd.getFullYear(), bucketEnd.getMonth(), bucketEnd.getDate() - 1);
+    return {
+      label,
+      description: `${formatDate(bucketStart.toISOString())}${bucketSize === 1 ? '' : ` through ${formatDate(lastDate.toISOString())}`}: ${value} completed ${value === 1 ? 'workout' : 'workouts'}`,
+      value,
+    };
   });
+  const max = Math.max(1, ...bars.map((bar) => bar.value));
+  return bars.map((bar) => ({ ...bar, height: bar.value === 0 ? 2 : Math.round((bar.value / max) * 112) }));
 }
 
-function createConsistencyRows(history: WorkoutHistoryItem[], now: Date): number[][] {
+function consistencyStart(now: Date): Date {
+  const weekday = (now.getDay() + 6) % 7;
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() - weekday - 12 * 7);
+}
+
+function createConsistencyRows(history: WorkoutHistoryItem[], now: Date): (number | null)[][] {
   const counts = new Map<string, number>();
   history.forEach((session) => {
     const key = formatDateKey(sessionDate(session));
     counts.set(key, (counts.get(key) ?? 0) + 1);
   });
+  const start = consistencyStart(now);
+  const today = formatDateKey(now);
 
-  return Array.from({ length: 6 }, (_, row) =>
-    Array.from({ length: 22 }, (_, column) => {
-      const daysAgo = (21 - column) * 7 + (5 - row);
-      const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo);
-      return Math.min(3, counts.get(formatDateKey(date)) ?? 0);
+  return Array.from({ length: 7 }, (_, weekday) =>
+    Array.from({ length: 13 }, (_, week) => {
+      const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + week * 7 + weekday);
+      const key = formatDateKey(date);
+      return key > today ? null : Math.min(3, counts.get(key) ?? 0);
     })
   );
 }
 
-function createLineSegments(values: number[]): LineSegment[] {
-  if (values.length < 2) return [];
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-  return values.slice(0, -1).map((value, index) => {
-    const next = values[index + 1];
-    const top = 82 - ((value - min) / range) * 64;
-    const nextTop = 82 - ((next - min) / range) * 64;
-    const rotate = Math.max(-35, Math.min(35, (nextTop - top) * 0.65));
-    return {
-      left: `${7 + index * (86 / (values.length - 1))}%` as `${number}%`,
-      rotate: `${rotate}deg` as `${number}deg`,
-      top: `${top}%` as `${number}%`,
-      width: 48,
-    };
-  });
+function createConsistencySummary(history: WorkoutHistoryItem[], now: Date): string {
+  const start = consistencyStart(now);
+  const today = formatDateKey(now);
+  const days = new Set(history
+    .filter((session) => sessionDate(session) >= start && formatDateKey(sessionDate(session)) <= today)
+    .map((session) => formatDateKey(sessionDate(session)))).size;
+  return `${days} training ${days === 1 ? 'day' : 'days'} in the last 13 weeks, including this week.`;
 }
 
 function parseOptionalPositiveNumber(value: string): number | null | undefined {

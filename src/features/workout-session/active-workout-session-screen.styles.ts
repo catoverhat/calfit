@@ -252,7 +252,7 @@ export const styles = StyleSheet.create({
   },
   setCheckButton: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 95, 31, 0.42)',
+    backgroundColor: SemanticColors.actionPressed,
     borderRadius: Radius.md,
     height: 48,
     justifyContent: 'center',

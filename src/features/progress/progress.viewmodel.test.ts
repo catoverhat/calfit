@@ -56,6 +56,56 @@ describe('progress view models', () => {
     expect(data.weeklySessions.reduce((total, day) => total + day.value, 0)).toBe(1);
     expect(data.consistencyRows.flat()).toContain(1);
   });
+
+  it.each([
+    [7, 3, 2],
+    [30, 5, 4],
+    [90, 7, 6],
+  ] as const)('filters workouts, training days, volume and chart buckets to %i calendar days', (period, count, days) => {
+    const now = new Date(2026, 9, 23, 12);
+    const history: WorkoutHistoryItem[] = [0, 0, 6, 7, 29, 30, 89, 90, -1].map((daysAgo, index) => ({
+      ...createSession('completed'),
+      workout_session_id: `completed-${index}`,
+      completed_at: new Date(2026, 9, 23 - daysAgo, 23, 59).toISOString(),
+    }));
+    history.push({ ...createSession('in_progress'), started_at: now.toISOString() });
+    const data = createProgressDashboardData({ history, measurements, now, period, user });
+    expect(data.sessionCount).toBe(count);
+    expect(data.trainingMetrics.map((metric) => metric.value)).toEqual([String(count), String(days)]);
+    expect(data.weeklySessions.reduce((sum, bar) => sum + bar.value, 0)).toBe(count);
+    expect(data.volumeTotal).toBe(`${new Intl.NumberFormat('en-US').format(count * 500)} kg`);
+    expect(data.volumeSegments).toHaveLength(count - 1);
+  });
+
+  it('includes Sunday, aligns the calendar to Monday, and leaves future dates blank', () => {
+    const sunday = { ...createSession('completed'), completed_at: new Date(2026, 6, 5, 12).toISOString() };
+    const data = createProgressDashboardData({ history: [sunday], measurements: [], now: new Date(2026, 6, 6, 12), user });
+    expect(data.consistencyRows).toHaveLength(7);
+    expect(data.consistencyRows.every((row) => row.length === 13)).toBe(true);
+    expect(data.consistencyRows[6][11]).toBe(1);
+    expect(data.consistencyRows[0][12]).toBe(0);
+    expect(data.consistencyRows[1][12]).toBeNull();
+    expect(data.consistencySummary).toBe('1 training day in the last 13 weeks, including this week.');
+  });
+
+  it('keeps the latest weight when the newest measurement only records body fat', () => {
+    const latest = { ...measurements[0], body_measurement_id: 'body-fat-only', created_at: '2026-07-07T12:00:00.000Z', weight: null };
+    const data = createProgressDashboardData({ history: [], measurements: [latest, ...measurements], now: new Date(2026, 6, 7, 12), user });
+    expect(data.latestWeight).toBe('81.5');
+    expect(data.weightSummary).toContain('From 82 to 81.5 kg');
+    expect(data.sessionCount).toBe(0);
+    expect(data.sessionSummary).toBe('No completed workouts in the last 7 days.');
+    expect(data.weeklySessions.every((bar) => bar.value === 0 && bar.height === 2)).toBe(true);
+  });
+
+  it('sums every workout in the selected period, including more than six', () => {
+    const history = Array.from({ length: 8 }, () => createSession('completed'));
+    const data = createProgressDashboardData({ history, measurements: [], now: new Date(2026, 6, 6, 12), user });
+    expect(data.volumeTotal).toBe('4,000 kg');
+    expect(data.volumeSegments).toHaveLength(7);
+    expect(data.trainingMetrics[1].value).toBe('1');
+    expect(data.consistencyRows[0][12]).toBe(3);
+  });
 });
 
 function createSession(status: WorkoutHistoryItem['status']): WorkoutHistoryItem {

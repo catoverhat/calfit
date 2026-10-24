@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { AppIcon } from '@/components/ui/app-icon';
-import { Palette, SemanticColors } from '@/theme/tokens';
+import { ComponentTokens, SemanticColors } from '@/theme/tokens';
 
 import { styles } from '../profile-setup-screen.styles';
 
@@ -13,6 +13,7 @@ type SegmentOption<T extends string> = {
 
 type SetupFieldProps = {
   accessory?: ReactNode;
+  helper?: string;
   keyboardType?: 'decimal-pad' | 'default' | 'numeric';
   label: string;
   onChangeText: (value: string) => void;
@@ -21,6 +22,7 @@ type SetupFieldProps = {
 };
 export function SetupField({
   accessory,
+  helper,
   keyboardType = 'default',
   label,
   onChangeText,
@@ -37,13 +39,14 @@ export function SetupField({
           keyboardType={keyboardType}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="rgba(255, 255, 255, 0.14)"
-          selectionColor={Palette.primary[500]}
+          placeholderTextColor={SemanticColors.textMuted}
+          selectionColor={ComponentTokens.input.selectionColor}
           style={styles.input}
           value={value}
         />
         {accessory ? <View style={styles.fieldAccessory}>{accessory}</View> : null}
       </View>
+      {helper ? <Text style={styles.fieldHelper}>{helper}</Text> : null}
     </View>
   );
 }

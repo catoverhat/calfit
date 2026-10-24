@@ -1,35 +1,54 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { getLocalUserProfile, getRecentBodyMeasurements, getWorkoutHistory, initializeLocalDatabase } from '@/db';
-import { createProgressDashboardData, type ProgressDashboardData } from './progress.viewmodel';
+import {
+  getLocalUserProfile,
+  getRecentBodyMeasurements,
+  getWorkoutHistory,
+  initializeLocalDatabase,
+  type BodyMeasurementRow,
+  type UserRow,
+  type WorkoutHistoryItem,
+} from '@/db';
+import { createProgressDashboardData, type ProgressPeriod } from './progress.viewmodel';
 
-type State = { data: ProgressDashboardData | null; error: string | null; isLoading: boolean };
+type Snapshot = { history: WorkoutHistoryItem[]; measurements: BodyMeasurementRow[]; user: UserRow };
+type State = { snapshot: Snapshot | null; error: string | null; isLoading: boolean };
 
-export function useProgressDashboard(): State {
-  const [state, setState] = useState<State>({ data: null, error: null, isLoading: true });
+export function useProgressDashboard() {
+  const [state, setState] = useState<State>({ snapshot: null, error: null, isLoading: true });
+  const [period, setPeriod] = useState<ProgressPeriod>(7);
+  const loadVersion = useRef(0);
 
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      async function load() {
-        setState((current) => ({ ...current, error: null, isLoading: true }));
-        try {
-          const db = await initializeLocalDatabase();
-          const [user, measurements, history] = await Promise.all([
-            getLocalUserProfile(db),
-            getRecentBodyMeasurements(db, undefined, 30),
-            getWorkoutHistory(db),
-          ]);
-          if (active) setState({ data: createProgressDashboardData({ history, measurements, user }), error: null, isLoading: false });
-        } catch (error) {
-          if (active) setState({ data: null, error: error instanceof Error ? error.message : 'Progress could not be loaded.', isLoading: false });
-        }
+  const reload = useCallback(async () => {
+    const version = ++loadVersion.current;
+    setState((current) => ({ ...current, error: null, isLoading: true }));
+    try {
+      const db = await initializeLocalDatabase();
+      const [user, measurements, history] = await Promise.all([
+        getLocalUserProfile(db),
+        getRecentBodyMeasurements(db, undefined, 30),
+        getWorkoutHistory(db),
+      ]);
+      if (version === loadVersion.current) {
+        setState({ snapshot: { history, measurements, user }, error: null, isLoading: false });
       }
-      load();
-      return () => { active = false; };
-    }, [])
+    } catch (error) {
+      if (version === loadVersion.current) {
+        setState({ snapshot: null, error: error instanceof Error ? error.message : 'Progress could not be loaded.', isLoading: false });
+      }
+    }
+  }, []);
+
+  useFocusEffect(useCallback(() => {
+    void reload();
+    return () => { loadVersion.current += 1; };
+  }, [reload]));
+
+  const data = useMemo(
+    () => state.snapshot ? createProgressDashboardData({ ...state.snapshot, period }) : null,
+    [state.snapshot, period]
   );
 
-  return state;
+  return { data, error: state.error, isLoading: state.isLoading, period, setPeriod, reload };
 }

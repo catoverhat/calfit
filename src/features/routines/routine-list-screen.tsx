@@ -76,10 +76,16 @@ export function RoutineListScreen() {
         </View>
 
         <Link href={'/workouts/exercises' as Href} asChild>
-          <Pressable accessibilityLabel="Manage exercise catalog" accessibilityRole="button" style={({ pressed }) => [styles.manageButton, pressed && styles.pressed]}>
-            <AppIcon color={SemanticColors.actionSoft} name="exercises" size={18} />
-            <ThemedText style={styles.manageButtonText}>Manage Exercises</ThemedText>
-            <AppIcon color={SemanticColors.textMuted} name="chevronRight" size={18} />
+          <Pressable
+            accessibilityLabel="Manage exercise catalog"
+            accessibilityRole="button">
+            {({ pressed }) => (
+              <View style={[styles.manageButton, pressed && styles.pressed]}>
+                <AppIcon color={SemanticColors.actionSoft} name="exercises" size={18} />
+                <ThemedText style={styles.manageButtonText}>Manage Exercises</ThemedText>
+                <AppIcon color={SemanticColors.textMuted} name="chevronRight" size={18} />
+              </View>
+            )}
           </Pressable>
         </Link>
 

@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
   addSetButton: { alignItems: 'center', alignSelf: 'flex-start', flexDirection: 'row', gap: Spacing.two, minHeight: 48, paddingHorizontal: Spacing.two },
   addSetText: { ...Typography.sm, color: SemanticColors.actionSoft, fontFamily: Fonts.bodyBold },
   addExerciseCard: { alignItems: 'center', borderColor: SemanticColors.borderStrong, borderRadius: Radius.lg, borderStyle: 'dashed', borderWidth: 1, flexDirection: 'row', gap: Spacing.three, minHeight: 88, padding: Spacing.three },
-  addIconCircle: { alignItems: 'center', backgroundColor: 'rgba(255,95,31,0.14)', borderRadius: Radius.full, height: 44, justifyContent: 'center', width: 44 },
+  addIconCircle: { alignItems: 'center', backgroundColor: SemanticColors.actionTint, borderRadius: Radius.full, height: 44, justifyContent: 'center', width: 44 },
   addCopy: { flex: 1, gap: Spacing.one },
   addExerciseText: { ...Typography.base, color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold },
   addExerciseHint: { ...Typography.xs, color: SemanticColors.textMuted, fontFamily: Fonts.body },

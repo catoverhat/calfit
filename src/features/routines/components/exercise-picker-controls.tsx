@@ -26,7 +26,7 @@ export function ExercisePickerFilters({
           accessibilityLabel="Search exercises"
           onChangeText={onQueryChange}
           placeholder="Search exercises..."
-          placeholderTextColor="rgba(229, 226, 225, 0.32)"
+          placeholderTextColor={SemanticColors.textMuted}
           selectionColor={SemanticColors.action}
           style={styles.searchInput}
           value={query}

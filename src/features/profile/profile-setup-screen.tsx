@@ -77,6 +77,7 @@ export function ProfileSetupScreen() {
               }
               keyboardType="decimal-pad"
               label="Height"
+              helper={draft.heightUnit === 'ft' ? 'Use feet.inches: 5.11 means 5 feet 11 inches.' : undefined}
               onChangeText={(value) => setField('height', value)}
               placeholder={draft.heightUnit === 'cm' ? '180' : '5.11'}
               value={draft.height}
@@ -92,7 +93,7 @@ export function ProfileSetupScreen() {
                   value={draft.weightUnit}
                 />
               }
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               label="Current Weight"
               onChangeText={(value) => setField('weight', value)}
               placeholder={draft.weightUnit === 'kg' ? '85.5' : '188.5'}
@@ -127,7 +128,7 @@ export function ProfileSetupScreen() {
           </View>
 
           {isLoading ? <ActivityIndicator color={SemanticColors.action} /> : null}
-          {error ? <Text selectable style={styles.feedbackError}>{error}</Text> : null}
+          {error ? <Text accessibilityRole="alert" selectable style={styles.feedbackError}>{error}</Text> : null}
           {success ? <Text accessibilityRole="alert" style={styles.feedbackSuccess}>{success}</Text> : null}
 
           <Pressable

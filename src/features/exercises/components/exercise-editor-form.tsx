@@ -78,7 +78,7 @@ export function ExerciseEditorForm({
               accessibilityLabel="Exercise Name"
               onChangeText={setName}
               placeholder="Exercise name"
-              placeholderTextColor="rgba(229, 226, 225, 0.26)"
+              placeholderTextColor={SemanticColors.textMuted}
               selectionColor={SemanticColors.action}
               style={styles.nameInput}
               value={name}
@@ -92,7 +92,7 @@ export function ExerciseEditorForm({
               multiline
               onChangeText={setDescription}
               placeholder="Describe the movement and key cues"
-              placeholderTextColor="rgba(229, 226, 225, 0.26)"
+              placeholderTextColor={SemanticColors.textMuted}
               selectionColor={SemanticColors.action}
               style={styles.descriptionInput}
               textAlignVertical="top"
@@ -109,7 +109,7 @@ export function ExerciseEditorForm({
               keyboardType="url"
               onChangeText={(value) => setImageUrl(value || null)}
               placeholder="https://example.com/exercise.jpg"
-              placeholderTextColor="rgba(229, 226, 225, 0.26)"
+              placeholderTextColor={SemanticColors.textMuted}
               selectionColor={SemanticColors.action}
               style={styles.urlInput}
               value={imageUrl ?? ''}
@@ -125,7 +125,7 @@ export function ExerciseEditorForm({
               keyboardType="url"
               onChangeText={(value) => setVideoUrl(value || null)}
               placeholder="https://example.com/demo"
-              placeholderTextColor="rgba(229, 226, 225, 0.26)"
+              placeholderTextColor={SemanticColors.textMuted}
               selectionColor={SemanticColors.action}
               style={styles.urlInput}
               value={videoUrl ?? ''}

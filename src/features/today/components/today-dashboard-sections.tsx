@@ -1,7 +1,7 @@
-import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
+import { Header } from "@/components/layout/header";
 import { AppIcon } from "@/components/ui/app-icon";
 import { DesignColors, SemanticColors } from "@/theme/tokens";
 import { styles } from "../today-dashboard-screen.styles";
@@ -15,41 +15,8 @@ export function TodayHeader({
   name,
   syncLabel,
 }: Pick<TodayDashboardData, "avatarUrl" | "name" | "syncLabel">) {
-  const initials = name.slice(0, 2).toUpperCase();
-
   return (
-    <View style={styles.brandBar}>
-      <Link href="/profile" asChild>
-        <Pressable
-          accessibilityLabel="Open profile"
-          accessibilityRole="button"
-          style={styles.profileLink}>
-          {({ pressed }) => (
-            <View style={[styles.brandLeft, pressed && styles.pressed]}>
-              {avatarUrl ? (
-                <Image
-                  accessibilityLabel={`${name}'s profile photo`}
-                  contentFit="cover"
-                  source={avatarUrl}
-                  style={styles.avatar}
-                />
-              ) : (
-                <View
-                  accessibilityLabel={`${name}'s local profile initials`}
-                  style={styles.avatarFallback}>
-                  <Text style={styles.avatarInitials}>{initials}</Text>
-                </View>
-              )}
-              <Text style={styles.brandName}>Kinetic Pulse</Text>
-            </View>
-          )}
-        </Pressable>
-      </Link>
-      <View accessibilityLabel={syncLabel} style={styles.syncPill}>
-        <AppIcon color={SemanticColors.success} name="cloudCheck" size={15} />
-        <Text style={styles.syncText}>{syncLabel}</Text>
-      </View>
-    </View>
+    <Header avatarUrl={avatarUrl} profileName={name} showAction={false} statusLabel={syncLabel} />
   );
 }
 
@@ -165,15 +132,32 @@ export function ProgressSummary({
 }) {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionEyebrow}>Recent Progress</Text>
+      <View style={styles.sectionHeading}>
+        <Text style={styles.sectionEyebrow}>Training snapshot</Text>
+        <Text style={styles.sectionHint}>Your latest measurements and training streak.</Text>
+      </View>
       <View style={styles.progressGrid}>
-        <View accessibilityLabel={`Body weight ${progress.bodyWeight}. ${progress.bodyWeightDelta}`} style={[styles.progressCard, styles.weightCard]}>
-          <Text style={styles.progressLabel}>Body Weight</Text>
+        <Link href="/progress/measurements" asChild>
+          <Pressable accessibilityLabel={`Body weight ${progress.bodyWeight}. ${progress.bodyWeightDelta}. Open measurements.`} accessibilityRole="button" style={styles.progressLink}>
+          {({ pressed }) => <View style={[styles.progressCard, pressed && styles.pressed]}>
+          <View style={styles.progressCardTop}>
+            <View style={styles.progressIconTile}>
+              <AppIcon color={SemanticColors.actionSoft} name="body" size={17} />
+            </View>
+            <Text style={styles.progressLabel}>Body weight</Text>
+          </View>
           <Text style={styles.progressValue}>{progress.bodyWeight}</Text>
           <Text style={styles.deltaText}>{progress.bodyWeightDelta}</Text>
-        </View>
+          </View>}
+          </Pressable>
+        </Link>
         <View accessibilityLabel={`Workout streak ${progress.streak}`} style={styles.progressCard}>
-          <Text style={styles.progressLabel}>Streak</Text>
+          <View style={styles.progressCardTop}>
+            <View style={styles.progressIconTile}>
+              <AppIcon color={SemanticColors.actionSoft} name="flame" size={17} />
+            </View>
+            <Text style={styles.progressLabel}>Streak</Text>
+          </View>
           <Text style={styles.progressValue}>{progress.streak}</Text>
           <View style={styles.streakTrack}>
             <View

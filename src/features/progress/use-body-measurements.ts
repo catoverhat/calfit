@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 
 import { createBodyMeasurement, getLocalUserProfile, getRecentBodyMeasurements, initializeLocalDatabase, normalizeWeightUnit, weightFromCanonical } from '@/db';
 import { createMeasurementTrendSegments, createMeasurementViewItems, validateMeasurementValues, type MeasurementViewItem } from './progress.viewmodel';
-import type { LineSegment } from './components/line-plot';
+import type { LineSegment } from './trend-chart';
 
 type Input = { bmi: string; bodyFat: string; date: string; weight: string };
 type State = { error: string | null; history: MeasurementViewItem[]; isLoading: boolean; isSaving: boolean; latestWeight: string; profileName: string; trendSegments: LineSegment[]; weightUnit: string };

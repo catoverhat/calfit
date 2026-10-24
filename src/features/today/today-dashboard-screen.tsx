@@ -33,7 +33,7 @@ export function TodayDashboardScreen() {
           <TodayHeader
             avatarUrl={todayDashboard.avatarUrl}
             name={todayDashboard.name}
-            syncLabel={todayDashboard.syncLabel}
+            syncLabel={isLoading ? 'Loading your plan' : error ? 'Plan unavailable' : todayDashboard.syncLabel}
           />
 
           <View style={styles.greetingBlock}>

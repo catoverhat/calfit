@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { Link } from 'expo-router';
 import {
   Pressable,
   StyleSheet,
@@ -8,10 +9,16 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { ThemedText } from '@/components/ui/themed-text';
 import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
-import { Fonts, Palette, Typography } from '@/theme/tokens';
-import { useTheme } from '@/theme/use-theme';
+import {
+  DesignColors,
+  Fonts,
+  Radius,
+  SemanticColors,
+  Space,
+  TouchTarget,
+  Typography,
+} from '@/theme/tokens';
 
 type HeaderProps = {
   actionAccessibilityLabel?: string;
@@ -21,7 +28,9 @@ type HeaderProps = {
   onNotificationsPress?: () => void;
   onProfilePress?: () => void;
   profileName: string;
+  profileIsInteractive?: boolean;
   showAction?: boolean;
+  statusLabel?: string;
   style?: StyleProp<ViewStyle>;
   title?: string;
 };
@@ -29,54 +38,61 @@ type HeaderProps = {
 export function Header({
   actionAccessibilityLabel = 'Open notifications',
   actionIcon = 'bell',
-  actionIconColor,
+  actionIconColor = SemanticColors.textPrimary,
   avatarUrl,
   onNotificationsPress,
   onProfilePress,
   profileName,
+  profileIsInteractive = true,
   showAction = true,
+  statusLabel,
   style,
   title = 'Kinetic Pulse',
 }: HeaderProps) {
-  const theme = useTheme();
-  const initials = profileName.slice(0, 2).toUpperCase();
+  const initials = (profileName.trim() || 'Local Athlete').slice(0, 2).toUpperCase();
+  const avatar = avatarUrl ? (
+    <Image contentFit="cover" source={avatarUrl} style={styles.avatar} transition={150} />
+  ) : (
+    <View style={[styles.avatar, styles.avatarFallback]}>
+      <Text style={styles.avatarInitials}>{initials}</Text>
+    </View>
+  );
+  const profileButton = (
+    <Pressable
+      accessibilityLabel={`Open ${profileName || 'Local Athlete'}'s profile`}
+      accessibilityRole="button"
+      onPress={onProfilePress}>
+      {({ pressed }) => (
+        <View style={[styles.sideSlot, pressed && styles.pressed]}>{avatar}</View>
+      )}
+    </Pressable>
+  );
 
   return (
     <View style={[styles.container, style]}>
-      <Pressable
-        accessibilityLabel={`Open ${profileName}'s profile`}
-        accessibilityRole="button"
-        hitSlop={8}
-        onPress={onProfilePress}
-        style={({ pressed }) => pressed && styles.pressed}>
-        {avatarUrl ? (
-          <Image
-            accessibilityLabel={`${profileName}'s profile photo`}
-            source={avatarUrl}
-            style={[styles.avatar, { borderColor: theme.border }]}
-            transition={150}
-          />
-        ) : (
-          <View
-            accessibilityLabel={`${profileName}'s profile initials`}
-            style={[styles.avatarFallback, { borderColor: theme.border }]}>
-            <Text style={styles.avatarInitials}>{initials}</Text>
-          </View>
-        )}
-      </Pressable>
-      <ThemedText style={styles.brand}>{title}</ThemedText>
-      {showAction ? (
+      {profileIsInteractive ? (
+        onProfilePress ? profileButton : <Link href="/profile" asChild>{profileButton}</Link>
+      ) : (
+        <View accessibilityLabel={`${profileName || 'Local Athlete'}'s profile`} style={styles.sideSlot}>
+          {avatar}
+        </View>
+      )}
+      <View style={styles.brandBlock}>
+        <Text style={styles.brand}>{title}</Text>
+        {statusLabel ? <Text style={styles.status}>{statusLabel}</Text> : null}
+      </View>
+      {showAction && onNotificationsPress ? (
         <Pressable
           accessibilityLabel={actionAccessibilityLabel}
           accessibilityRole="button"
-          hitSlop={12}
-          onPress={onNotificationsPress}
-          style={({ pressed }) => [styles.notificationButton, pressed && styles.pressed]}>
-          <AppIcon color={actionIconColor ?? theme.text} name={actionIcon} size={19} />
+          onPress={onNotificationsPress}>
+          {({ pressed }) => (
+            <View style={[styles.sideSlot, pressed && styles.pressed]}>
+              <AppIcon color={actionIconColor} name={actionIcon} size={20} />
+            </View>
+          )}
         </Pressable>
-      ) : (
-        <View style={styles.notificationButton} />
-      )}
+      ) : <View style={styles.sideSlot} />}
     </View>
   );
 }
@@ -84,46 +100,48 @@ export function Header({
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
+    borderBottomColor: SemanticColors.border,
+    borderBottomWidth: 1,
     flexDirection: 'row',
-    minHeight: 44,
+    gap: Space.base,
+    paddingBottom: Space.sm,
+  },
+  sideSlot: {
+    alignItems: 'center',
+    borderRadius: Radius.md,
+    height: TouchTarget.min,
+    justifyContent: 'center',
+    width: TouchTarget.min,
   },
   avatar: {
-    borderCurve: 'continuous',
-    borderRadius: 18,
+    borderColor: SemanticColors.borderStrong,
+    borderRadius: Radius.full,
     borderWidth: 1,
-    height: 36,
-    width: 36,
+    height: 40,
+    width: 40,
   },
   avatarFallback: {
     alignItems: 'center',
-    backgroundColor: Palette.primary[500],
-    borderCurve: 'continuous',
-    borderRadius: 18,
-    borderWidth: 1,
-    height: 36,
+    backgroundColor: SemanticColors.actionTint,
     justifyContent: 'center',
-    width: 36,
   },
   avatarInitials: {
-    color: Palette.secondary[950],
+    ...Typography.xs,
+    color: DesignColors.primary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 11,
-    lineHeight: 14,
   },
+  brandBlock: { flex: 1, gap: Space.xs, minWidth: 0 },
   brand: {
-    ...Typography.sm,
-    color: Palette.primary[600],
-    flex: 1,
+    ...Typography.base,
+    color: SemanticColors.textPrimary,
     fontFamily: Fonts.heading,
     textAlign: 'center',
   },
-  notificationButton: {
-    alignItems: 'center',
-    height: 36,
-    justifyContent: 'center',
-    width: 36,
+  status: {
+    ...Typography.xs,
+    color: SemanticColors.textMuted,
+    fontFamily: Fonts.body,
+    textAlign: 'center',
   },
-  pressed: {
-    opacity: 0.55,
-  },
+  pressed: { backgroundColor: SemanticColors.hover, opacity: 0.72 },
 });

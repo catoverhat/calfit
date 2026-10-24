@@ -94,7 +94,7 @@ export const styles = StyleSheet.create({
   },
   iconTile: {
     alignItems: "center",
-    backgroundColor: "rgba(255, 95, 31, 0.14)",
+    backgroundColor: SemanticColors.actionTint,
     borderRadius: Radius.md,
     height: 64,
     justifyContent: "center",

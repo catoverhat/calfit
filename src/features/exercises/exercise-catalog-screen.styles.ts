@@ -54,11 +54,10 @@ export const styles = StyleSheet.create({
     width: 134,
   },
   createButtonText: {
+    ...Typography.sm,
     color: DesignColors.onPrimaryContainer,
     flexShrink: 1,
     fontFamily: Fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 12,
     textAlign: 'center',
     textTransform: 'uppercase',
   },
@@ -75,7 +74,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
   },
   searchInput: {
-    ...Typography.xs,
+    ...Typography.base,
     color: SemanticColors.textPrimary,
     flex: 1,
     fontFamily: Fonts.bodyMedium,
@@ -104,10 +103,9 @@ export const styles = StyleSheet.create({
     borderColor: SemanticColors.action,
   },
   filterText: {
+    ...Typography.sm,
     color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 12,
   },
   filterTextSelected: {
     color: DesignColors.onPrimaryContainer,
@@ -130,8 +128,8 @@ export const styles = StyleSheet.create({
   exerciseImage: {
     backgroundColor: DesignColors.surfaceContainerLowest,
     borderRadius: Radius.md,
-    height: 80,
-    width: 80,
+    height: 64,
+    width: 64,
   },
   exerciseImageFallback: {
     alignItems: 'center',
@@ -163,16 +161,15 @@ export const styles = StyleSheet.create({
     gap: Space.xs,
   },
   tag: {
-    backgroundColor: 'rgba(255, 95, 31, 0.14)',
+    backgroundColor: SemanticColors.actionTint,
     borderRadius: Radius.sm,
     paddingHorizontal: Space.xs,
     paddingVertical: 2,
   },
   tagText: {
+    ...Typography.xs,
     color: SemanticColors.actionSoft,
     fontFamily: Fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 13,
   },
   menuButton: {
     alignItems: 'center',
@@ -204,10 +201,9 @@ export const styles = StyleSheet.create({
     width: 34,
   },
   addCustomText: {
+    ...Typography.sm,
     color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 11,
-    lineHeight: 14,
   },
   emptyState: {
     alignItems: 'center',
