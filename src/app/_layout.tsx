@@ -7,6 +7,8 @@ import { AnimatedSplashOverlay } from "@/components/layout/animated-splash-overl
 import { AppLockProvider, useAppLock } from "@/features/auth/app-lock-context";
 import { getAppLockRouteAccess } from "@/features/auth/app-lock.viewmodel";
 import { useAppFonts } from "@/hooks/use-app-fonts";
+import { useDevelopmentScreenTimeout } from "@/hooks/use-development-screen-timeout";
+import { WorkoutPreferencesProvider } from "@/features/workout-session/workout-preferences";
 import { AppThemeProvider } from "@/theme/app-theme-provider";
 
 void SplashScreen.preventAutoHideAsync();
@@ -16,6 +18,7 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+  useDevelopmentScreenTimeout();
   const [fontsLoaded, fontError] = useAppFonts();
 
   if (fontError) throw fontError;
@@ -23,10 +26,12 @@ export default function RootLayout() {
 
   return (
     <AppThemeProvider>
-      <AppLockProvider>
-        <AnimatedSplashOverlay />
-        <RootNavigator />
-      </AppLockProvider>
+      <WorkoutPreferencesProvider>
+        <AppLockProvider>
+          <AnimatedSplashOverlay />
+          <RootNavigator />
+        </AppLockProvider>
+      </WorkoutPreferencesProvider>
     </AppThemeProvider>
   );
 }

@@ -20,6 +20,8 @@ export interface TodayDashboardRoutine {
 export interface TodayDashboardData {
   actionLabel: string;
   activeSessionId: string | null;
+  activeWorkoutIsSeparate: boolean;
+  completedSessionId: string | null;
   avatarUrl: string | null;
   dateLabel: string;
   greeting: string;
@@ -27,6 +29,7 @@ export interface TodayDashboardData {
   syncLabel: string;
   routine: TodayDashboardRoutine | null;
   progress: {
+    completedWorkouts: number;
     bodyWeight: string;
     bodyWeightDelta: string;
     streak: string;
@@ -52,13 +55,18 @@ export function createTodayDashboardData(snapshot: DashboardSnapshot | null, dat
         ? 'Workout Complete'
         : 'Start Workout',
     activeSessionId: snapshot?.activeSession?.workout_session_id ?? null,
+    activeWorkoutIsSeparate: Boolean(snapshot?.activeSession &&
+      snapshot.activeSession.workout_session_id !== planEntry?.session?.workout_session_id),
+    completedSessionId: planEntry?.session?.status === 'completed'
+      ? planEntry.session.workout_session_id
+      : null,
     avatarUrl: null,
     dateLabel: formatDashboardDate(date),
     greeting: createGreeting(date),
     name: user.username,
     syncLabel: 'Saved locally',
     routine: planEntry ? mapPlanEntryToDashboardRoutine(planEntry) : null,
-    progress,
+    progress: { ...progress, completedWorkouts: snapshot?.completedWorkoutCount ?? 0 },
     tip: createDashboardTip(snapshot),
   };
 }
@@ -84,10 +92,10 @@ function mapPlanEntryToDashboardRoutine(
   entry: NonNullable<DashboardSnapshot['planEntry']>
 ): TodayDashboardRoutine {
   const routine = mapRoutineToDashboardRoutine(entry.routine);
-  const state = entry.routine.active !== 1
-    ? 'unavailable'
-    : entry.session?.status === 'completed'
-      ? 'completed'
+  const state = entry.session?.status === 'completed'
+    ? 'completed'
+    : entry.routine.active !== 1
+      ? 'unavailable'
       : entry.session?.status === 'in_progress'
         ? 'in_progress'
         : 'assigned';
@@ -107,7 +115,7 @@ function createProgressData(
   latestMeasurement: BodyMeasurementRow | null,
   previousMeasurement: BodyMeasurementRow | null,
   workoutStreak: number
-): TodayDashboardData['progress'] {
+): Omit<TodayDashboardData['progress'], 'completedWorkouts'> {
   const weightUnit = normalizeWeightUnit(user.weight_unit);
   return {
     bodyWeight:
@@ -146,14 +154,14 @@ function createDashboardTip(snapshot: DashboardSnapshot | null): string {
   }
 
   if (!snapshot.latestBodyMeasurement) {
-    return 'Log a body measurement to unlock real progress trends.';
+    return 'Your sets tell the story. Log what you complete to track your training over time.';
   }
 
   if (snapshot.workoutStreak === 0) {
-    return `Start ${snapshot.planEntry.routine.name} to begin your local streak.`;
+    return 'Build at your own pace. Every completed workout becomes part of your training history.';
   }
 
-  return `Local streak active: ${snapshot.workoutStreak} ${snapshot.workoutStreak === 1 ? 'day' : 'days'}.`;
+  return 'Make room for recovery. Your workout history is here whenever you want to look back.';
 }
 
 function createFallbackUser(): UserRow {

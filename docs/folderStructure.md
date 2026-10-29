@@ -15,6 +15,9 @@ The architecture is **route-first at the navigation boundary and feature-first e
 assets/                         # Expo-configured images, icons, and native assets
 docs/                           # Product, design, architecture, and workflow documentation
 src/
+├── device/                     # App-wide native device identity
+│   ├── device-id-service.ts
+│   └── device-id-service.test.ts
 ├── app/                        # Expo Router routes and layouts only
 │   ├── _layout.tsx
 │   ├── login.tsx
@@ -124,6 +127,10 @@ The five top-level destinations are Today, Plan, Workouts, Progress, and Profile
 The retired `/routines` and `/exercises` URL aliases are not registered in `src/app`. New navigation and links must use `/workouts` and `/workouts/exercises` exclusively.
 
 Date assignments belong exclusively to `db/repositories/workout-plan.ts`. Workouts are reusable definitions with no weekday schedule; Today reads the date-based plan. The retired recurring-schedule tables, import UI, and compatibility APIs are removed.
+
+## Device infrastructure
+
+`src/device` owns app-wide device identity services. It is independent of feature state and SQLite, so development database resets do not rotate a native device identifier. Feature code imports the singleton from `@/device/device-id-service`; colocate its tests in the same directory. Only Android and iOS have a native device identifier; web callers receive an explicit unsupported-platform error.
 
 ## Folder Responsibilities
 
@@ -266,6 +273,10 @@ The feature-first migration is complete. When moving or introducing code:
 7. Remove empty directories and unused barrel files created by the move.
 8. Run TypeScript, lint, and relevant tests without starting the Expo development server.
 9. Keep screen files focused on state, navigation, and composition; extract feature-owned sections and keep their styles beside them.
+
+## Workout screen preferences
+
+`src/features/workout-session/workout-preferences.tsx` exposes the workout screen wake preference and its provider as a deliberate public API for Profile. The workout feature owns foreground detection, screen wake locks, and display timer lifecycle. Profile owns the settings control. The app-wide `src/hooks/use-development-screen-timeout.ts` releases Expo's automatic development wake lock. See [screen and battery behavior](screen-and-battery.md).
 
 ## Placement Checklist
 

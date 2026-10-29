@@ -1,16 +1,16 @@
-import { router, type Href, useFocusEffect } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { router, useFocusEffect, type Href } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 
 import {
   getTodayDashboardSnapshot,
   initializeLocalDatabase,
   seedDemoRoutinesIfEmpty,
   startOrResumeWorkoutFromPlanEntry,
-} from '@/db';
+} from "@/db";
 import {
   createTodayDashboardData,
   type TodayDashboardData,
-} from './today-dashboard.viewmodel';
+} from "./today-dashboard.viewmodel";
 
 interface TodayDashboardState {
   data: TodayDashboardData;
@@ -22,9 +22,11 @@ interface TodayDashboardState {
 export function useTodayDashboard(): TodayDashboardState & {
   openPlan: () => void;
   openWorkouts: () => void;
+  retry: () => void;
   startWorkout: () => Promise<void>;
 } {
   const hasLoaded = useRef(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [state, setState] = useState<TodayDashboardState>({
     data: createTodayDashboardData(null),
     error: null,
@@ -36,7 +38,11 @@ export function useTodayDashboard(): TodayDashboardState & {
     useCallback(() => {
       let active = true;
       async function load() {
-        setState((current) => ({ ...current, error: null, isLoading: !hasLoaded.current }));
+        setState((current) => ({
+          ...current,
+          error: null,
+          isLoading: !hasLoaded.current,
+        }));
         try {
           const db = await initializeLocalDatabase();
           await seedDemoRoutinesIfEmpty(db);
@@ -54,7 +60,10 @@ export function useTodayDashboard(): TodayDashboardState & {
           if (active) {
             setState((current) => ({
               ...current,
-              error: error instanceof Error ? error.message : 'Local database could not be loaded.',
+              error:
+                error instanceof Error
+                  ? error.message
+                  : "Local database could not be loaded.",
               isLoading: false,
             }));
           }
@@ -64,7 +73,9 @@ export function useTodayDashboard(): TodayDashboardState & {
       return () => {
         active = false;
       };
-    }, [])
+      // A new retry token restarts the load while this screen remains focused.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [reloadKey]),
   );
 
   const startWorkout = useCallback(async () => {
@@ -73,17 +84,28 @@ export function useTodayDashboard(): TodayDashboardState & {
       router.push(workoutHref(state.data.activeSessionId));
       return;
     }
-    if (!state.data.routine || state.data.routine.state === 'completed' || state.data.routine.state === 'unavailable') return;
+    if (
+      !state.data.routine ||
+      state.data.routine.state === "completed" ||
+      state.data.routine.state === "unavailable"
+    )
+      return;
 
     setState((current) => ({ ...current, error: null, isStarting: true }));
     try {
       const db = await initializeLocalDatabase();
-      const result = await startOrResumeWorkoutFromPlanEntry(db, state.data.routine.planEntryId);
+      const result = await startOrResumeWorkoutFromPlanEntry(
+        db,
+        state.data.routine.planEntryId,
+      );
       router.push(workoutHref(result.session.workout_session_id));
     } catch (error) {
       setState((current) => ({
         ...current,
-        error: error instanceof Error ? error.message : 'Workout session could not be opened.',
+        error:
+          error instanceof Error
+            ? error.message
+            : "Workout session could not be opened.",
         isStarting: false,
       }));
     }
@@ -91,16 +113,20 @@ export function useTodayDashboard(): TodayDashboardState & {
 
   const openPlan = useCallback(() => {
     const now = new Date();
-    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
-      now.getDate()
-    ).padStart(2, '0')}`;
-    router.push({ pathname: '/plan', params: { date } } as unknown as Href);
+    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+      now.getDate(),
+    ).padStart(2, "0")}`;
+    router.push({ pathname: "/plan", params: { date } } as unknown as Href);
   }, []);
-  const openWorkouts = useCallback(() => router.push('/workouts' as Href), []);
+  const openWorkouts = useCallback(() => router.push("/workouts" as Href), []);
+  const retry = useCallback(() => {
+    hasLoaded.current = false;
+    setReloadKey((current) => current + 1);
+  }, []);
 
-  return { ...state, openPlan, openWorkouts, startWorkout };
+  return { ...state, openPlan, openWorkouts, retry, startWorkout };
 }
 
 function workoutHref(id: string): Href {
-  return { pathname: '/workout-session/[id]', params: { id } } as Href;
+  return { pathname: "/workout-session/[id]", params: { id } } as Href;
 }

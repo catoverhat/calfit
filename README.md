@@ -36,6 +36,10 @@ Expo Router owns navigation under `src/app`; product screens, hooks, components,
 
 The current pre-release schema is version 8. Opening an older local database clears its development records and recreates the current tables. New records persist after the reset. Older recurring schedules and their import flow are removed; date assignments belong only to the planner.
 
+## Device identity
+
+Use `deviceIdService.getId()` from `@/device/device-id-service` for the native app-scoped identifier. See [native device identity](docs/device-identity.md) for package choices, iOS Keychain behavior, Android persistence limits, and research sources. The new native packages require a new development build.
+
 ## Appearance
 
 Profile > Appearance offers System (default), Light, and Dark. The selection applies immediately and saves to the local profile. System follows changes to the device/browser theme. Navigation, status bar, forms, and already mounted screens share the selected palette. The native splash now has light/dark backgrounds; rebuild the development client to apply that native configuration.

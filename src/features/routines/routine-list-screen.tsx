@@ -1,71 +1,63 @@
-import { useAppTheme } from '@/theme/app-theme-provider';
 import { Link, type Href } from "expo-router";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, Pressable, TextInput, View } from "react-native";
 
 import { Header } from "@/components/layout/header";
 import { TabScreen } from "@/components/layout/tab-screen";
 import { AppIcon } from "@/components/ui/app-icon";
 import { ThemedText } from "@/components/ui/themed-text";
+import { useAppTheme } from "@/theme/app-theme-provider";
 
 import { RoutineCard } from "./components/routine-card";
 import { useStyles } from "./routine-list-screen.styles";
 import { useRoutineList } from "./use-routine-list";
 
-const ErrorState = ({
-  error,
-  reload,
-}: {
-  error: string;
-  reload: () => void;
-}) => {
-  const styles = useStyles();
-  const { SemanticColors } = useAppTheme();
-  return (
-    <View style={styles.stateCard}>
-      <View style={styles.stateIcon}>
-        <AppIcon color={SemanticColors.danger} name="warning" size={22} />
-      </View>
-      <ThemedText style={styles.stateTitle}>Workouts unavailable</ThemedText>
-      <ThemedText style={styles.stateText}>{error}</ThemedText>
-      <Pressable
-        accessibilityLabel="Retry loading workouts"
-        accessibilityRole="button"
-        onPress={reload}
-        style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
-      >
-        <ThemedText style={styles.retryText}>Try again</ThemedText>
-      </Pressable>
-    </View>
-  );
-};
+const focusFilters = ["All", "Strength", "Cardio"] as const;
+type FocusFilter = (typeof focusFilters)[number];
 
 export function RoutineListScreen() {
   const styles = useStyles();
-  const { DesignColors, SemanticColors } = useAppTheme();
+  const { DesignColors, SemanticColors, scheme } = useAppTheme();
   const { error, isLoading, profileName, reload, routines } = useRoutineList();
+  const [query, setQuery] = useState("");
+  const [focus, setFocus] = useState<FocusFilter>("All");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const search = query.trim().toLocaleLowerCase();
+  const visibleRoutines = routines.filter(
+    (routine) =>
+      (focus === "All" || routine.focus === focus.toLowerCase()) &&
+      `${routine.title} ${routine.description}`
+        .toLocaleLowerCase()
+        .includes(search),
+  );
 
   return (
     <TabScreen
       contentContainerStyle={styles.scrollContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
       style={styles.screen}
     >
       <View style={styles.content}>
         <Header profileName={profileName} showAction={false} />
-        <View style={styles.headingRow}>
-          <View style={styles.heading}>
-            <ThemedText style={styles.eyebrow}>Your program</ThemedText>
-            <ThemedText style={styles.title}>Workout Library</ThemedText>
-            {!isLoading && !error ? (
-              <ThemedText style={styles.subtitle}>
-                {routines.length}{" "}
-                {routines.length === 1 ? "workout" : "workouts"} stored locally
-              </ThemedText>
-            ) : null}
-          </View>
+        <View style={styles.heading}>
+          <ThemedText style={styles.eyebrow}>
+            Your training, your way
+          </ThemedText>
+          <ThemedText accessibilityRole="header" style={styles.title}>
+            Workouts
+          </ThemedText>
+          <ThemedText style={styles.subtitle}>
+            Find your next session or build one of your own.
+          </ThemedText>
+        </View>
+
+        <View style={styles.libraryActions}>
           <Link href="/workouts/create" asChild>
             <Pressable
               accessibilityLabel="Create workout"
               accessibilityRole="button"
+              style={styles.createLink}
             >
               {({ pressed }) => (
                 <View style={[styles.createButton, pressed && styles.pressed]}>
@@ -74,35 +66,149 @@ export function RoutineListScreen() {
                     name="add"
                     size={20}
                   />
+                  <ThemedText style={styles.createButtonText}>
+                    Create workout
+                  </ThemedText>
+                </View>
+              )}
+            </Pressable>
+          </Link>
+          <Link href={"/workouts/exercises" as Href} asChild>
+            <Pressable
+              accessibilityLabel="Browse and manage exercises"
+              accessibilityRole="button"
+              style={styles.catalogLink}
+            >
+              {({ pressed }) => (
+                <View style={[styles.manageButton, pressed && styles.pressed]}>
+                  <AppIcon
+                    color={SemanticColors.actionSoft}
+                    name="exercises"
+                    size={20}
+                  />
+                  <ThemedText style={styles.manageButtonText}>
+                    Exercises
+                  </ThemedText>
                 </View>
               )}
             </Pressable>
           </Link>
         </View>
 
-        <Link href={'/workouts/exercises' as Href} asChild>
-          <Pressable
-            accessibilityLabel="Manage exercise catalog"
-            accessibilityRole="button">
-            {({ pressed }) => (
-              <View style={[styles.manageButton, pressed && styles.pressed]}>
-                <AppIcon color={SemanticColors.actionSoft} name="exercises" size={18} />
-                <ThemedText style={styles.manageButtonText}>Manage Exercises</ThemedText>
-                <AppIcon color={SemanticColors.textMuted} name="chevronRight" size={18} />
-              </View>
-            )}
-          </Pressable>
-        </Link>
+        {!isLoading && !error && routines.length > 0 ? (
+          <View style={styles.discovery}>
+            <View
+              style={[
+                styles.searchField,
+                searchFocused && styles.searchFieldFocused,
+              ]}
+            >
+              <AppIcon
+                color={SemanticColors.textMuted}
+                name="search"
+                size={20}
+              />
+              <TextInput
+                accessibilityLabel="Search workouts by name or description"
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardAppearance={scheme}
+                onBlur={() => setSearchFocused(false)}
+                onChangeText={setQuery}
+                onFocus={() => setSearchFocused(true)}
+                placeholder="Search workouts"
+                placeholderTextColor={SemanticColors.textMuted}
+                returnKeyType="search"
+                selectionColor={SemanticColors.action}
+                style={styles.searchInput}
+                value={query}
+              />
+              {query ? (
+                <Pressable
+                  accessibilityLabel="Clear workout search"
+                  accessibilityRole="button"
+                  onPress={() => setQuery("")}
+                  style={({ pressed }) => [
+                    styles.clearSearch,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <AppIcon
+                    color={SemanticColors.textSecondary}
+                    name="close"
+                    size={20}
+                  />
+                </Pressable>
+              ) : null}
+            </View>
+            <View accessibilityLabel="Workout type" style={styles.filters}>
+              {focusFilters.map((filter) => (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: focus === filter }}
+                  key={filter}
+                  onPress={() => setFocus(filter)}
+                  style={({ pressed }) => [
+                    styles.filter,
+                    focus === filter && styles.filterSelected,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <ThemedText
+                    style={[
+                      styles.filterText,
+                      focus === filter && styles.filterTextSelected,
+                    ]}
+                  >
+                    {filter}
+                  </ThemedText>
+                </Pressable>
+              ))}
+            </View>
+            <ThemedText
+              accessibilityLiveRegion="polite"
+              style={styles.resultCount}
+            >
+              {visibleRoutines.length}{" "}
+              {visibleRoutines.length === 1 ? "workout" : "workouts"}
+              {search || focus !== "All"
+                ? ` of ${routines.length}`
+                : " in your library"}
+            </ThemedText>
+          </View>
+        ) : null}
 
         {isLoading ? (
-          <View accessibilityLabel="Loading workouts" style={styles.stateCard}>
+          <View
+            accessibilityLabel="Loading workouts"
+            accessibilityState={{ busy: true }}
+            style={styles.stateCard}
+          >
             <ActivityIndicator color={SemanticColors.action} size="large" />
             <ThemedText style={styles.stateText}>
-              Loading your workouts…
+              Loading your workouts...
             </ThemedText>
           </View>
         ) : error ? (
-          <ErrorState error={error} reload={reload} />
+          <View accessibilityLiveRegion="polite" style={styles.stateCard}>
+            <View style={styles.stateIcon}>
+              <AppIcon color={SemanticColors.danger} name="warning" size={24} />
+            </View>
+            <ThemedText style={styles.stateTitle}>
+              Workouts unavailable
+            </ThemedText>
+            <ThemedText style={styles.stateText}>{error}</ThemedText>
+            <Pressable
+              accessibilityRole="button"
+              onPress={reload}
+              style={({ pressed }) => [
+                styles.retryButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <ThemedText style={styles.retryText}>Try again</ThemedText>
+            </Pressable>
+          </View>
         ) : routines.length === 0 ? (
           <View style={styles.stateCard}>
             <View style={styles.stateIcon}>
@@ -113,32 +219,45 @@ export function RoutineListScreen() {
               />
             </View>
             <ThemedText style={styles.stateTitle}>
-              Build your first workout
+              Your next session starts here
             </ThemedText>
             <ThemedText style={styles.stateText}>
-              Combine exercises and set reusable training targets.
+              Create a workout above, add your exercises, and set your targets.
+              You can use it again whenever you train.
             </ThemedText>
-            <Link href="/workouts/create" asChild>
-              <Pressable
-                accessibilityRole="button"
-                style={({ pressed }) => [
-                  styles.emptyCreateButton,
-                  pressed && styles.pressed,
-                ]}>
-                <AppIcon
-                  color={DesignColors.onPrimaryContainer}
-                  name="add"
-                  size={18}
-                />
-                <ThemedText style={styles.emptyCreateButtonText}>
-                  Create Workout
-                </ThemedText>
-              </Pressable>
-            </Link>
+          </View>
+        ) : visibleRoutines.length === 0 ? (
+          <View style={styles.stateCard}>
+            <View style={styles.stateIcon}>
+              <AppIcon
+                color={SemanticColors.textMuted}
+                name="search"
+                size={24}
+              />
+            </View>
+            <ThemedText style={styles.stateTitle}>No workouts found</ThemedText>
+            <ThemedText style={styles.stateText}>
+              Try a different name or show all workout types.
+            </ThemedText>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setQuery("");
+                setFocus("All");
+              }}
+              style={({ pressed }) => [
+                styles.retryButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <ThemedText style={styles.retryText}>
+                Reset search & filters
+              </ThemedText>
+            </Pressable>
           </View>
         ) : (
           <View style={styles.list}>
-            {routines.map((routine) => (
+            {visibleRoutines.map((routine) => (
               <RoutineCard key={routine.id} routine={routine} />
             ))}
           </View>

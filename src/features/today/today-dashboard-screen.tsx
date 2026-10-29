@@ -5,9 +5,9 @@ import { useStyles } from "./today-dashboard-screen.styles";
 import {
   ProgressSummary,
   TodayHeader,
-  TodayRoutineCard,
   TrainingTip,
 } from "./components/today-dashboard-sections";
+import { TodayWorkoutCard } from "./components/today-workout-card";
 import { useTodayDashboard } from "./use-today-dashboard";
 
 export function TodayDashboardScreen() {
@@ -19,6 +19,7 @@ export function TodayDashboardScreen() {
     isStarting,
     openPlan,
     openWorkouts,
+    retry,
     startWorkout,
   } = useTodayDashboard();
 
@@ -34,29 +35,38 @@ export function TodayDashboardScreen() {
           <TodayHeader
             avatarUrl={todayDashboard.avatarUrl}
             name={todayDashboard.name}
-            syncLabel={isLoading ? 'Loading your plan' : error ? 'Plan unavailable' : todayDashboard.syncLabel}
+            syncLabel={
+              isLoading
+                ? "Loading your plan"
+                : error
+                  ? "Plan unavailable"
+                  : todayDashboard.syncLabel
+            }
           />
 
           <View style={styles.greetingBlock}>
             <Text style={styles.dateLabel}>{todayDashboard.dateLabel}</Text>
-            <Text style={styles.greeting}>
+            <Text accessibilityRole="header" style={styles.greeting}>
               {todayDashboard.greeting}, {todayDashboard.name}!
             </Text>
           </View>
 
-          <TodayRoutineCard
-            actionLabel={todayDashboard.actionLabel}
-            canStart={Boolean(todayDashboard.routine || todayDashboard.activeSessionId)}
+          <TodayWorkoutCard
+            data={todayDashboard}
             error={error}
             isLoading={isLoading}
             isStarting={isStarting}
             onBrowseWorkouts={openWorkouts}
             onOpenPlan={openPlan}
+            onRetry={retry}
             onStart={startWorkout}
-            routine={todayDashboard.routine}
           />
-          <ProgressSummary progress={todayDashboard.progress} />
-          <TrainingTip tip={todayDashboard.tip} />
+          {!isLoading && !error ? (
+            <>
+              <ProgressSummary progress={todayDashboard.progress} />
+              <TrainingTip tip={todayDashboard.tip} />
+            </>
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>

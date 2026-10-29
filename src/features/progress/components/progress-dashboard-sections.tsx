@@ -156,17 +156,20 @@ export function ConsistencyCard({ data }: { data: ProgressDashboardData }) {
 
 type ProgressHref = '/progress/history' | '/progress/measurements' | '/progress/storage' | '/workouts';
 
-export function ProgressLink({ href, icon, label }: { href: ProgressHref; icon: AppIconName; label: string }) {
+export function ProgressLink({ compact = false, detail, href, icon, label }: { compact?: boolean; detail?: string; href: ProgressHref; icon: AppIconName; label: string }) {
   const styles = useStyles();
   const { SemanticColors } = useAppTheme();
   return (
     <Link href={href} push asChild>
       <Pressable accessibilityLabel={label} accessibilityRole="button">
         {({ pressed }) => (
-          <View style={[styles.quickLink, pressed && styles.pressed]}>
+          <View style={[styles.quickLink, compact && styles.compactLink, pressed && styles.pressed]}>
             <AppIcon color={SemanticColors.actionSoft} name={icon} size={20} />
-            <Text style={styles.quickLinkText}>{label}</Text>
-            <AppIcon color={SemanticColors.textMuted} name="chevronRight" size={18} />
+            <View style={compact ? undefined : styles.quickLinkCopy}>
+              <Text style={styles.quickLinkText}>{label}</Text>
+              {detail ? <Text style={styles.metaText}>{detail}</Text> : null}
+            </View>
+            {!compact ? <AppIcon color={SemanticColors.textMuted} name="chevronRight" size={18} /> : null}
           </View>
         )}
       </Pressable>

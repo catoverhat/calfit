@@ -64,6 +64,13 @@
           }
         }
       ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Allow Calfit to use Face ID to protect your workout data."
+        }
+      ],
       "expo-sqlite",
       "@react-native-vector-icons/lucide"
     ],

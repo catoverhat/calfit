@@ -1,8 +1,7 @@
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { router } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useState } from 'react';
 import {
-  FlatList,
   Modal,
   Pressable,
   ScrollView,
@@ -17,7 +16,9 @@ import { AppIcon } from '@/components/ui/app-icon';
 import { ThemedText } from '@/components/ui/themed-text';
 
 import { DayCard } from './weekly-plan-day-card';
-import { formatWeekRange, getIsoWeek, parseLocalDateKey } from './plan-calendar';
+import { WeeklyPlanNavigation } from './weekly-plan-navigation';
+import { WeeklyPlanOverview } from './weekly-plan-overview';
+import { getIsoWeek, parseLocalDateKey } from './plan-calendar';
 import { useStyles } from './weekly-plan-screen.styles';
 import { useWeeklyPlan } from './use-weekly-plan';
 import type { WorkoutDefinition, WorkoutPlanDay } from './weekly-plan.viewmodel';
@@ -34,25 +35,11 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
   const { SemanticColors } = useAppTheme();
   const planner = useWeeklyPlan(initialDate);
   const { width } = useWindowDimensions();
-  const wide = width >= 960;
-  const weekList = useRef<FlatList<number>>(null);
+  const wide = width >= 720;
   const [picker, setPicker] = useState<PickerState>(null);
   const [change, setChange] = useState<ChangeState>(null);
   const [target, setTarget] = useState<TargetState>(null);
   const [swapTarget, setSwapTarget] = useState<WorkoutPlanDay | null>(null);
-
-  const weeks = useMemo(
-    () => Array.from({ length: planner.maxWeek }, (_, index) => index + 1),
-    [planner.maxWeek]
-  );
-  const range = formatWeekRange(planner.dates);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      weekList.current?.scrollToIndex({ animated: true, index: planner.week - 1, viewPosition: 0.45 });
-    }, 60);
-    return () => clearTimeout(timer);
-  }, [planner.week, planner.year]);
 
   const selectWorkout = (workout: WorkoutDefinition) => {
     if (!picker) return;
@@ -89,8 +76,8 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
           <View style={styles.headingRow}>
             <View style={styles.heading}>
               <ThemedText style={styles.eyebrow}>Weekly planning</ThemedText>
-              <ThemedText style={styles.title}>Workout Plan</ThemedText>
-              <ThemedText style={styles.subtitle}>Assign one reusable workout to any date.</ThemedText>
+              <ThemedText accessibilityRole="header" style={styles.title}>Your week</ThemedText>
+              <ThemedText style={styles.subtitle}>Make room for training and recovery.</ThemedText>
             </View>
             <Pressable
               accessibilityLabel="Return to the current week"
@@ -102,44 +89,22 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
             </Pressable>
           </View>
 
-          <View style={styles.yearControls}>
-            <IconButton label="Previous year" name="chevronLeft" onPress={() => planner.selectYear(planner.year - 1)} />
-            <ThemedText style={styles.year}>{planner.year}</ThemedText>
-            <IconButton label="Next year" name="chevronRight" onPress={() => planner.selectYear(planner.year + 1)} />
-          </View>
-
-          <FlatList
-            contentContainerStyle={styles.weekRail}
-            data={weeks}
-            horizontal
-            keyExtractor={(item) => String(item)}
-            onScrollToIndexFailed={(info) =>
-              weekList.current?.scrollToOffset({ animated: true, offset: Math.max(0, info.index * 70 - 120) })
-            }
-            ref={weekList}
-            renderItem={({ item }) => (
-              <Pressable
-                accessibilityLabel={`Week ${item}`}
-                accessibilityRole="button"
-                accessibilityState={{ selected: item === planner.week }}
-                onPress={() => planner.selectWeek(item)}
-                style={({ pressed }) => [
-                  styles.weekChip,
-                  item === planner.week && styles.weekChipSelected,
-                  pressed && styles.pressed,
-                ]}>
-                <ThemedText style={[styles.weekChipText, item === planner.week && styles.weekChipTextSelected]}>
-                  W{item}
-                </ThemedText>
-              </Pressable>
-            )}
-            showsHorizontalScrollIndicator={false}
+          <WeeklyPlanNavigation
+            dates={planner.dates}
+            maxWeek={planner.maxWeek}
+            onNextWeek={() => navigateWeek(planner, 1)}
+            onPreviousWeek={() => navigateWeek(planner, -1)}
+            onSelectWeek={planner.selectWeek}
+            onSelectYear={planner.selectYear}
+            week={planner.week}
+            year={planner.year}
           />
+
+          {!planner.isLoading && !planner.error ? <WeeklyPlanOverview days={planner.weekModel.days} /> : null}
 
           <View style={styles.weekSummary}>
             <View>
-              <ThemedText style={styles.weekTitle}>Week {planner.week}</ThemedText>
-              <ThemedText style={styles.weekRange}>{range}</ThemedText>
+              <ThemedText style={styles.sectionTitle}>Daily schedule</ThemedText>
             </View>
             <Pressable
               accessibilityLabel="Copy assignments from the previous week"
@@ -154,7 +119,7 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
               onPress={() => void planner.copyPreviousWeek()}
               style={({ pressed }) => [
                 styles.copyButton,
-                (!planner.weekModel.isEmpty || planner.dates[6] < planner.today) && styles.disabled,
+                (planner.isLoading || planner.isSaving || !planner.weekModel.isEmpty || planner.dates[6] < planner.today) && styles.disabled,
                 pressed && styles.pressed,
               ]}>
               <AppIcon color={SemanticColors.actionSoft} name="copy" size={17} />
@@ -163,7 +128,7 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
           </View>
 
           {planner.error ? (
-            <View style={styles.errorBanner}>
+            <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
               <AppIcon color={SemanticColors.danger} name="warning" size={18} />
               <ThemedText style={styles.errorText}>{planner.error}</ThemedText>
               <Pressable
@@ -219,6 +184,7 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
       </View>
 
       <WorkoutPicker
+        key={picker?.day.date ?? 'closed'}
         onClose={() => setPicker(null)}
         onCreate={() => {
           if (!picker) return;
@@ -227,7 +193,7 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
         }}
         onSelect={selectWorkout}
         open={Boolean(picker)}
-        title={picker?.mode === 'change' ? `Change ${picker.day.weekday}` : `Assign ${picker?.day.weekday ?? ''}`}
+        title={picker ? `${picker.mode === 'change' ? 'Change' : 'Plan'} ${picker.day.weekday}, ${picker.day.dateLabel}` : 'Plan a workout'}
         workouts={planner.workouts.filter((workout) => workout.active)}
       />
 
@@ -292,12 +258,17 @@ function WorkoutPicker({ onClose, onCreate, onSelect, open, title, workouts }: {
         <AppIcon color={SemanticColors.textMuted} name="search" size={18} />
         <TextInput keyboardAppearance={scheme}
           accessibilityLabel="Search workouts"
+          autoCapitalize="none"
+          autoCorrect={false}
           onChangeText={setQuery}
           placeholder="Search workouts"
           placeholderTextColor={SemanticColors.textMuted}
           style={styles.searchInput}
           value={query}
         />
+        {query ? <Pressable accessibilityLabel="Clear workout search" accessibilityRole="button" onPress={() => setQuery('')} style={styles.iconButton}>
+          <AppIcon color={SemanticColors.textMuted} name="close" size={18} />
+        </Pressable> : null}
       </View>
       <ScrollView contentContainerStyle={styles.sheetList} keyboardShouldPersistTaps="handled">
         {visible.map((workout) => (
@@ -315,7 +286,11 @@ function WorkoutPicker({ onClose, onCreate, onSelect, open, title, workouts }: {
             <AppIcon color={SemanticColors.textMuted} name="chevronRight" size={18} />
           </Pressable>
         ))}
-        {visible.length === 0 ? <ThemedText style={styles.emptyText}>No matching workouts.</ThemedText> : null}
+        {visible.length === 0 ? <View style={styles.pickerEmpty}>
+          <AppIcon color={SemanticColors.textMuted} name={workouts.length === 0 ? 'strength' : 'search'} size={32} />
+          <ThemedText style={styles.optionTitle}>{workouts.length === 0 ? 'Build your first workout' : 'No workouts found'}</ThemedText>
+          <ThemedText style={styles.emptyText}>{workouts.length === 0 ? 'Create a workout with your exercises, then add it to this day.' : 'Try a different name or clear your search.'}</ThemedText>
+        </View> : null}
       </ScrollView>
       <Pressable accessibilityRole="button" onPress={onCreate} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}>
         <AppIcon color={DesignColors.onPrimaryContainer} name="add" size={19} />

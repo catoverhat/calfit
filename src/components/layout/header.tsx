@@ -41,11 +41,11 @@ export function Header({
   showAction = true,
   statusLabel,
   style,
-  title = 'Kinetic Pulse',
+  title = 'Calfit',
 }: HeaderProps) {
   const styles = useStyles();
   const { SemanticColors } = useAppTheme();
-  const initials = (profileName.trim() || 'Local Athlete').slice(0, 2).toUpperCase();
+  const initials = (profileName.trim() || 'Local Athlete').split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
   const avatar = avatarUrl ? (
     <Image contentFit="cover" source={avatarUrl} style={styles.avatar} transition={150} />
   ) : (
@@ -66,13 +66,9 @@ export function Header({
 
   return (
     <View style={[styles.container, style]}>
-      {profileIsInteractive ? (
-        onProfilePress ? profileButton : <Link href="/profile" asChild>{profileButton}</Link>
-      ) : (
-        <View accessibilityLabel={`${profileName || 'Local Athlete'}'s profile`} style={styles.sideSlot}>
-          {avatar}
-        </View>
-      )}
+      <View style={styles.brandMark}>
+        <AppIcon color={SemanticColors.actionSoft} name="strength" size={22} />
+      </View>
       <View style={styles.brandBlock}>
         <Text style={styles.brand}>{title}</Text>
         {statusLabel ? <Text style={styles.status}>{statusLabel}</Text> : null}
@@ -88,7 +84,14 @@ export function Header({
             </View>
           )}
         </Pressable>
-      ) : <View style={styles.sideSlot} />}
+      ) : null}
+      {profileIsInteractive ? (
+        onProfilePress ? profileButton : <Link href="/profile" asChild>{profileButton}</Link>
+      ) : (
+        <View accessibilityLabel={`${profileName || 'Local Athlete'}'s profile`} style={styles.sideSlot}>
+          {avatar}
+        </View>
+      )}
     </View>
   );
 }
@@ -99,7 +102,7 @@ const useStyles = createThemedStyles(({ DesignColors, SemanticColors }) => Style
     borderBottomColor: SemanticColors.border,
     borderBottomWidth: 1,
     flexDirection: 'row',
-    gap: Space.base,
+    gap: Space.sm,
     paddingBottom: Space.sm,
   },
   sideSlot: {
@@ -108,6 +111,14 @@ const useStyles = createThemedStyles(({ DesignColors, SemanticColors }) => Style
     height: TouchTarget.min,
     justifyContent: 'center',
     width: TouchTarget.min,
+  },
+  brandMark: {
+    alignItems: 'center',
+    backgroundColor: SemanticColors.actionTint,
+    borderRadius: Radius.md,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
   },
   avatar: {
     borderColor: SemanticColors.borderStrong,
@@ -128,16 +139,14 @@ const useStyles = createThemedStyles(({ DesignColors, SemanticColors }) => Style
   },
   brandBlock: { flex: 1, gap: Space.xs, minWidth: 0 },
   brand: {
-    ...Typography.base,
+    ...Typography.xl,
     color: SemanticColors.textPrimary,
     fontFamily: Fonts.heading,
-    textAlign: 'center',
   },
   status: {
     ...Typography.xs,
     color: SemanticColors.textMuted,
     fontFamily: Fonts.body,
-    textAlign: 'center',
   },
   pressed: { backgroundColor: SemanticColors.hover, opacity: 0.72 },
 }));

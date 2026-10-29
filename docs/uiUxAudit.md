@@ -213,3 +213,21 @@ Appearance remains saved independently from profile details. Changing weight exp
 Verification: TypeScript and ESLint passed; all 27 Jest suites / 105 tests passed. Added hook coverage for clean/dirty state, refocus preservation, single pending writes, failure retry, and initial-load recovery. Web production export passed to dist/profile-ui-preview. A responsive single-file visual prototype is available at dist/profile-redesign/profile-preview.html (design preview, not the running native screen). Browser screenshot capture was unavailable under sandbox permissions. Device appearance, native text scaling, keyboard behavior, and screen-reader interaction still need manual review. No Expo development server was started.
 
 Profile ordering follow-up: moved Appearance directly above Privacy & security, after the profile details and save action, as requested.
+
+## Exercise flow refresh - 2026-10-29
+
+Improved the core training journey while preserving the current light/dark palettes, embedded fonts, native navigation, and feature ownership. Reviewed the Expo SDK 56 reference before implementation.
+
+| Area | Implemented change |
+|---|---|
+| Shared header | Consistent Calfit identity, compact brand mark, and a clearly separated profile action. |
+| Today | One prominent start/resume/summary action, useful rest-day and retry states, completed-workout count, and direct access to history and measurements. An active session remains resumable even when today's separate plan is completed or inactive. Completed sessions keep their summary after the workout definition is archived. |
+| Workout library | Search by name/description, Strength/Cardio filters, resettable no-results state, full-card navigation, and clearer metadata. |
+| Workout details | Compact overview, explicit recovery for empty/inactive workouts, active-session guidance, and numbered expandable exercise targets. |
+| Weekly plan | Previous/next-week navigation with an expandable week picker, actual scheduled/completed/rest counts, quieter rest days, and roomier responsive cards. |
+| Active workout | Combined timer/progress overview, explicit Log set controls, next-set emphasis, readable numeric inputs, sage completion, and rest controls outside the scroll area. Existing foreground and screen-wake behavior is preserved. |
+| Progress | Training metrics and consistency precede optional body measurements; workout history is available near the heading. |
+
+Validation: TypeScript passed; the full Jest suite passed 33 suites / 136 tests. After the final Today fixes, its 3 suites / 12 tests passed, including the newly added retry/refocus regression test. Source ESLint and diff checks passed. The production web export succeeded at `dist/ux-refresh-20261029`. Running ESLint over the entire repository reported only an existing unused-disable warning in generated `.expo/types/router.d.ts`.
+
+No Expo development server was started. Verification covers source, behavior tests, and bundling; rendered device/browser appearance, large system text, keyboard behavior, and screen-reader interaction still need a manual pass.

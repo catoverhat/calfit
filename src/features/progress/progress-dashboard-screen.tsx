@@ -22,9 +22,13 @@ export function ProgressDashboardScreen() {
     <TabScreen contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
         <Header avatarUrl={data?.avatarUrl} profileName={data?.profileName ?? 'Local Athlete'} showAction={false} />
-        <View style={styles.headingBlock}>
-          <Text accessibilityRole="header" style={styles.title}>Your progress</Text>
-          <Text style={styles.subtitle}>See how your training adds up.</Text>
+        <View style={styles.headingRow}>
+          <View style={styles.headingBlock}>
+            <Text style={styles.eyebrow}>Every session counts</Text>
+            <Text accessibilityRole="header" style={styles.title}>Your progress</Text>
+            <Text style={styles.subtitle}>See how your training adds up.</Text>
+          </View>
+          <ProgressLink compact href="/progress/history" icon="history" label="History" />
         </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Training overview</Text>
@@ -33,7 +37,7 @@ export function ProgressDashboardScreen() {
           {data && !isLoading ? (
             <>
               <View style={styles.metricGrid}>
-                {data.trainingMetrics.map((metric) => <MetricCard key={metric.label} metric={metric} />)}
+                {data.trainingMetrics.map((metric) => <MetricCard key={metric.label} metric={metric} prominent />)}
               </View>
               <TrainingChart data={data} />
             </>
@@ -41,22 +45,25 @@ export function ProgressDashboardScreen() {
         </View>
         {data && !isLoading ? (
           <>
+            <ConsistencyCard data={data} />
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Body measurements</Text>
+              <View style={styles.sectionHeading}>
+                <Text style={styles.sectionTitle}>Body measurements</Text>
+                <Text style={styles.sectionHint}>An optional way to track changes over time.</Text>
+              </View>
               <WeightTrendCard data={data} />
               <View style={styles.metricGrid}>
                 {data.metrics.map((metric) => <MetricCard key={metric.label} metric={metric} />)}
               </View>
             </View>
-            <ConsistencyCard data={data} />
           </>
         ) : null}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Explore your progress</Text>
           <View style={styles.quickLinks}>
-            <ProgressLink href="/progress/history" icon="history" label="Workout history" />
-            <ProgressLink href="/progress/measurements" icon="body" label="Measurements" />
-            <ProgressLink href="/progress/storage" icon="database" label="Local data" />
+            <ProgressLink href="/progress/history" icon="history" label="Workout history" detail="Review sessions, sets, and lifting volume" />
+            <ProgressLink href="/progress/measurements" icon="body" label="Measurements" detail="Add or review your body measurements" />
+            <ProgressLink href="/progress/storage" icon="database" label="Local data" detail="See what is saved on this device" />
           </View>
         </View>
       </View>

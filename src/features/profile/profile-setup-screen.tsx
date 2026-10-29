@@ -12,6 +12,7 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { useAppLock } from "@/features/auth/app-lock-context";
 import { useAppTheme } from "@/theme/app-theme-provider";
 import { ProfileAppearanceSection } from "./components/profile-appearance-section";
+import { ProfileScreenPreferenceSection } from "./components/profile-screen-preference-section";
 import {
   SegmentedControl,
   SetupField,
@@ -304,6 +305,7 @@ export function ProfileSetupScreen() {
           )}
 
           <ProfileAppearanceSection />
+          <ProfileScreenPreferenceSection />
 
           <ProfileSecuritySection
             isWebSession={capability.kind === "web"}

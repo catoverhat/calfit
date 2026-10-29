@@ -48,6 +48,7 @@ export function DayCard({
       accessibilityState={{ busy }}
       style={[
         styles.dayCard,
+        day.state === 'rest' && styles.dayCardRest,
         wide && styles.dayCardWide,
         day.isToday && styles.dayCardToday,
       ]}
@@ -55,7 +56,7 @@ export function DayCard({
       <View style={styles.dayHeader}>
         <View>
           <ThemedText style={styles.weekday}>
-            {wide ? day.weekday.slice(0, 3) : day.weekday}
+            {day.weekday}
           </ThemedText>
           <ThemedText style={styles.dateLabel}>{day.dateLabel}</ThemedText>
         </View>
@@ -85,7 +86,7 @@ export function DayCard({
         </View>
       ) : day.workout ? (
         <View style={styles.dayBody}>
-          <ThemedText numberOfLines={2} style={styles.workoutTitle}>
+          <ThemedText style={styles.workoutTitle}>
             {day.workout.title}
           </ThemedText>
           <ThemedText style={styles.workoutMeta}>
@@ -94,7 +95,7 @@ export function DayCard({
           {canStart ? (
             <SmallAction
               disabled={disabled}
-              label={day.state === "in_progress" ? "Resume" : "Start"}
+              label={day.state === "in_progress" ? "Resume workout" : "Start workout"}
               onPress={onStart}
               primary
             />
@@ -123,19 +124,19 @@ export function DayCard({
         </View>
       ) : (
         <View style={styles.restBody}>
-          <ThemedText style={styles.restTitle}>
-            {day.isToday ? "Planned rest day" : "Rest day"}
-          </ThemedText>
+          <View style={styles.restHeading}>
+            <AppIcon color={SemanticColors.textMuted} name="sun" size={20} />
+            <ThemedText style={styles.restTitle}>Rest day</ThemedText>
+          </View>
           {day.editable ? (
             <SmallAction
               busy={busy}
               disabled={disabled}
               label="Assign workout"
               onPress={onAssign}
-              primary
             />
           ) : (
-            <ThemedText style={styles.lockedText}>Read-only</ThemedText>
+            <ThemedText style={styles.lockedText}>No workout was planned.</ThemedText>
           )}
         </View>
       )}
@@ -161,6 +162,7 @@ function SmallAction({
   const styles = useStyles();
   const { SemanticColors } = useAppTheme();
   const assign = label === "Assign workout";
+  const start = label === 'Start workout' || label === 'Resume workout';
   return (
     <Pressable
       accessibilityLabel={busy ? "Assigning workout" : label}
@@ -171,22 +173,26 @@ function SmallAction({
       style={({ pressed }) => [
         styles.smallAction,
         assign && styles.assignAction,
+        start && styles.startAction,
         primary && styles.smallActionPrimary,
         danger && styles.smallActionDanger,
+        disabled && !assign && styles.disabled,
         pressed && styles.pressed,
       ]}
     >
       {assign ? (
         busy ? (
-          <ActivityIndicator color={SemanticColors.actionText} size="small" />
+          <ActivityIndicator color={SemanticColors.actionSoft} size="small" />
         ) : (
-          <AppIcon color={SemanticColors.actionText} name="add" size={18} />
+          <AppIcon color={SemanticColors.actionSoft} name="add" size={18} />
         )
       ) : null}
+      {start ? <AppIcon color={SemanticColors.actionText} name="play" size={18} /> : null}
       <ThemedText
         style={[
           styles.smallActionText,
           assign && styles.assignActionText,
+          start && styles.startActionText,
           primary && styles.smallActionPrimaryText,
           danger && styles.smallActionDangerText,
         ]}
