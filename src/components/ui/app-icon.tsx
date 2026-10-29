@@ -43,6 +43,7 @@ export type AppIconName =
   | "strength"
   | "play"
   | "add"
+  | "minus"
   | "edit"
   | "open"
   | "briefcase"
@@ -110,6 +111,7 @@ const icons: Record<AppIconName, LucideIconName> = {
   strength: "dumbbell",
   play: "play",
   add: "plus",
+  minus: "minus",
   edit: "pencil",
   open: "external-link",
   briefcase: "briefcase",
@@ -148,6 +150,7 @@ export function AppIcon({ color, name, size = 16 }: AppIconProps) {
   return (
     <Lucide
       accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
       color={color}
       name={icons[name]}
       size={size}

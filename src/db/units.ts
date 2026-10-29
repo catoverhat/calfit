@@ -28,6 +28,15 @@ export function weightFromCanonical(valueKg: number, unit: WeightUnit): number {
   return unit === 'lb' ? valueKg / KILOGRAMS_PER_POUND : valueKg;
 }
 
+/**
+ * Body mass index: weight (kg) / height (m)², rounded to one decimal.
+ * Quetelet's index, named BMI by Keys et al. (1972); the formula WHO uses.
+ */
+export function calculateBmi(weightKg: number | null, heightCm: number | null): number | null {
+  if (!weightKg || !heightCm || weightKg <= 0 || heightCm <= 0) return null;
+  return Math.round((weightKg / (heightCm / 100) ** 2) * 10) / 10;
+}
+
 export function weightToCanonical(value: number, unit: WeightUnit): number {
   return unit === 'lb' ? value * KILOGRAMS_PER_POUND : value;
 }

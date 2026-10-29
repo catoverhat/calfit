@@ -25,6 +25,7 @@ export const useStyles = createThemedStyles(({ SemanticColors, ComponentTokens }
   fieldHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: Spacing.two },
   fieldLabel: { ...Typography.sm, color: SemanticColors.textPrimary, fontFamily: Fonts.bodySemiBold },
   optionalLabel: { color: SemanticColors.textMuted, fontFamily: Fonts.body },
+  dateText: { ...Typography.base, color: SemanticColors.textPrimary, fontFamily: Fonts.body },
   fieldHelper: { ...Typography.xs, color: SemanticColors.textMuted, fontFamily: Fonts.body },
   input: { ...Typography.base, color: SemanticColors.textPrimary, backgroundColor: SemanticColors.recessed, borderColor: SemanticColors.borderStrong, borderWidth: 1, borderRadius: Radius.md, fontFamily: Fonts.body, minHeight: 56, paddingHorizontal: Space.sm, paddingVertical: Spacing.two },
   inputFocused: { borderColor: SemanticColors.focus, borderWidth: 2, paddingHorizontal: Space.sm - 1, paddingVertical: Spacing.two - 1 },

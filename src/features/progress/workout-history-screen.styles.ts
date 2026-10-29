@@ -118,9 +118,9 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   statusText: {
     color: SemanticColors.action,
     fontFamily: Fonts.bodyBold,
-    fontSize: 11,
+    fontSize: 12,
     letterSpacing: 0.8,
-    lineHeight: 15,
+    lineHeight: 16,
     textTransform: 'uppercase',
   },
   statusTextMuted: {
@@ -129,15 +129,17 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   ring: {
     alignItems: 'center',
     borderRadius: Radius.full,
-    borderWidth: 5,
-    height: 48,
+    borderWidth: 4,
+    // min sizes let the ring grow with large system text instead of clipping "100%".
+    minHeight: 56,
     justifyContent: 'center',
-    width: 48,
+    minWidth: 56,
+    paddingHorizontal: 4,
   },
   ringText: {
     fontFamily: Fonts.bodyBold,
-    fontSize: 9,
-    lineHeight: 12,
+    fontSize: 12,
+    lineHeight: 16,
   },
   metricsRow: {
     borderTopColor: SemanticColors.border,
@@ -153,8 +155,8 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   metricLabel: {
     color: SemanticColors.textSecondary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 13,
+    fontSize: 12,
+    lineHeight: 16,
   },
   metricValue: {
     ...Typography.lg,
@@ -172,9 +174,9 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   monthLabel: {
     color: DesignColors.primaryFixedDim,
     fontFamily: Fonts.bodyBold,
-    fontSize: 11,
+    fontSize: 12,
     letterSpacing: 1,
-    lineHeight: 15,
+    lineHeight: 16,
     textTransform: 'uppercase',
   },
   monthLine: {

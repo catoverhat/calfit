@@ -37,7 +37,7 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   removeSetButton: { alignItems: 'center', height: 48, justifyContent: 'center', width: 48 },
   targetFields: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   targetField: { flexGrow: 1, gap: Spacing.one, minWidth: 86, width: '30%' },
-  targetLabel: { color: SemanticColors.textMuted, fontFamily: Fonts.bodySemiBold, fontSize: 10, lineHeight: 14, textTransform: 'uppercase' },
+  targetLabel: { color: SemanticColors.textMuted, fontFamily: Fonts.bodySemiBold, fontSize: 12, lineHeight: 16, textTransform: 'uppercase' },
   targetInput: { ...Typography.base, backgroundColor: ComponentTokens.input.background, borderColor: ComponentTokens.input.borderColor, borderRadius: Radius.md, borderWidth: 1, color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold, minHeight: 48, paddingHorizontal: Spacing.two },
   addSetButton: { alignItems: 'center', alignSelf: 'flex-start', flexDirection: 'row', gap: Spacing.two, minHeight: 48, paddingHorizontal: Spacing.two },
   addSetText: { ...Typography.sm, color: SemanticColors.actionSoft, fontFamily: Fonts.bodyBold },

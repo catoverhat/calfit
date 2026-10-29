@@ -82,6 +82,19 @@ describe('workout session view model', () => {
     expect(workout.weightUnit).toBe('lb');
     expect(workout.exercises[0].sets[0].weight).toBe('132.28');
   });
+
+  it('labels each set with the matching set from the last completed session', () => {
+    const previous = new Map([[
+      'exercise-1',
+      [{
+        exercise_id: 'exercise-1', workout_session_id: 'old', set_number: 1,
+        reps: 6, weight: 62.5, speed: null, duration_seconds: null, distance: null,
+      }],
+    ]]);
+    const workout = mapWorkoutSessionToViewModel(session, user, previous);
+
+    expect(workout.exercises[0].sets.map((set) => set.previous)).toEqual(['62.5 kg × 6', null]);
+  });
 });
 
 function createSet(id: string, setNumber: number, reps: number, weight: number) {

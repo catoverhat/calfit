@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 
 import { Header } from '@/components/layout/header';
 import { TabScreen } from '@/components/layout/tab-screen';
@@ -51,6 +52,13 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
     setChange({ day: picker.day, workout });
     setPicker(null);
   };
+
+  const copyBlockedReason = planner.dates[6] < planner.today
+    ? 'Past weeks can’t be changed.'
+    : !planner.weekModel.isEmpty
+      ? 'Available when this week has no workouts.'
+      : null;
+  const copyDisabled = planner.isLoading || planner.isSaving || copyBlockedReason !== null;
 
   const chooseTarget = (day: WorkoutPlanDay) => {
     if (!target || day.date === target.day.date || !day.editable) return;
@@ -104,28 +112,27 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
 
           <View style={styles.weekSummary}>
             <View>
-              <ThemedText style={styles.sectionTitle}>Daily schedule</ThemedText>
+              <ThemedText accessibilityRole="header" style={styles.sectionTitle}>Daily schedule</ThemedText>
             </View>
             <Pressable
+              accessibilityHint={copyBlockedReason ?? undefined}
               accessibilityLabel="Copy assignments from the previous week"
               accessibilityRole="button"
-              accessibilityState={{
-                disabled:
-                  planner.isLoading || !planner.weekModel.isEmpty ||
-                  planner.isSaving ||
-                  planner.dates[6] < planner.today,
-              }}
-              disabled={planner.isLoading || !planner.weekModel.isEmpty || planner.isSaving || planner.dates[6] < planner.today}
+              accessibilityState={{ disabled: copyDisabled }}
+              disabled={copyDisabled}
               onPress={() => void planner.copyPreviousWeek()}
               style={({ pressed }) => [
                 styles.copyButton,
-                (planner.isLoading || planner.isSaving || !planner.weekModel.isEmpty || planner.dates[6] < planner.today) && styles.disabled,
+                copyDisabled && styles.disabled,
                 pressed && styles.pressed,
               ]}>
               <AppIcon color={SemanticColors.actionSoft} name="copy" size={17} />
               <ThemedText style={styles.copyButtonText}>Copy previous week</ThemedText>
             </Pressable>
           </View>
+          {copyBlockedReason && !planner.isLoading ? (
+            <ThemedText style={styles.muted}>Copy previous week: {copyBlockedReason}</ThemedText>
+          ) : null}
 
           {planner.error ? (
             <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
@@ -222,7 +229,7 @@ export function WeeklyPlanScreen({ initialDate }: { initialDate?: string }) {
         onPreviousWeek={() => navigateWeek(planner, -1)}
         onSelect={chooseTarget}
         open={Boolean(target)}
-        sourceDate={target?.day.date}
+        source={target?.day}
         swapTarget={swapTarget}
         week={planner.weekModel}
         onConfirmSwap={() => {
@@ -325,7 +332,7 @@ function ChoiceSheet({ change, onClose, onMoveOriginal, onReplace }: {
   );
 }
 
-function TargetSheet({ allowOccupied, onClose, onConfirmSwap, onNextWeek, onPreviousWeek, onSelect, open, sourceDate, swapTarget, week }: {
+function TargetSheet({ allowOccupied, onClose, onConfirmSwap, onNextWeek, onPreviousWeek, onSelect, open, source, swapTarget, week }: {
   allowOccupied: boolean;
   onClose: () => void;
   onConfirmSwap: () => void;
@@ -333,18 +340,23 @@ function TargetSheet({ allowOccupied, onClose, onConfirmSwap, onNextWeek, onPrev
   onPreviousWeek: () => void;
   onSelect: (day: WorkoutPlanDay) => void;
   open: boolean;
-  sourceDate?: string;
+  source?: WorkoutPlanDay;
   swapTarget: WorkoutPlanDay | null;
   week: { days: WorkoutPlanDay[]; week: number; year: number };
 }) {
   const styles = useStyles();
   const { SemanticColors } = useAppTheme();
+  const sourceDate = source?.date;
   return (
     <Sheet onClose={onClose} open={open} title={swapTarget ? 'Preview swap' : 'Choose destination'}>
       {swapTarget ? (
         <>
           <ThemedText style={styles.sheetDescription}>Both dates are occupied. Confirm to swap the two workouts.</ThemedText>
-          <View style={styles.swapPreview}><ThemedText style={styles.optionTitle}>{sourceDate}</ThemedText><AppIcon color={SemanticColors.action} name="swap" size={22} /><ThemedText style={styles.optionTitle}>{swapTarget.date}</ThemedText></View>
+          <View style={styles.swapPreview}>
+            {source ? <SwapDay day={source} /> : null}
+            <AppIcon color={SemanticColors.action} name="swap" size={22} />
+            <SwapDay day={swapTarget} />
+          </View>
           <Pressable accessibilityRole="button" onPress={onConfirmSwap} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}><ThemedText style={styles.primaryButtonText}>Confirm swap</ThemedText></Pressable>
         </>
       ) : (
@@ -375,14 +387,25 @@ function TargetSheet({ allowOccupied, onClose, onConfirmSwap, onNextWeek, onPrev
   );
 }
 
-function Sheet({ children, onClose, open, title }: { children: React.ReactNode; onClose: () => void; open: boolean; title: string }) {
+function SwapDay({ day }: { day: WorkoutPlanDay }) {
   const styles = useStyles();
   return (
-    <Modal animationType="slide" onRequestClose={onClose} presentationStyle="overFullScreen" transparent visible={open}>
+    <View style={styles.optionCopy}>
+      <ThemedText style={styles.optionTitle}>{day.weekday}, {day.dateLabel}</ThemedText>
+      <ThemedText numberOfLines={2} style={styles.optionMeta}>{day.workout?.title ?? 'Workout'}</ThemedText>
+    </View>
+  );
+}
+
+function Sheet({ children, onClose, open, title }: { children: React.ReactNode; onClose: () => void; open: boolean; title: string }) {
+  const styles = useStyles();
+  const reduceMotion = useReducedMotion();
+  return (
+    <Modal animationType={reduceMotion ? 'none' : 'slide'} onRequestClose={onClose} presentationStyle="overFullScreen" transparent visible={open}>
       <View style={styles.modalBackdrop}>
         <Pressable accessibilityLabel="Close sheet" accessibilityRole="button" onPress={onClose} style={styles.backdropPress} />
         <View accessibilityViewIsModal style={styles.sheet}>
-          <View style={styles.sheetHeader}><ThemedText style={styles.sheetTitle}>{title}</ThemedText><IconButton label="Close" name="close" onPress={onClose} /></View>
+          <View style={styles.sheetHeader}><ThemedText accessibilityRole="header" style={styles.sheetTitle}>{title}</ThemedText><IconButton label="Close" name="close" onPress={onClose} /></View>
           {children}
         </View>
       </View>

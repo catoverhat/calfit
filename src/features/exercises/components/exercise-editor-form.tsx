@@ -36,7 +36,6 @@ export function ExerciseEditorForm({
   const selectedCategory = data.categories.find((category) => category.id === categoryId) ?? null;
   const muscleGroup = selectedCategory?.muscleGroup ?? data.initialValues.muscleGroup;
 
-  const title = mode === 'edit' ? 'Edit Exercise' : 'Create Exercise';
   const subtitle =
     mode === 'edit'
       ? 'Update the technical specifications for this movement.'
@@ -63,12 +62,11 @@ export function ExerciseEditorForm({
       style={styles.screen}>
       <View style={styles.content}>
         <View style={styles.titleBlock}>
-          <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Exercise Identity</Text>
+          <Text style={styles.sectionLabel}>Exercise details</Text>
 
           {error ? (
             <StatusCard body={error} title="Local exercise unavailable" />
@@ -77,9 +75,9 @@ export function ExerciseEditorForm({
           ) : null}
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Exercise Name</Text>
+            <Text style={styles.inputLabel}>Exercise name</Text>
             <TextInput keyboardAppearance={scheme}
-              accessibilityLabel="Exercise Name"
+              accessibilityLabel="Exercise name"
               onChangeText={setName}
               placeholder="Exercise name"
               placeholderTextColor={SemanticColors.textMuted}
@@ -90,9 +88,9 @@ export function ExerciseEditorForm({
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Description & Coaching Cues</Text>
+            <Text style={styles.inputLabel}>Description & coaching cues</Text>
             <TextInput keyboardAppearance={scheme}
-              accessibilityLabel="Description and Coaching Cues"
+              accessibilityLabel="Description and coaching cues"
               multiline
               onChangeText={setDescription}
               placeholder="Describe the movement and key cues"
@@ -105,7 +103,7 @@ export function ExerciseEditorForm({
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Image URL (Optional)</Text>
+            <Text style={styles.inputLabel}>Image URL (optional)</Text>
             <TextInput keyboardAppearance={scheme}
               accessibilityLabel="Exercise image URL"
               autoCapitalize="none"
@@ -121,7 +119,7 @@ export function ExerciseEditorForm({
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Video URL (Optional)</Text>
+            <Text style={styles.inputLabel}>Video URL (optional)</Text>
             <TextInput keyboardAppearance={scheme}
               accessibilityLabel="Exercise video URL"
               autoCapitalize="none"
@@ -141,11 +139,11 @@ export function ExerciseEditorForm({
             onSelect={setCategoryId}
             selectedId={categoryId}
           />
-          <InfoRow label="Primary Muscle Group" value={muscleGroup} />
+          <InfoRow label="Primary muscle group" value={muscleGroup} />
 
           <View style={styles.statusCard}>
             <View style={styles.statusCopy}>
-              <Text style={styles.statusTitle}>Active Status</Text>
+              <Text style={styles.statusTitle}>Active</Text>
               <Text style={styles.statusSubtitle}>Visibility in workout selector</Text>
             </View>
             <Pressable
@@ -161,7 +159,7 @@ export function ExerciseEditorForm({
         </View>
 
         <Pressable
-          accessibilityLabel="Save Exercise"
+          accessibilityLabel="Save exercise"
           accessibilityRole="button"
           accessibilityState={{ disabled: saveDisabled }}
           disabled={saveDisabled}
@@ -171,7 +169,7 @@ export function ExerciseEditorForm({
             saveDisabled && styles.saveButtonDisabled,
             pressed && !saveDisabled && styles.saveButtonPressed,
           ]}>
-          <Text style={styles.saveButtonText}>{isSaving ? 'Saving...' : 'Save Exercise'}</Text>
+          <Text style={styles.saveButtonText}>{isSaving ? 'Saving...' : 'Save exercise'}</Text>
           <AppIcon color={DesignColors.onPrimaryContainer} name="check" size={18} />
         </Pressable>
       </View>
@@ -181,17 +179,15 @@ export function ExerciseEditorForm({
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   const styles = useStyles();
-  const { SemanticColors } = useAppTheme();
+  // Read-only: no trailing icon, so it does not look like a control.
   return (
     <View
-      accessibilityLabel={`${label}: ${value}`}
+      accessible
+      accessibilityLabel={`${label}: ${value}. Set by the category.`}
       style={styles.selectRow}>
       <View style={styles.selectCopy}>
         <Text style={styles.inputLabel}>{label}</Text>
         <Text style={styles.selectValue}>{value}</Text>
-      </View>
-      <View style={styles.selectIcons}>
-        <AppIcon color={SemanticColors.actionSoft} name="info" size={15} />
       </View>
     </View>
   );

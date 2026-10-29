@@ -5,6 +5,7 @@ import { getWorkoutPlanEntryForDate } from './workout-plan';
 import { getLocalUserProfile } from './users';
 import { getInProgressWorkoutSession } from './workout-sessions';
 
+/** Consecutive Monday-to-Sunday weeks with at least one completed workout, so rest days never break it. */
 export async function getWorkoutStreak(
   db: LocalDatabase,
   userId = LOCAL_USER_ID,
@@ -18,13 +19,15 @@ export async function getWorkoutStreak(
     userId,
     'completed'
   );
-  const completedDays = new Set(rows.map((row) => toLocalDateKey(new Date(row.completed_at))));
+  const trainedWeeks = new Set(rows.map((row) => toLocalDateKey(startOfLocalWeek(new Date(row.completed_at)))));
   let streak = 0;
-  const cursor = startOfLocalDay(asOf);
+  const cursor = startOfLocalWeek(asOf);
+  // The current week is still open, so not having trained yet does not end the streak.
+  if (!trainedWeeks.has(toLocalDateKey(cursor))) cursor.setDate(cursor.getDate() - 7);
 
-  while (completedDays.has(toLocalDateKey(cursor))) {
+  while (trainedWeeks.has(toLocalDateKey(cursor))) {
     streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
+    cursor.setDate(cursor.getDate() - 7);
   }
 
   return streak;
@@ -60,8 +63,9 @@ export async function getTodayDashboardSnapshot(
 }
 
 
-function startOfLocalDay(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+function startOfLocalWeek(date: Date): Date {
+  const mondayOffset = (date.getDay() + 6) % 7;
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() - mondayOffset);
 }
 
 function toLocalDateKey(date: Date): string {

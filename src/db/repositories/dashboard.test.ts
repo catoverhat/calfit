@@ -67,6 +67,10 @@ describe('dashboard repository', () => {
     const snapshot = await getTodayDashboardSnapshot(db, LOCAL_USER_ID, new Date('2026-07-06T12:00:00.000Z'));
 
     expect(streak).toBe(2);
+    // Rest days and a not-yet-trained current week keep the streak; a whole missed week ends it.
+    expect(await getWorkoutStreak(db, LOCAL_USER_ID, new Date('2026-07-08T12:00:00.000Z'))).toBe(2);
+    expect(await getWorkoutStreak(db, LOCAL_USER_ID, new Date('2026-07-15T12:00:00.000Z'))).toBe(2);
+    expect(await getWorkoutStreak(db, LOCAL_USER_ID, new Date('2026-07-22T12:00:00.000Z'))).toBe(0);
     expect(snapshot.latestBodyMeasurement?.body_measurement_id).toBe('measurement-new');
     expect(snapshot.previousBodyMeasurement?.body_measurement_id).toBe('measurement-old');
     expect(snapshot.workoutStreak).toBe(2);

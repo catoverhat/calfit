@@ -123,8 +123,8 @@ function createProgressData(
         ? `${formatMeasurement(weightFromCanonical(latestMeasurement.weight, weightUnit))} ${weightUnit}`
         : 'Not logged',
     bodyWeightDelta: createWeightDeltaLabel(user, latestMeasurement, previousMeasurement),
-    streak: `${workoutStreak} ${workoutStreak === 1 ? 'day' : 'days'}`,
-    streakProgress: Math.min(workoutStreak / 7, 1),
+    streak: `${workoutStreak} ${workoutStreak === 1 ? 'week' : 'weeks'}`,
+    streakProgress: Math.min(workoutStreak / 4, 1),
   };
 }
 

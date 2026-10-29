@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { TabScreen } from '@/components/layout/tab-screen';
 import { WorkoutHistoryCard } from './components/workout-history-card';
 import { HISTORY_FILTERS, createHistoryGroups, type ProgressHistoryFilter } from './progress.viewmodel';
 import { useStyles } from './workout-history-screen.styles';
@@ -14,12 +13,9 @@ export function WorkoutHistoryScreen() {
   const groups = useMemo(() => createHistoryGroups(history, selectedFilter, weightUnit), [history, selectedFilter, weightUnit]);
 
   return (
-    <TabScreen contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+    <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={styles.content}>
-        <View style={styles.headingBlock}>
-          <Text style={styles.title}>Workout History</Text>
-          <Text style={styles.subtitle}>Review every locally saved workout session.</Text>
-        </View>
+        <Text style={styles.subtitle}>Review every saved workout. Tap one in progress to resume it.</Text>
         <ScrollView accessibilityLabel="Workout history filters" horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.filterContent}>
           {HISTORY_FILTERS.map((filter) => {
             const selected = filter.id === selectedFilter;
@@ -42,7 +38,7 @@ export function WorkoutHistoryScreen() {
           ))}
         </View>
       </View>
-    </TabScreen>
+    </ScrollView>
   );
 }
 

@@ -43,7 +43,9 @@
             "node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf",
             "node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf",
             "node_modules/@expo-google-fonts/montserrat/400Regular/Montserrat_400Regular.ttf",
-            "node_modules/@expo-google-fonts/montserrat/600SemiBold/Montserrat_600SemiBold.ttf"
+            "node_modules/@expo-google-fonts/montserrat/600SemiBold/Montserrat_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/montserrat/700Bold/Montserrat_700Bold.ttf",
+            "node_modules/@expo-google-fonts/montserrat/800ExtraBold/Montserrat_800ExtraBold.ttf"
           ]
         }
       ],
@@ -57,7 +59,9 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#F4F7F2",
-          "dark": { "backgroundColor": "#141918" },
+          "dark": {
+            "backgroundColor": "#141918"
+          },
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
@@ -72,7 +76,8 @@
         }
       ],
       "expo-sqlite",
-      "@react-native-vector-icons/lucide"
+      "@react-native-vector-icons/lucide",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

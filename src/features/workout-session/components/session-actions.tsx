@@ -8,14 +8,16 @@ import { useStyles } from "../active-workout-session-screen.styles";
 export function SessionActions({
   busy,
   disabled,
+  onDiscard,
   onFinish,
 }: {
   busy: boolean;
   disabled: boolean;
+  onDiscard: () => void;
   onFinish: () => void;
 }) {
   const styles = useStyles();
-  const { DesignColors } = useAppTheme();
+  const { DesignColors, SemanticColors } = useAppTheme();
   return (
     <View style={styles.bottomActions}>
       <Pressable
@@ -45,6 +47,22 @@ export function SessionActions({
         <Text style={styles.finishButtonText}>
           {busy ? "Saving workout..." : "Finish workout"}
         </Text>
+      </Pressable>
+      <Pressable
+        accessibilityHint="Deletes this session and its logged sets."
+        accessibilityLabel="Discard workout"
+        accessibilityRole="button"
+        accessibilityState={{ disabled: busy }}
+        disabled={busy}
+        onPress={onDiscard}
+        style={({ pressed }) => [
+          styles.discardButton,
+          busy && styles.disabled,
+          pressed && styles.pressed,
+        ]}
+      >
+        <AppIcon color={SemanticColors.danger} name="trash" size={16} />
+        <Text style={styles.discardText}>Discard workout</Text>
       </Pressable>
     </View>
   );

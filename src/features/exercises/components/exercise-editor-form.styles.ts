@@ -56,8 +56,8 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   inputLabel: {
     color: SemanticColors.actionSoft,
     fontFamily: Fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 12,
+    fontSize: 12,
+    lineHeight: 16,
   },
   nameInput: {
     ...Typography.lg,
@@ -109,8 +109,8 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   categoryChipText: {
     color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 12,
+    lineHeight: 16,
   },
   categoryChipTextSelected: {
     color: DesignColors.onPrimaryContainer,
@@ -165,8 +165,8 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   statusSubtitle: {
     color: SemanticColors.textMuted,
     fontFamily: Fonts.bodyBold,
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 12,
+    lineHeight: 16,
   },
   switchTrack: {
     backgroundColor: DesignColors.surfaceContainerHigh,
@@ -193,7 +193,6 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
     backgroundColor: ComponentTokens.button.primaryBackground,
     borderCurve: 'continuous',
     borderRadius: Radius.md,
-    boxShadow: '0 14px 28px rgba(255, 95, 31, 0.24)',
     flexDirection: 'row',
     gap: Space.sm,
     justifyContent: 'center',

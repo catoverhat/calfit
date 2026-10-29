@@ -24,7 +24,7 @@ export function WorkoutSessionStatusScreen({ body, onBack, onRetry, title }: Wor
         </Text>
         {onRetry || onBack ? <View style={styles.actions}>
           {onBack ? <Pressable accessibilityRole="button" onPress={onBack} style={styles.secondaryButton}><Text style={styles.secondaryText}>Back</Text></Pressable> : null}
-          {onRetry ? <Pressable accessibilityRole="button" onPress={onRetry} style={styles.primaryButton}><Text style={styles.primaryText}>Try Again</Text></Pressable> : null}
+          {onRetry ? <Pressable accessibilityRole="button" onPress={onRetry} style={styles.primaryButton}><Text style={styles.primaryText}>Try again</Text></Pressable> : null}
         </View> : null}
       </View>
     </ScrollView>

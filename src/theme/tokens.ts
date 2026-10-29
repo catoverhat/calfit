@@ -6,6 +6,16 @@ export const Fonts = {
     default: "Montserrat_600SemiBold",
     web: "Montserrat_600SemiBold",
   }),
+  headingBold: Platform.select({
+    ios: "Montserrat-Bold",
+    default: "Montserrat_700Bold",
+    web: "Montserrat_700Bold",
+  }),
+  display: Platform.select({
+    ios: "Montserrat-ExtraBold",
+    default: "Montserrat_800ExtraBold",
+    web: "Montserrat_800ExtraBold",
+  }),
   headingRegular: Platform.select({
     ios: "Montserrat-Regular",
     default: "Montserrat_400Regular",
@@ -57,13 +67,13 @@ export const Typography = {
 
 export const TypeScale = {
   headlineLg: {
-    fontFamily: Fonts.heading,
+    fontFamily: Fonts.headingBold,
     fontSize: 32,
     fontWeight: "700",
     lineHeight: 40,
   },
   headlineMd: {
-    fontFamily: Fonts.heading,
+    fontFamily: Fonts.headingBold,
     fontSize: 24,
     fontWeight: "700",
     lineHeight: 32,
@@ -101,7 +111,7 @@ export const TypeScale = {
     lineHeight: 16,
   },
   dataDisplay: {
-    fontFamily: Fonts.heading,
+    fontFamily: Fonts.display,
     fontSize: 48,
     fontWeight: "800",
     lineHeight: 48,

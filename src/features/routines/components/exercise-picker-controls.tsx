@@ -65,6 +65,27 @@ export function ExercisePickerFilters({
   );
 }
 
+export function CustomExerciseButton() {
+  const styles = useStyles();
+  const { SemanticColors } = useAppTheme();
+  return (
+    <Pressable
+      accessibilityHint="Opens the exercise form, then returns you to this list."
+      accessibilityLabel="Create custom exercise"
+      accessibilityRole="button"
+      onPress={() =>
+        router.push({ pathname: '/workouts/exercises/create', params: { returnTo: 'builder' } })
+      }
+      style={({ pressed }) => [styles.customButton, pressed && styles.pressed]}>
+      <View style={styles.customIcon}>
+        <AppIcon color={SemanticColors.actionSoft} name="add" size={16} />
+      </View>
+      <Text style={styles.customText}>Create custom exercise</Text>
+    </Pressable>
+  );
+}
+
+/** Pinned below the list so the selection can be confirmed from anywhere in the catalog. */
 export function ExercisePickerFooter({
   onAddSelection,
   routineName,
@@ -75,24 +96,13 @@ export function ExercisePickerFooter({
   selectedCount: number;
 }) {
   const styles = useStyles();
-  const { SemanticColors } = useAppTheme();
   return (
-    <>
-      <Pressable
-        accessibilityLabel="Create Custom Exercise"
-        accessibilityRole="button"
-        onPress={() =>
-          router.push({ pathname: '/workouts/exercises/create', params: { returnTo: 'builder' } })
-        }
-        style={({ pressed }) => [styles.customButton, pressed && styles.pressed]}>
-        <View style={styles.customIcon}>
-          <AppIcon color={SemanticColors.actionSoft} name="add" size={16} />
-        </View>
-        <Text style={styles.customText}>Create Custom Exercise</Text>
-      </Pressable>
+    <View style={styles.footerDock}>
       <View style={styles.footer}>
-        <View style={styles.footerCopy}>
-          <Text style={styles.selectedCount}>{selectedCount} Exercises Selected</Text>
+        <View accessibilityLiveRegion="polite" style={styles.footerCopy}>
+          <Text style={styles.selectedCount}>
+            {selectedCount} {selectedCount === 1 ? 'exercise' : 'exercises'} selected
+          </Text>
           <Text numberOfLines={1} style={styles.routineName}>{routineName}</Text>
         </View>
         <Pressable
@@ -103,16 +113,16 @@ export function ExercisePickerFooter({
           onPress={onAddSelection}
           style={({ pressed }) => [
             styles.addSelectionButton,
-            selectedCount === 0 && { opacity: 0.5 },
+            selectedCount === 0 && styles.disabled,
             pressed && styles.addSelectionPressed,
           ]}>
           <Text style={styles.addSelectionText}>
             {selectedCount > 0
-              ? `Add ${selectedCount} Exercise${selectedCount === 1 ? '' : 's'}`
-              : 'Select Exercises'}
+              ? `Add ${selectedCount} exercise${selectedCount === 1 ? '' : 's'}`
+              : 'Select exercises'}
           </Text>
         </Pressable>
       </View>
-    </>
+    </View>
   );
 }

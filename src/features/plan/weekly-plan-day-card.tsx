@@ -42,6 +42,8 @@ export function DayCard({
     day.entryId &&
     (day.state === "assigned" || day.state === "in_progress") &&
     day.isToday;
+  // Seven cards share these buttons, so screen readers need the day and workout in each name.
+  const context = `${day.workout?.title ?? "workout"} on ${day.weekday}, ${day.dateLabel}`;
   return (
     <Animated.View
       layout={LinearTransition.duration(180).reduceMotion(ReduceMotion.System)}
@@ -94,6 +96,7 @@ export function DayCard({
           </ThemedText>
           {canStart ? (
             <SmallAction
+              accessibilityLabel={`${day.state === "in_progress" ? "Resume" : "Start"} ${context}`}
               disabled={disabled}
               label={day.state === "in_progress" ? "Resume workout" : "Start workout"}
               onPress={onStart}
@@ -101,19 +104,21 @@ export function DayCard({
             />
           ) : null}
           <View style={styles.dayActions}>
-            <SmallAction label="View" onPress={onView} />
+            <SmallAction accessibilityLabel={`View ${context}`} label="View" onPress={onView} />
             {day.editable ? (
               <SmallAction
+                accessibilityLabel={`Change ${context}`}
                 disabled={disabled}
                 label="Change"
                 onPress={onChange}
               />
             ) : null}
             {day.editable ? (
-              <SmallAction disabled={disabled} label="Move" onPress={onMove} />
+              <SmallAction accessibilityLabel={`Move ${context}`} disabled={disabled} label="Move" onPress={onMove} />
             ) : null}
             {day.editable ? (
               <SmallAction
+                accessibilityLabel={`Remove ${context}`}
                 disabled={disabled}
                 danger
                 label="Remove"
@@ -130,6 +135,7 @@ export function DayCard({
           </View>
           {day.editable ? (
             <SmallAction
+              accessibilityLabel={`Assign a workout to ${day.weekday}, ${day.dateLabel}`}
               busy={busy}
               disabled={disabled}
               label="Assign workout"
@@ -145,6 +151,7 @@ export function DayCard({
 }
 
 function SmallAction({
+  accessibilityLabel,
   busy,
   danger,
   disabled,
@@ -152,6 +159,7 @@ function SmallAction({
   onPress,
   primary,
 }: {
+  accessibilityLabel: string;
   busy?: boolean;
   disabled?: boolean;
   danger?: boolean;
@@ -165,7 +173,7 @@ function SmallAction({
   const start = label === 'Start workout' || label === 'Resume workout';
   return (
     <Pressable
-      accessibilityLabel={busy ? "Assigning workout" : label}
+      accessibilityLabel={busy ? "Assigning workout" : accessibilityLabel}
       accessibilityRole="button"
       accessibilityState={{ busy, disabled }}
       disabled={disabled}
@@ -205,8 +213,8 @@ function SmallAction({
 
 function statusStyle(day: WorkoutPlanDay, styles: ReturnType<typeof useStyles>) {
   if (day.state === "completed") return styles.stateCompleted;
-  if (day.state === "missed" || day.state === "unavailable")
-    return styles.stateDanger;
+  // Rose is reserved for errors; a missed session is information, not a failure.
+  if (day.state === "unavailable") return styles.stateDanger;
   if (day.state === "in_progress" || day.isToday) return styles.stateActive;
   return styles.stateNeutral;
 }

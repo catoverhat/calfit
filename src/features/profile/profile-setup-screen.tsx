@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/app-icon";
+import { DateField } from "@/components/ui/date-field";
 import { useAppLock } from "@/features/auth/app-lock-context";
 import { useAppTheme } from "@/theme/app-theme-provider";
 import { ProfileAppearanceSection } from "./components/profile-appearance-section";
@@ -130,17 +131,23 @@ export function ProfileSetupScreen() {
                     />
                   </View>
                   <View style={styles.fieldCell}>
-                    <SetupField
-                      autoCapitalize="none"
-                      disabled={disabled}
-                      helper="Use YYYY-MM-DD, for example 1990-05-20."
-                      label="Date of birth"
-                      maxLength={10}
-                      onChangeText={(value) => setField("birthDate", value)}
-                      optional
-                      placeholder="YYYY-MM-DD"
-                      value={draft.birthDate}
-                    />
+                    <View style={styles.field}>
+                      <Text style={styles.fieldLabel}>
+                        Date of birth
+                        <Text style={styles.optionalLabel}> (optional)</Text>
+                      </Text>
+                      <DateField
+                        accessibilityLabel="Date of birth"
+                        clearable
+                        disabled={disabled}
+                        maximumDate={new Date()}
+                        onChange={(value) => setField("birthDate", value)}
+                        placeholder="Choose a date"
+                        style={styles.input}
+                        textStyle={styles.dateText}
+                        value={draft.birthDate}
+                      />
+                    </View>
                   </View>
                 </View>
               </ProfileSection>

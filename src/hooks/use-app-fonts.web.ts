@@ -8,6 +8,8 @@ import {
 import {
   Montserrat_400Regular,
   Montserrat_600SemiBold,
+  Montserrat_700Bold,
+  Montserrat_800ExtraBold,
   useFonts as useMontserratFonts,
 } from '@expo-google-fonts/montserrat';
 import { useFonts } from 'expo-font';
@@ -22,6 +24,8 @@ export function useAppFonts() {
   const [montserratLoaded, montserratError] = useMontserratFonts({
     Montserrat_400Regular,
     Montserrat_600SemiBold,
+    Montserrat_700Bold,
+    Montserrat_800ExtraBold,
   });
   const [iconsLoaded, iconsError] = useFonts({
     Lucide: require('@react-native-vector-icons/lucide/fonts/Lucide.ttf'),

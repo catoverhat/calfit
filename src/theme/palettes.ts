@@ -138,6 +138,7 @@ const SemanticColors = {
   successBorder: dark ? "#718F79" : "#62856C",
   dangerTint: DesignColors.errorContainer,
   hover: dark ? "rgba(237, 242, 236, 0.06)" : "rgba(28, 43, 35, 0.06)",
+  scrim: dark ? "rgba(0, 0, 0, 0.72)" : "rgba(28, 43, 35, 0.6)",
   focus: DesignColors.tertiary,
 } as const;
 

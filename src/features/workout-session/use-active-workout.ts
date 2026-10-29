@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Vibration } from "react-native";
 
 import {
   distanceToCanonical,
@@ -15,6 +16,10 @@ import type {
 } from "./workout-session.viewmodel";
 
 const SAVE_DELAY_MS = 350;
+const REST_STEP_SECONDS = 30;
+const REST_END_VIBRATION = [0, 400, 200, 400];
+
+type RestTimer = { deadline: number; durationSeconds: number };
 
 export function useActiveWorkout(
   workout: WorkoutSessionViewModel,
@@ -32,8 +37,8 @@ export function useActiveWorkout(
   );
   const [infoExerciseId, setInfoExerciseId] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
-  const [restDeadline, setRestDeadline] = useState<number | null>(() =>
-    restoredRestDeadline(initialSets),
+  const [rest, setRest] = useState<RestTimer | null>(() =>
+    restoredRest(initialSets),
   );
 
   useEffect(() => {
@@ -43,8 +48,13 @@ export function useActiveWorkout(
   useEffect(() => {
     setSets(initialSets);
     setsRef.current = initialSets;
-    setExpandedExerciseId(firstIncompleteExercise(workout, initialSets));
-    setRestDeadline(restoredRestDeadline(initialSets));
+    // A reload after adding or removing sets keeps the exercise the athlete is on.
+    setExpandedExerciseId((current) =>
+      workout.exercises.some((exercise) => exercise.id === current)
+        ? current
+        : firstIncompleteExercise(workout, initialSets),
+    );
+    setRest(restoredRest(initialSets));
   }, [initialSets, workout]);
 
   useEffect(() => {
@@ -53,14 +63,6 @@ export function useActiveWorkout(
     const tick = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(tick);
   }, [isForeground]);
-
-  useEffect(
-    () => () => {
-      timers.current.forEach(clearTimeout);
-      timers.current.clear();
-    },
-    [],
-  );
 
   const updateField = (
     setId: string,
@@ -132,7 +134,10 @@ export function useActiveWorkout(
             },
           }));
           if (completed && set.restTimeSeconds > 0) {
-            setRestDeadline(Date.now() + set.restTimeSeconds * 1000);
+            setRest({
+              deadline: Date.now() + set.restTimeSeconds * 1000,
+              durationSeconds: set.restTimeSeconds,
+            });
           }
         }
         return true;
@@ -154,15 +159,21 @@ export function useActiveWorkout(
     [workout],
   );
 
-  useEffect(() => {
-    if (isForeground) return;
+  const persistPending = useCallback(() => {
     const pendingIds = [...timers.current.keys()];
     timers.current.forEach(clearTimeout);
     timers.current.clear();
     pendingIds.forEach((id) => {
       void persistSet(id);
     });
-  }, [isForeground, persistSet]);
+  }, [persistSet]);
+
+  useEffect(() => {
+    if (!isForeground) persistPending();
+  }, [isForeground, persistPending]);
+
+  // Leaving the screen within the save delay must not drop the last edit.
+  useEffect(() => persistPending, [persistPending]);
 
   const blurField = useCallback(
     (setId: string) => {
@@ -197,9 +208,14 @@ export function useActiveWorkout(
           [setId]: { ...current[setId], completed: set.completed },
         }));
         setsRef.current = { ...setsRef.current, [setId]: set };
+      } else if (nextCompleted && set.restTimeSeconds <= 0) {
+        // Without a rest timer there is no rest end to advance on, so advance now.
+        setExpandedExerciseId((current) =>
+          nextIncompleteExercise(workout, setsRef.current, current),
+        );
       }
     },
-    [persistSet],
+    [persistSet, workout],
   );
 
   const flush = useCallback(async (): Promise<boolean> => {
@@ -212,19 +228,20 @@ export function useActiveWorkout(
   }, [persistSet]);
 
   const skipRest = useCallback(() => {
-    setRestDeadline(null);
-    setExpandedExerciseId(
-      nextIncompleteExercise(workout, setsRef.current, expandedExerciseId),
+    setRest(null);
+    setExpandedExerciseId((current) =>
+      nextIncompleteExercise(workout, setsRef.current, current),
     );
-  }, [expandedExerciseId, workout]);
+  }, [workout]);
 
   const restSeconds =
-    restDeadline === null
-      ? 0
-      : Math.max(0, Math.ceil((restDeadline - now) / 1000));
+    rest === null ? 0 : Math.max(0, Math.ceil((rest.deadline - now) / 1000));
   useEffect(() => {
-    if (restDeadline !== null && restSeconds === 0) skipRest();
-  }, [restDeadline, restSeconds, skipRest]);
+    if (rest !== null && restSeconds === 0) {
+      Vibration.vibrate(REST_END_VIBRATION);
+      skipRest();
+    }
+  }, [rest, restSeconds, skipRest]);
 
   const elapsedSeconds = workout.startedAt
     ? Math.max(
@@ -238,7 +255,13 @@ export function useActiveWorkout(
 
   return {
     addRest: () =>
-      setRestDeadline((current) => (current ?? Date.now()) + 30_000),
+      setRest(
+        (current) =>
+          current && {
+            deadline: current.deadline + REST_STEP_SECONDS * 1000,
+            durationSeconds: current.durationSeconds + REST_STEP_SECONDS,
+          },
+      ),
     blurField,
     elapsedSeconds,
     expandedExerciseId,
@@ -246,11 +269,23 @@ export function useActiveWorkout(
     incompleteCount,
     infoExerciseId,
     isSaving: savingIds.size > 0,
+    restDurationSeconds: rest?.durationSeconds ?? 0,
     restSeconds,
     saveErrors,
     setExpandedExerciseId,
     sets,
     skipRest,
+    subtractRest: () =>
+      setRest(
+        (current) =>
+          current && {
+            deadline: current.deadline - REST_STEP_SECONDS * 1000,
+            durationSeconds: Math.max(
+              REST_STEP_SECONDS,
+              current.durationSeconds - REST_STEP_SECONDS,
+            ),
+          },
+      ),
     toggleInfo: (id: string) =>
       setInfoExerciseId((current) => (current === id ? null : id)),
     toggleSet,
@@ -326,9 +361,9 @@ function parseMetric(
   return parsed;
 }
 
-function restoredRestDeadline(
+function restoredRest(
   sets: Record<string, WorkoutSessionSetViewModel>,
-): number | null {
+): RestTimer | null {
   const latest = Object.values(sets)
     .filter((set) => set.completed && set.completedAt)
     .sort((left, right) =>
@@ -337,7 +372,9 @@ function restoredRestDeadline(
   if (!latest?.completedAt || latest.restTimeSeconds <= 0) return null;
   const deadline =
     new Date(latest.completedAt).getTime() + latest.restTimeSeconds * 1000;
-  return deadline > Date.now() ? deadline : null;
+  return deadline > Date.now()
+    ? { deadline, durationSeconds: latest.restTimeSeconds }
+    : null;
 }
 
 function firstIncompleteExercise(

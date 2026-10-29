@@ -45,6 +45,19 @@ export function ExerciseCatalogScreen({ nested = false }: { nested?: boolean }) 
         />
 
         <View style={styles.cardList}>
+          <Link href="/workouts/exercises/create" push asChild>
+            <Pressable accessibilityLabel="Add custom exercise" accessibilityRole="button">
+              {({ pressed }) => (
+                <View style={[styles.addCustomCard, pressed && styles.pressed]}>
+                  <View style={styles.addCustomIcon}>
+                    <AppIcon color={SemanticColors.textPrimary} name="add" size={18} />
+                  </View>
+                  <Text style={styles.addCustomText}>Add custom exercise</Text>
+                </View>
+              )}
+            </Pressable>
+          </Link>
+
           {error ? (
             <StatusCard body={error} title="Local catalog unavailable" />
           ) : isLoading ? (
@@ -57,19 +70,6 @@ export function ExerciseCatalogScreen({ nested = false }: { nested?: boolean }) 
               <Text style={styles.emptyText}>Try another search or category.</Text>
             </View>
           )}
-
-          <Link href="/workouts/exercises/create" push asChild>
-            <Pressable accessibilityLabel="Add Custom Exercise" accessibilityRole="button">
-              {({ pressed }) => (
-                <View style={[styles.addCustomCard, pressed && styles.pressed]}>
-                  <View style={styles.addCustomIcon}>
-                    <AppIcon color={SemanticColors.textPrimary} name="add" size={18} />
-                  </View>
-                  <Text style={styles.addCustomText}>Add Custom Exercise</Text>
-                </View>
-              )}
-            </Pressable>
-          </Link>
         </View>
       </View>
   );

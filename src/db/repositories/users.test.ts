@@ -33,7 +33,7 @@ describe('users repository', () => {
       weightUnit: 'lb',
     });
     expect(saved).toEqual(expect.objectContaining({ username: 'IronPulse', height: 180, weight_unit: 'lb' }));
-    await expect(getLatestBodyMeasurement(db)).resolves.toEqual(expect.objectContaining({ weight: 81.5 }));
+    await expect(getLatestBodyMeasurement(db)).resolves.toEqual(expect.objectContaining({ weight: 81.5, bmi: 25.2 }));
   });
   it('persists appearance independently of other profile fields and keeps it on later profile saves', async () => {
     const db = new MemoryDb();

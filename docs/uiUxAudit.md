@@ -231,3 +231,47 @@ Improved the core training journey while preserving the current light/dark palet
 Validation: TypeScript passed; the full Jest suite passed 33 suites / 136 tests. After the final Today fixes, its 3 suites / 12 tests passed, including the newly added retry/refocus regression test. Source ESLint and diff checks passed. The production web export succeeded at `dist/ux-refresh-20261029`. Running ESLint over the entire repository reported only an existing unused-disable warning in generated `.expo/types/router.d.ts`.
 
 No Expo development server was started. Verification covers source, behavior tests, and bundling; rendered device/browser appearance, large system text, keyboard behavior, and screen-reader interaction still need a manual pass.
+
+## Gym-flow features and page recheck - 2026-10-29
+
+Rechecked every route against the review rubric, prioritising the active workout because it is used between sets.
+
+| Area | Change |
+|---|---|
+| Active workout | Shows "Last time" per set from the exercise's most recent completed session. Adds −/+ steppers for reps (1), weight (2.5 kg / 5 lb) and time (5 s); adds Add set and Remove set (unlogged last set only); adds Discard workout with confirmation (plan entries are unlinked, not deleted). |
+| Rest timer | 48 px data-display countdown, remaining-time progress bar, −30 / +30 / Skip as equal 48 px buttons, and a vibration when rest runs out. |
+| Session flow | Logging the last set of an exercise without a rest timer now opens the next exercise. Edits typed within the 350 ms save delay are saved when the screen unmounts. The exercise in view stays open after adding or removing sets. |
+| Navigation | The workout session now has a themed Stack header with native back. Summary, History, Measurements and Local data no longer add a second top safe-area inset under their Stack headers. In-progress history entries resume the session instead of opening a summary. |
+| Workout summary | Shows sets logged vs total, a per-exercise list with each exercise's best set, and a sand PR chip when a set beats every earlier completed session's best weight for that exercise. First attempts are not flagged. |
+| Typography | Embedded Montserrat Bold and ExtraBold; headline-lg/md use Bold and data-display uses ExtraBold, as the design specifies. Raised 16 text styles below 12 px to the 12 px label size with 16 px line height. |
+| Copy and layout | Sentence-case buttons and statuses, dialog titles marked as headers, Add custom exercise moved above the catalog list, keyboard-aware scrolling on the workout and measurement forms. |
+
+Verification: TypeScript and ESLint passed; all 34 Jest suites / 142 tests passed, including new repository coverage (add/remove set, previous performance, best weights, discard cascade) and hook coverage (auto-advance, rest-end vibration, save-on-unmount).
+
+Not done: rest-end alerts while the app is backgrounded need `expo-notifications`. A new development build is required for the embedded fonts. Device visual QA, large text and screen-reader passes remain manual. No Expo development server was started.
+
+## ui-ux-pro-max second opinion - 2026-10-29
+
+Second review of all 18 pages using the ui-ux-pro-max skill (React Native stack guidance and the native-app pre-delivery checklist). The skill's product guidance for fitness apps (dark theme, energetic orange) matches the existing design direction, so no visual redesign was made.
+
+| Finding | Change |
+|---|---|
+| Icons were hidden from screen readers on iOS only | `AppIcon` also sets `importantForAccessibility="no-hide-descendants"`, so TalkBack skips icon glyphs app-wide. |
+| Daily streak reset on every rest day and every morning | The streak now counts consecutive Monday–Sunday weeks with a workout; an untrained current week does not break it. Today shows "N weeks". |
+| Planner day actions announced as bare "View / Change / Move / Remove" | Each action names the workout and day; sheet titles and the schedule heading are headers. |
+| Planner swap preview showed raw date keys; Copy previous week disabled without reason | The preview shows weekday, date and workout; a visible note and hint explain why copying is unavailable. |
+| Missed days used the rose error color | Missed days use the neutral state; rose stays for unavailable workouts. |
+| Labels set on non-accessible Views | Measurement history rows and the exercise editor's muscle-group row are `accessible`; the misleading info icon was removed. |
+| Measurement inputs had a 4% white border | They use the shared recessed input background and boundary tokens. |
+| Exercise picker's confirm action sat below the whole catalog | The selection bar is pinned under the list; Create custom exercise sits above it; Try again is a 48 px button. |
+| Measurement dates typed by hand; BMI typed by hand; errors at the top of the page | Today and Yesterday buttons set the date; a blank BMI is calculated from profile height; errors appear above the Add button. |
+| Exercise editor duplicated its header title and used a retired-orange shadow | Title, shadow and title-case labels removed. |
+| Modal scrims hard-coded per screen | A themed `scrim` token is used by the workout and planner modals. |
+| Planner sheets ignored reduced motion | Sheets skip the slide animation when the system setting is on. |
+| No per-exercise progress | Progress shows Lift progress: top set weight trend for the four most-trained weighted lifts. |
+
+Verification: TypeScript and ESLint passed; all 34 Jest suites / 144 tests passed, including new streak, BMI, quick-date, lift-progress and planner label coverage.
+
+Not done: a native date picker for date of birth and measurements needs `@react-native-community/datetimepicker` and a new development build. Large-text and screen-reader passes on devices remain manual. No Expo development server was started.
+
+Date picker follow-up: added `@react-native-community/datetimepicker` 9.1.0 (SDK-matched via `expo install`, config plugin registered). The shared `src/components/ui/date-field.tsx` opens the Android system dialog or an iOS inline calendar sheet (Cancel / Done, plus Clear for optional dates); `date-field.web.tsx` uses the browser date input because the package has no web build. Profile date of birth (clearable) and the measurement date use it, both capped at today; values remain YYYY-MM-DD so validation and storage are unchanged. The Today/Yesterday measurement shortcuts remain. TypeScript, ESLint and 35 suites / 145 tests passed. Requires a new development build; not yet seen on a device.

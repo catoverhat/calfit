@@ -87,14 +87,14 @@ export function ProgressSummary({
         </Link>
         <View
           accessible
-          accessibilityLabel={`Current streak: ${progress.streak}. Consecutive training days.`}
+          accessibilityLabel={`Current streak: ${progress.streak}. Consecutive weeks with a workout.`}
           style={styles.progressStandaloneCard}
         >
           <AppIcon color={SemanticColors.success} name="flame" size={20} />
           <Text style={styles.progressValue}>{progress.streak}</Text>
           <View style={styles.metricCopy}>
             <Text style={styles.progressLabel}>Current streak</Text>
-            <Text style={styles.metricHelper}>Consecutive training days</Text>
+            <Text style={styles.metricHelper}>Weeks with a workout</Text>
           </View>
         </View>
       </View>

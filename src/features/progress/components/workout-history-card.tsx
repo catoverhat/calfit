@@ -13,8 +13,13 @@ export function WorkoutHistoryCard({ workout }: { workout: ProgressHistoryCard }
   const ringColor = completed ? SemanticColors.action : DesignColors.secondary;
 
   return (
-    <Link href={{ pathname: '/progress/summary', params: { sessionId: workout.id } }} push asChild>
-      <Pressable accessibilityLabel={`Open ${workout.title}, ${workout.statusLabel}`} accessibilityRole="button">
+    <Link
+      href={completed
+        ? { pathname: '/progress/summary', params: { sessionId: workout.id } }
+        : { pathname: '/workout-session/[id]', params: { id: workout.id } }}
+      push
+      asChild>
+      <Pressable accessibilityLabel={`${completed ? 'Open' : 'Resume'} ${workout.title}, ${workout.statusLabel}`} accessibilityRole="button">
         {({ pressed }) => (
           <View style={[styles.card, pressed && styles.cardPressed]}>
             <View style={styles.cardHeader}>

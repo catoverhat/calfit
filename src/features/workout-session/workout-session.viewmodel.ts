@@ -6,6 +6,7 @@ import {
   speedFromCanonical,
   weightFromCanonical,
   type DistanceUnit,
+  type PreviousSetPerformance,
   type SpeedUnit,
   type UserRow,
   type WeightUnit,
@@ -22,6 +23,8 @@ export interface WorkoutSessionSetViewModel {
   duration: string;
   fields: WorkoutMetricField[];
   id: string;
+  /** What this set number achieved in the exercise's last completed session. */
+  previous: string | null;
   reps: string;
   restTimeSeconds: number;
   setNumber: number;
@@ -54,11 +57,13 @@ export interface WorkoutSessionViewModel {
 
 export function mapWorkoutSessionToViewModel(
   session: WorkoutSessionDetail,
-  user: UserRow
+  user: UserRow,
+  previous: Map<string, PreviousSetPerformance[]> = new Map()
 ): WorkoutSessionViewModel {
   const weightUnit = normalizeWeightUnit(user.weight_unit);
   const speedUnit = normalizeSpeedUnit(user.speed_unit);
   const distanceUnit = normalizeDistanceUnit(user.distance_unit);
+  const units = { distanceUnit, speedUnit, weightUnit };
 
   return {
     completedAt: session.completed_at,
@@ -76,6 +81,10 @@ export function mapWorkoutSessionToViewModel(
         duration: displayValue(set.duration_seconds),
         fields: relevantFields(set),
         id: set.workout_set_id,
+        previous: formatPrevious(
+          previous.get(item.exercise_id_fk)?.find((row) => row.set_number === set.set_number),
+          units
+        ),
         reps: displayValue(set.reps),
         restTimeSeconds: set.rest_time_seconds ?? 0,
         setNumber: set.set_number,
@@ -104,6 +113,26 @@ function relevantFields(
   if (set.duration_seconds !== null) fields.push('duration');
   if (set.distance !== null) fields.push('distance');
   return fields.length > 0 ? fields : ['reps', 'weight'];
+}
+
+function formatPrevious(
+  row: PreviousSetPerformance | undefined,
+  units: { distanceUnit: DistanceUnit; speedUnit: SpeedUnit; weightUnit: WeightUnit }
+): string | null {
+  if (!row) return null;
+  const weight = displayValue(row.weight, (value) => weightFromCanonical(value, units.weightUnit));
+  const parts: string[] = [];
+  if (weight && row.reps !== null) parts.push(`${weight} ${units.weightUnit} × ${row.reps}`);
+  else if (weight) parts.push(`${weight} ${units.weightUnit}`);
+  else if (row.reps !== null) parts.push(`${row.reps} reps`);
+  if (row.duration_seconds !== null) parts.push(`${row.duration_seconds} sec`);
+  if (row.distance !== null) {
+    parts.push(`${displayValue(row.distance, (value) => distanceFromCanonical(value, units.distanceUnit))} ${units.distanceUnit}`);
+  }
+  if (row.speed !== null) {
+    parts.push(`${displayValue(row.speed, (value) => speedFromCanonical(value, units.speedUnit))} ${units.speedUnit === 'kmh' ? 'km/h' : 'mph'}`);
+  }
+  return parts.length > 0 ? parts.join(' · ') : null;
 }
 
 function displayValue(value: number | null, convert: (value: number) => number = (item) => item): string {

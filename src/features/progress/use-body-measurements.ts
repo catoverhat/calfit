@@ -6,11 +6,11 @@ import { createMeasurementTrendSegments, createMeasurementViewItems, validateMea
 import type { LineSegment } from './trend-chart';
 
 type Input = { bmi: string; bodyFat: string; date: string; weight: string };
-type State = { error: string | null; history: MeasurementViewItem[]; isLoading: boolean; isSaving: boolean; latestWeight: string; profileName: string; trendSegments: LineSegment[]; weightUnit: string };
+type State = { error: string | null; heightCm: number | null; history: MeasurementViewItem[]; isLoading: boolean; isSaving: boolean; latestWeight: string; profileName: string; trendSegments: LineSegment[]; weightUnit: string };
 
 export function useBodyMeasurements(): State & { addMeasurement: (input: Input) => Promise<boolean> } {
   const [reloadKey, setReloadKey] = useState(0);
-  const [state, setState] = useState<State>({ error: null, history: [], isLoading: true, isSaving: false, latestWeight: '—', profileName: 'Local Athlete', trendSegments: [], weightUnit: 'kg' });
+  const [state, setState] = useState<State>({ error: null, heightCm: null, history: [], isLoading: true, isSaving: false, latestWeight: '—', profileName: 'Local Athlete', trendSegments: [], weightUnit: 'kg' });
   useFocusEffect(useCallback(() => {
     void reloadKey;
     let active = true;
@@ -22,7 +22,8 @@ export function useBodyMeasurements(): State & { addMeasurement: (input: Input) 
         const weightUnit = normalizeWeightUnit(user.weight_unit);
         if (active) setState({
           error: null,
-          history: createMeasurementViewItems(measurements, user.weight_unit),
+          heightCm: user.height,
+          history: createMeasurementViewItems(measurements, user.weight_unit, user.height),
           isLoading: false,
           isSaving: false,
           latestWeight: measurements[0]?.weight === null || measurements[0]?.weight === undefined ? '—' : `${Math.round(weightFromCanonical(measurements[0].weight, weightUnit) * 10) / 10}`,
@@ -39,7 +40,7 @@ export function useBodyMeasurements(): State & { addMeasurement: (input: Input) 
   }, [reloadKey]));
 
   const addMeasurement = useCallback(async (input: Input) => {
-    const validated = validateMeasurementValues(input, state.weightUnit);
+    const validated = validateMeasurementValues(input, state.weightUnit, state.heightCm);
     if (!validated.values) {
       setState((current) => ({ ...current, error: validated.error }));
       return false;
@@ -54,7 +55,7 @@ export function useBodyMeasurements(): State & { addMeasurement: (input: Input) 
       setState((current) => ({ ...current, error: error instanceof Error ? error.message : 'Measurement could not be saved.', isSaving: false }));
       return false;
     }
-  }, [state.weightUnit]);
+  }, [state.heightCm, state.weightUnit]);
 
   return { ...state, addMeasurement };
 }

@@ -337,7 +337,7 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   disabled: { opacity: 0.54 },
   pressed: { opacity: 0.66 },
   modalBackdrop: {
-    backgroundColor: "rgba(0,0,0,0.66)",
+    backgroundColor: SemanticColors.scrim,
     flex: 1,
     justifyContent: "flex-end",
   },

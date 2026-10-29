@@ -97,7 +97,7 @@ describe("today dashboard view models", () => {
       completedWorkouts: 0,
       bodyWeight: "Not logged",
       bodyWeightDelta: "Add a measurement",
-      streak: "0 days",
+      streak: "0 weeks",
       streakProgress: 0,
     });
     expect("calories" in data.progress).toBe(false);
@@ -159,8 +159,8 @@ describe("today dashboard view models", () => {
 
     expect(data.progress.bodyWeight).toBe("81.7 kg");
     expect(data.progress.bodyWeightDelta).toBe("-0.7 kg vs previous");
-    expect(data.progress.streak).toBe("2 days");
-    expect(data.progress.streakProgress).toBeCloseTo(2 / 7);
+    expect(data.progress.streak).toBe("2 weeks");
+    expect(data.progress.streakProgress).toBeCloseTo(2 / 4);
     expect(data.progress.completedWorkouts).toBe(2);
   });
 

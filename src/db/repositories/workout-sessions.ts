@@ -257,6 +257,145 @@ export async function completeWorkoutSession(
   );
 }
 
+/** Deletes an unwanted session; foreign keys cascade its sets and unlink plan entries. */
+export async function discardWorkoutSession(db: LocalDatabase, workoutSessionId: string): Promise<void> {
+  await db.runAsync('DELETE FROM workout_sessions WHERE workout_session_id = ?', workoutSessionId);
+}
+
+/** Appends a set that copies the exercise's last set values and rest time. */
+export async function addWorkoutSet(
+  db: LocalDatabase,
+  workoutExerciseId: string,
+  now = new Date().toISOString()
+): Promise<void> {
+  const sets = await db.getAllAsync<WorkoutSetRow>(
+    `SELECT *
+    FROM workout_sets
+    WHERE workout_exercise_id_fk = ?
+    ORDER BY set_number ASC`,
+    workoutExerciseId
+  );
+  const last = sets.at(-1);
+  if (!last) throw new Error(`Workout exercise has no sets: ${workoutExerciseId}`);
+
+  await db.runAsync(
+    `INSERT INTO workout_sets (
+        workout_set_id,
+        workout_exercise_id_fk,
+        set_number,
+        reps,
+        weight,
+        speed,
+        duration_seconds,
+        distance,
+        rest_time_seconds,
+        completed,
+        completed_at,
+        created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    createLocalId('workout_set'),
+    workoutExerciseId,
+    last.set_number + 1,
+    last.reps,
+    last.weight,
+    last.speed,
+    last.duration_seconds,
+    last.distance,
+    last.rest_time_seconds,
+    0,
+    null,
+    now
+  );
+}
+
+export async function removeWorkoutSet(db: LocalDatabase, workoutSetId: string): Promise<void> {
+  await db.runAsync('DELETE FROM workout_sets WHERE workout_set_id = ?', workoutSetId);
+}
+
+export interface PreviousSetPerformance {
+  exercise_id: string;
+  workout_session_id: string;
+  set_number: number;
+  reps: number | null;
+  weight: number | null;
+  speed: number | null;
+  duration_seconds: number | null;
+  distance: number | null;
+}
+
+/** Completed sets from each exercise's most recent completed session, keyed by exercise id. */
+export async function getPreviousExercisePerformance(
+  db: LocalDatabase,
+  exerciseIds: string[],
+  userId = LOCAL_USER_ID
+): Promise<Map<string, PreviousSetPerformance[]>> {
+  const latest = new Map<string, PreviousSetPerformance[]>();
+  if (exerciseIds.length === 0) return latest;
+
+  const rows = await db.getAllAsync<PreviousSetPerformance>(
+    `SELECT
+      workout_exercises.exercise_id_fk AS exercise_id,
+      workout_sessions.workout_session_id AS workout_session_id,
+      workout_sets.set_number AS set_number,
+      workout_sets.reps AS reps,
+      workout_sets.weight AS weight,
+      workout_sets.speed AS speed,
+      workout_sets.duration_seconds AS duration_seconds,
+      workout_sets.distance AS distance
+    FROM workout_sets
+    JOIN workout_exercises ON workout_exercises.workout_exercise_id = workout_sets.workout_exercise_id_fk
+    JOIN workout_sessions ON workout_sessions.workout_session_id = workout_exercises.workout_session_id_fk
+    WHERE workout_sessions.user_id_fk = ?
+      AND workout_sessions.status = 'completed'
+      AND workout_sets.completed = 1
+      AND workout_exercises.exercise_id_fk IN (${exerciseIds.map(() => '?').join(', ')})
+    ORDER BY workout_sessions.completed_at DESC, workout_sets.set_number ASC`,
+    userId,
+    ...exerciseIds
+  );
+
+  const sessionByExercise = new Map<string, string>();
+  for (const row of rows) {
+    const sessionId = sessionByExercise.get(row.exercise_id);
+    if (sessionId === undefined) {
+      sessionByExercise.set(row.exercise_id, row.workout_session_id);
+      latest.set(row.exercise_id, [row]);
+    } else if (sessionId === row.workout_session_id) {
+      latest.get(row.exercise_id)?.push(row);
+    }
+  }
+  return latest;
+}
+
+/** Heaviest completed set per exercise from completed sessions started before `startedBefore`. */
+export async function getExerciseBestWeights(
+  db: LocalDatabase,
+  exerciseIds: string[],
+  startedBefore: string,
+  userId = LOCAL_USER_ID
+): Promise<Map<string, number>> {
+  if (exerciseIds.length === 0) return new Map();
+  const rows = await db.getAllAsync<{ exercise_id: string; best_weight: number }>(
+    `SELECT
+      workout_exercises.exercise_id_fk AS exercise_id,
+      MAX(workout_sets.weight) AS best_weight
+    FROM workout_sets
+    JOIN workout_exercises ON workout_exercises.workout_exercise_id = workout_sets.workout_exercise_id_fk
+    JOIN workout_sessions ON workout_sessions.workout_session_id = workout_exercises.workout_session_id_fk
+    WHERE workout_sessions.user_id_fk = ?
+      AND workout_sessions.status = 'completed'
+      AND workout_sessions.started_at < ?
+      AND workout_sets.completed = 1
+      AND workout_sets.weight IS NOT NULL
+      AND workout_exercises.exercise_id_fk IN (${exerciseIds.map(() => '?').join(', ')})
+    GROUP BY workout_exercises.exercise_id_fk`,
+    userId,
+    startedBefore,
+    ...exerciseIds
+  );
+  return new Map(rows.map((row) => [row.exercise_id, row.best_weight]));
+}
+
 export async function getWorkoutSessionDetail(
   db: LocalDatabase,
   workoutSessionId: string

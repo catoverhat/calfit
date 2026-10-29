@@ -63,21 +63,28 @@ export type {
   RoutineSummary,
 } from './repositories/routines';
 export {
+  addWorkoutSet,
   completeWorkoutSession,
   createWorkoutSessionFromRoutine,
+  discardWorkoutSession,
+  getExerciseBestWeights,
   getInProgressWorkoutSession,
+  getPreviousExercisePerformance,
   getWorkoutHistory,
   getWorkoutSessionDetail,
   logWorkoutSet,
+  removeWorkoutSet,
   startOrResumeWorkoutFromRoutine,
   startWorkoutFromRoutine,
 } from './repositories/workout-sessions';
 export type {
   LogWorkoutSetInput,
+  PreviousSetPerformance,
   StartOrResumeWorkoutResult,
   StartWorkoutFromRoutineInput,
 } from './repositories/workout-sessions';
 export {
+  calculateBmi,
   distanceFromCanonical,
   distanceToCanonical,
   formatUnitNumber,

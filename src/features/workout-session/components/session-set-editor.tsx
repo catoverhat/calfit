@@ -12,17 +12,28 @@ import type {
   WorkoutSessionViewModel,
 } from "../workout-session.viewmodel";
 
+type Units = Pick<
+  WorkoutSessionViewModel,
+  "distanceUnit" | "speedUnit" | "weightUnit"
+>;
+
 export function SessionSetEditor({
+  busy,
   exercise,
+  onAddSet,
   onBlurField,
+  onRemoveSet,
   onToggleSet,
   onUpdateField,
   saveErrors,
   sets,
   units,
 }: {
+  busy: boolean;
   exercise: WorkoutSessionExerciseViewModel;
+  onAddSet: () => void;
   onBlurField: (setId: string) => void;
+  onRemoveSet: (setId: string) => void;
   onToggleSet: (setId: string) => void;
   onUpdateField: (
     setId: string,
@@ -31,14 +42,17 @@ export function SessionSetEditor({
   ) => void;
   saveErrors: Record<string, string>;
   sets: Record<string, WorkoutSessionSetViewModel>;
-  units: Pick<
-    WorkoutSessionViewModel,
-    "distanceUnit" | "speedUnit" | "weightUnit"
-  >;
+  units: Units;
 }) {
   const styles = useStyles();
   const { SemanticColors } = useAppTheme();
   const nextSetId = exercise.sets.find((set) => !sets[set.id].completed)?.id;
+  const lastSet = exercise.sets.at(-1);
+  // Only an unlogged trailing set can be removed, so set numbers stay contiguous and no logged work is lost.
+  const removableSetId =
+    exercise.sets.length > 1 && lastSet && !sets[lastSet.id].completed
+      ? lastSet.id
+      : null;
 
   return (
     <View style={styles.setList}>
@@ -69,6 +83,11 @@ export function SessionSetEditor({
                 >
                   {set.completed ? "Completed" : isNext ? "Next set" : "To do"}
                 </Text>
+                {set.previous ? (
+                  <Text style={styles.previousText}>
+                    Last time: {set.previous}
+                  </Text>
+                ) : null}
               </View>
               <Pressable
                 accessibilityHint={
@@ -133,11 +152,57 @@ export function SessionSetEditor({
                 <Text style={styles.setError}>{error}</Text>
               </View>
             ) : null}
+            {set.id === removableSetId ? (
+              <Pressable
+                accessibilityLabel={`Remove set ${set.setNumber} from ${exercise.name}`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: busy }}
+                disabled={busy}
+                onPress={() => onRemoveSet(set.id)}
+                style={({ pressed }) => [
+                  styles.removeSetButton,
+                  busy && styles.disabled,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <AppIcon color={SemanticColors.danger} name="trash" size={16} />
+                <Text style={styles.removeSetText}>Remove set</Text>
+              </Pressable>
+            ) : null}
           </View>
         );
       })}
+      <Pressable
+        accessibilityLabel={`Add a set to ${exercise.name}`}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: busy }}
+        disabled={busy}
+        onPress={onAddSet}
+        style={({ pressed }) => [
+          styles.addSetButton,
+          busy && styles.disabled,
+          pressed && styles.pressed,
+        ]}
+      >
+        <AppIcon color={SemanticColors.actionSoft} name="add" size={18} />
+        <Text style={styles.addSetText}>Add set</Text>
+      </Pressable>
     </View>
   );
+}
+
+function stepFor(field: WorkoutMetricField, units: Units): number | null {
+  if (field === "reps") return 1;
+  if (field === "weight") return units.weightUnit === "lb" ? 5 : 2.5;
+  if (field === "duration") return 5;
+  return null;
+}
+
+function stepValue(value: string, delta: number): string {
+  const current = Number(value.replace(",", "."));
+  const next =
+    Math.round(((Number.isFinite(current) ? current : 0) + delta) * 100) / 100;
+  return next > 0 ? String(next) : "";
 }
 
 function MetricInput({
@@ -155,10 +220,7 @@ function MetricInput({
   onBlur: () => void;
   onChange: (value: string) => void;
   set: WorkoutSessionSetViewModel;
-  units: Pick<
-    WorkoutSessionViewModel,
-    "distanceUnit" | "speedUnit" | "weightUnit"
-  >;
+  units: Units;
 }) {
   const { scheme, SemanticColors, ComponentTokens } = useAppTheme();
   const styles = useStyles();
@@ -170,35 +232,57 @@ function MetricInput({
     duration: "Time (sec)",
     distance: `Distance (${units.distanceUnit})`,
   };
+  const step = stepFor(field, units);
+  const fieldLabel = `${labels[field]} for ${exerciseName}, set ${set.setNumber}`;
+
+  const stepper = (delta: number) => (
+    <Pressable
+      accessibilityLabel={`${delta > 0 ? "Increase" : "Decrease"} ${fieldLabel} by ${Math.abs(delta)}`}
+      accessibilityRole="button"
+      hitSlop={4}
+      onPress={() => onChange(stepValue(set[field], delta))}
+      style={({ pressed }) => [styles.stepButton, pressed && styles.pressed]}
+    >
+      <AppIcon
+        color={SemanticColors.textPrimary}
+        name={delta > 0 ? "add" : "minus"}
+        size={18}
+      />
+    </Pressable>
+  );
 
   return (
-    <View style={styles.dynamicField}>
+    <View style={[styles.dynamicField, step !== null && styles.stepperField]}>
       <Text style={styles.dynamicFieldLabel}>{labels[field]}</Text>
-      <TextInput
-        accessibilityLabel={`${labels[field]} for ${exerciseName}, set ${set.setNumber}`}
-        keyboardAppearance={scheme}
-        keyboardType={
-          field === "reps" || field === "duration"
-            ? "number-pad"
-            : "decimal-pad"
-        }
-        onBlur={() => {
-          setFocused(false);
-          onBlur();
-        }}
-        onChangeText={onChange}
-        onFocus={() => setFocused(true)}
-        placeholder="—"
-        placeholderTextColor={SemanticColors.textMuted}
-        selectTextOnFocus
-        selectionColor={ComponentTokens.input.selectionColor}
-        style={[
-          styles.dynamicInput,
-          hasError && styles.inputError,
-          focused && styles.inputFocused,
-        ]}
-        value={set[field]}
-      />
+      <View style={styles.stepperRow}>
+        {step !== null ? stepper(-step) : null}
+        <TextInput
+          accessibilityLabel={fieldLabel}
+          keyboardAppearance={scheme}
+          keyboardType={
+            field === "reps" || field === "duration"
+              ? "number-pad"
+              : "decimal-pad"
+          }
+          onBlur={() => {
+            setFocused(false);
+            onBlur();
+          }}
+          onChangeText={onChange}
+          onFocus={() => setFocused(true)}
+          placeholder="—"
+          placeholderTextColor={SemanticColors.textMuted}
+          selectTextOnFocus
+          selectionColor={ComponentTokens.input.selectionColor}
+          style={[
+            styles.dynamicInput,
+            hasError && styles.inputError,
+            focused && styles.inputFocused,
+          ]}
+          value={set[field]}
+        />
+        {step !== null ? stepper(step) : null}
+      </View>
     </View>
   );
 }

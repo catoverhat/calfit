@@ -7,6 +7,8 @@ import {
   createMeasurementViewItems,
   createProgressDashboardData,
   createWorkoutSummaryData,
+  measurementDateInput,
+  previewBmi,
   validateMeasurementValues,
 } from './progress.viewmodel';
 
@@ -37,6 +39,22 @@ describe('progress view models', () => {
     expect(validateMeasurementValues({ bmi: '23.1', bodyFat: '14,5', date: '2026-07-06', weight: '81.2' }).values).toEqual(expect.objectContaining({ bmi: 23.1, bodyFatPercentage: 14.5, weight: 81.2 }));
   });
 
+  it('derives a blank BMI from profile height but keeps an entered one', () => {
+    expect(validateMeasurementValues({ bmi: '', bodyFat: '', date: '2026-07-06', weight: '81' }, 'kg', 180).values?.bmi).toBe(25);
+    expect(validateMeasurementValues({ bmi: '24', bodyFat: '', date: '2026-07-06', weight: '81' }, 'kg', 180).values?.bmi).toBe(24);
+    expect(validateMeasurementValues({ bmi: '', bodyFat: '', date: '2026-07-06', weight: '81' }, 'kg', null).values?.bmi).toBeNull();
+    expect(measurementDateInput(1, new Date(2026, 2, 1, 9))).toBe('2026-02-28');
+  });
+
+  it('previews BMI while typing and fills it for rows saved without one', () => {
+    expect(previewBmi('64', 'kg', 170)).toBe('22.1');
+    expect(previewBmi('', 'kg', 170)).toBeNull();
+    expect(previewBmi('64', 'kg', null)).toBeNull();
+    const profileWeight = { ...measurements[1], bmi: null, weight: 64 };
+    expect(createMeasurementViewItems([profileWeight], 'kg', 170)[0].bmi).toBe('22.1');
+    expect(createMeasurementViewItems([profileWeight], 'kg')[0].bmi).toBe('—');
+  });
+
   it('derives history status, completion, duration, volume, and month groups', () => {
     const history = [createSession('completed')];
     const groups = createHistoryGroups(history, 'completed', 'kg');
@@ -50,7 +68,18 @@ describe('progress view models', () => {
   });
 
   it('creates a real summary from one persisted session', () => {
-    expect(createWorkoutSummaryData(createSession('completed'), 'kg')).toEqual(expect.objectContaining({ duration: '60m', exerciseCount: 1, setCount: 2, statusLabel: 'Completed', title: 'Strength A', volume: '500 kg' }));
+    expect(createWorkoutSummaryData(createSession('completed'), 'kg')).toEqual(expect.objectContaining({ completedSetCount: 1, duration: '60m', exerciseCount: 1, setCount: 2, statusLabel: 'Completed', title: 'Strength A', volume: '500 kg' }));
+  });
+
+  it('reports each exercise best set and flags records only against earlier history', () => {
+    const session = createSession('completed');
+    expect(createWorkoutSummaryData(session, 'kg').exercises[0]).toEqual({
+      best: '100 kg × 5', id: 'workout-exercise-1', isRecord: false, name: 'Squat', sets: '1 of 2 sets',
+    });
+    const beaten = createWorkoutSummaryData(session, 'kg', new Map([['exercise-1', 95]]));
+    expect(beaten.exercises[0].isRecord).toBe(true);
+    expect(beaten.recordCount).toBe(1);
+    expect(createWorkoutSummaryData(session, 'kg', new Map([['exercise-1', 100]])).recordCount).toBe(0);
   });
 
   it('derives dashboard measurements, trends, weekly sessions, volume, and consistency', () => {
@@ -102,6 +131,21 @@ describe('progress view models', () => {
     expect(data.sessionCount).toBe(0);
     expect(data.sessionSummary).toBe('No completed workouts in the last 7 days.');
     expect(data.weeklySessions.every((bar) => bar.value === 0 && bar.height === 2)).toBe(true);
+  });
+
+  it('tracks each lift by its top completed set per session', () => {
+    const later: WorkoutHistoryItem = {
+      ...createSession('completed'),
+      workout_session_id: 'later',
+      completed_at: '2026-07-13T14:00:00.000Z',
+    };
+    later.exercises = [{ ...later.exercises[0], sets: [createSet('set-1', 5, 105, 1), createSet('set-2', 5, 120, 0)] }];
+    const data = createProgressDashboardData({ history: [later, createSession('completed'), createSession('in_progress')], measurements: [], now: new Date(2026, 6, 14, 12), user });
+    expect(data.lifts).toEqual([
+      expect.objectContaining({ change: '+5 kg over 2 sessions', latest: '105 kg', name: 'Squat' }),
+    ]);
+    expect(data.lifts[0].segments).toHaveLength(1);
+    expect(createProgressDashboardData({ history: [], measurements: [], user }).lifts).toEqual([]);
   });
 
   it('sums every workout in the selected period, including more than six', () => {

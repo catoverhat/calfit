@@ -32,7 +32,8 @@ beforeEach(() => {
 test('assign action keeps its dimensions and centered label while saving', async () => {
   let root: ReturnType<typeof create>;
   await act(async () => { root = create(<DayCard {...handlers} day={day} busy={false} initialLoading={false} disabled={false} wide={false} />); });
-  const button = root.root.findByProps({ accessibilityLabel: 'Assign workout' });
+  const button = root.root.findAll((node: { props: { accessibilityLabel?: string; style?: unknown } }) =>
+    node.props.accessibilityLabel === `Assign a workout to ${day.weekday}, ${day.dateLabel}` && typeof node.props.style === 'function')[0];
   const idleStyle = StyleSheet.flatten(button.props.style({ pressed: false }));
   expect(idleStyle).toMatchObject({ width: 176, minHeight: 48, flexDirection: 'row', justifyContent: 'center' });
   await act(async () => { root.update(<DayCard {...handlers} day={day} busy initialLoading={false} disabled wide={false} />); });

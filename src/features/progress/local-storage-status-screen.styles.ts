@@ -18,7 +18,7 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors }) =
   statusTitle: { ...Typography.lg, color: SemanticColors.textPrimary, fontFamily: Fonts.heading },
   statusBody: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyMedium, fontSize: 13, lineHeight: 19 },
   retryButton: { alignItems: 'center', alignSelf: 'flex-start', backgroundColor: SemanticColors.action, borderRadius: Radius.sm, flexDirection: 'row', gap: Spacing.one, minHeight: 48, paddingHorizontal: Spacing.three },
-  retryText: { color: DesignColors.onPrimaryContainer, fontFamily: Fonts.bodyBold, fontSize: 11, textTransform: 'uppercase' },
+  retryText: { color: DesignColors.onPrimaryContainer, fontFamily: Fonts.bodyBold, fontSize: 12, textTransform: 'uppercase' },
   guidelinesBlock: { borderTopColor: SemanticColors.border, borderTopWidth: 1, gap: Spacing.three, paddingTop: Spacing.three },
   guidelinesTitle: { ...Typography.lg, color: SemanticColors.textPrimary, fontFamily: Fonts.heading },
   guidelineRow: { flexDirection: 'row', gap: Spacing.two },

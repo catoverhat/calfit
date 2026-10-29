@@ -1,6 +1,7 @@
 /// <reference types="jest" />
 
 import {
+  calculateBmi,
   distanceFromCanonical,
   distanceToCanonical,
   heightFromCanonical,
@@ -18,6 +19,14 @@ describe('measurement units', () => {
     expect(heightToCanonical(heightFromCanonical(180, 'ft'), 'ft')).toBeCloseTo(180);
     expect(speedToCanonical(speedFromCanonical(12, 'mph'), 'mph')).toBeCloseTo(12);
     expect(distanceToCanonical(distanceFromCanonical(5000, 'mi'), 'mi')).toBeCloseTo(5000);
+  });
+
+  it('calculates BMI as kg / m² and skips it without both values', () => {
+    expect(calculateBmi(64, 170)).toBe(22.1);
+    expect(calculateBmi(81.5, 180)).toBe(25.2);
+    expect(calculateBmi(64, null)).toBeNull();
+    expect(calculateBmi(null, 170)).toBeNull();
+    expect(calculateBmi(0, 170)).toBeNull();
   });
 
   it('uses supported distance display units', () => {

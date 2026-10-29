@@ -1,7 +1,7 @@
 import { LOCAL_USER_ID } from '../schema';
 import { createLocalId } from '../id';
 import type { LocalDatabase, ThemePreference, UserRow } from '../types';
-import type { DistanceUnit, HeightUnit, SpeedUnit, WeightUnit } from '../units';
+import { calculateBmi, type DistanceUnit, type HeightUnit, type SpeedUnit, type WeightUnit } from '../units';
 
 export interface SaveLocalProfileInput {
   currentWeightKg?: number | null;
@@ -60,7 +60,7 @@ export async function saveLocalProfile(
         createLocalId('body_measurement'),
         userId,
         input.currentWeightKg,
-        null,
+        calculateBmi(input.currentWeightKg, input.heightCm),
         null,
         now
       );

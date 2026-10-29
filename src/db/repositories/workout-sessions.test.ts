@@ -1,14 +1,19 @@
 /// <reference types="jest" />
 
 import {
+  addWorkoutSet,
   completeWorkoutSession,
   createExercise,
   createRoutine,
+  discardWorkoutSession,
+  getExerciseBestWeights,
+  getPreviousExercisePerformance,
   getRoutineDetail,
   getWorkoutHistory,
   getWorkoutSessionDetail,
   initializeLocalDatabase,
   logWorkoutSet,
+  removeWorkoutSet,
   startOrResumeWorkoutFromRoutine,
   startWorkoutFromRoutine,
   updateRoutine,
@@ -147,6 +152,43 @@ describe('workout session repository', () => {
     expect(updated?.exercises[0].sets[0]).toEqual(expect.objectContaining({
       completed: 1, completed_at: '2026-09-10T10:05:00.000Z',
     }));
+  });
+
+  it('adds and removes sets, reports last performance, and discards sessions', async () => {
+    const db = new MemoryDb();
+    await initializeLocalDatabase(db);
+    const exercise = await createExercise(db, { id: 'press', name: 'Press', categoryId: 'cat-shoulders' });
+    const routine = await createRoutine(db, {
+      id: 'press-routine', name: 'Press day',
+      exercises: [{ exerciseId: exercise.exercise_id, targets: [{ targetReps: 5, targetWeight: 40, restTimeSeconds: 90 }] }],
+    });
+
+    const first = await startWorkoutFromRoutine(db, { id: 'first', routineId: routine.routine_id });
+    const firstDetail = await getWorkoutSessionDetail(db, 'first');
+    const workoutExerciseId = firstDetail?.exercises[0].workout_exercise_id ?? '';
+    await addWorkoutSet(db, workoutExerciseId);
+    let detail = await getWorkoutSessionDetail(db, 'first');
+    expect(detail?.exercises[0].sets[1]).toEqual(expect.objectContaining({
+      set_number: 2, reps: 5, weight: 40, rest_time_seconds: 90, completed: 0,
+    }));
+    await logWorkoutSet(db, detail?.exercises[0].sets[0].workout_set_id ?? '', { reps: 6, weight: 42.5, completed: true });
+    await removeWorkoutSet(db, detail?.exercises[0].sets[1].workout_set_id ?? '');
+    detail = await getWorkoutSessionDetail(db, 'first');
+    expect(detail?.exercises[0].sets).toHaveLength(1);
+    await completeWorkoutSession(db, first.workout_session_id, '2026-09-11T10:00:00.000Z');
+
+    await startWorkoutFromRoutine(db, { id: 'second', routineId: routine.routine_id });
+    const previous = await getPreviousExercisePerformance(db, [exercise.exercise_id]);
+    expect(previous.get(exercise.exercise_id)).toEqual([
+      expect.objectContaining({ workout_session_id: 'first', set_number: 1, reps: 6, weight: 42.5 }),
+    ]);
+
+    expect(await getExerciseBestWeights(db, [exercise.exercise_id], '9999-01-01')).toEqual(new Map([[exercise.exercise_id, 42.5]]));
+    expect((await getExerciseBestWeights(db, [exercise.exercise_id], String(first.started_at))).size).toBe(0);
+
+    await discardWorkoutSession(db, 'second');
+    expect(await getWorkoutSessionDetail(db, 'second')).toBeNull();
+    expect(db.tables.get('workout_exercises')).toHaveLength(1);
   });
 
 });

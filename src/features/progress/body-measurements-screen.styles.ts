@@ -1,7 +1,7 @@
 import { createThemedStyles } from '@/theme/create-themed-styles';
 import { StyleSheet } from 'react-native';
 
-import { Fonts, Typography, Spacing, Radius, TouchTarget, MaxContentWidth } from '@/theme/tokens';
+import { Fonts, Typography, TypeScale, Space, Spacing, Radius, TouchTarget, MaxContentWidth } from '@/theme/tokens';
 
 export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, ComponentTokens }) => StyleSheet.create({
   scrollContent: {
@@ -28,9 +28,9 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   label: {
     color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 11,
+    fontSize: 12,
     letterSpacing: 1,
-    lineHeight: 15,
+    lineHeight: 16,
     textTransform: 'uppercase',
   },
   weightRow: {
@@ -62,8 +62,8 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   deltaText: {
     color: SemanticColors.action,
     fontFamily: Fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 14,
+    fontSize: 12,
+    lineHeight: 16,
   },
   chartCard: {
     backgroundColor: SemanticColors.actionTint,
@@ -111,8 +111,8 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   chartLabel: {
     color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 9,
-    lineHeight: 12,
+    fontSize: 12,
+    lineHeight: 16,
   },
   formCard: {
     backgroundColor: DesignColors.surfaceContainerLow,
@@ -137,13 +137,13 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   inputLabel: {
     color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 13,
+    fontSize: 12,
+    lineHeight: 16,
   },
   inputShell: {
     alignItems: 'center',
-    backgroundColor: DesignColors.surfaceContainerLowest,
-    borderColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: ComponentTokens.input.background,
+    borderColor: ComponentTokens.input.borderColor,
     borderCurve: 'continuous',
     borderRadius: Radius.sm,
     borderWidth: 1,
@@ -161,9 +161,40 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
     minHeight: 50,
     padding: 0,
   },
-  inputWithIcon: {
+  // The input style's minHeight would pin non-editable date text to the top of the field.
+  dateText: {
     color: SemanticColors.textPrimary,
+    fontFamily: Fonts.bodyBold,
+    fontSize: 13,
+    lineHeight: 18,
   },
+  bmiHeader: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  bmiInfoButton: { alignItems: 'center', flexDirection: 'row', gap: Space.xs, minHeight: TouchTarget.min - Space.base },
+  bmiInfoButtonText: { ...TypeScale.labelMd, color: SemanticColors.info },
+  bmiResult: {
+    alignItems: 'center',
+    backgroundColor: SemanticColors.cardElevated,
+    borderRadius: Radius.sm,
+    flexDirection: 'row',
+    gap: Space.sm,
+    minHeight: 52,
+    paddingHorizontal: Spacing.two,
+  },
+  bmiValue: { ...TypeScale.headlineSm, color: SemanticColors.textPrimary, fontVariant: ['tabular-nums'] },
+  bmiValueEmpty: { color: SemanticColors.textMuted },
+  bmiCaption: { ...Typography.xs, color: SemanticColors.textSecondary, flex: 1, fontFamily: Fonts.body },
+  bmiProfileLink: { alignItems: 'center', flexDirection: 'row', gap: Space.xs, minHeight: TouchTarget.min },
+  bmiProfileLinkText: { ...TypeScale.labelMd, color: SemanticColors.actionSoft, flexShrink: 1 },
+  bmiInfo: {
+    backgroundColor: SemanticColors.cardElevated,
+    borderColor: SemanticColors.border,
+    borderRadius: Radius.sm,
+    borderWidth: 1,
+    gap: Space.base,
+    padding: Space.sm,
+  },
+  bmiFormula: { ...TypeScale.labelLg, color: SemanticColors.textPrimary, textTransform: 'none' },
+  bmiInfoText: { ...Typography.xs, color: SemanticColors.textSecondary, fontFamily: Fonts.body },
   addButton: {
     alignItems: 'center',
     backgroundColor: SemanticColors.action,
@@ -247,8 +278,8 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
   historyWeight: {
     color: SemanticColors.textPrimary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 13,
+    fontSize: 12,
+    lineHeight: 16,
   },
   historyStats: {
     alignItems: 'flex-end',
@@ -261,16 +292,31 @@ export const useStyles = createThemedStyles(({ DesignColors, SemanticColors, Com
     lineHeight: 16,
   },
   bmi: {
-    color: SemanticColors.action,
+    color: SemanticColors.textSecondary,
     fontFamily: Fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 13,
+    fontSize: 12,
+    lineHeight: 16,
   },
   pressed: {
     opacity: 0.72,
     transform: [{ scale: 0.99 }],
   },
   disabled: { opacity: 0.54 },
+  quickDates: { flexDirection: 'row', gap: Space.base },
+  quickDate: {
+    alignItems: 'center',
+    borderColor: SemanticColors.borderStrong,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    justifyContent: 'center',
+    minHeight: TouchTarget.min,
+    paddingHorizontal: Space.md,
+  },
+  quickDateSelected: { backgroundColor: SemanticColors.actionTint, borderColor: SemanticColors.action },
+  quickDateText: { ...TypeScale.labelMd, color: SemanticColors.textPrimary },
+  quickDateTextSelected: { color: SemanticColors.actionSoft },
+  formError: { alignItems: 'flex-start', flexDirection: 'row', gap: Space.base },
+  formErrorText: { ...Typography.sm, color: SemanticColors.danger, flex: 1, fontFamily: Fonts.bodyMedium },
   emptyText: { color: SemanticColors.textSecondary, fontFamily: Fonts.bodyMedium, fontSize: 12, lineHeight: 17 },
   statusCard: { backgroundColor: DesignColors.surfaceContainerLow, borderColor: SemanticColors.border, borderRadius: Radius.md, borderWidth: 1, gap: Spacing.one, padding: Spacing.three },
   statusTitle: { color: SemanticColors.textPrimary, fontFamily: Fonts.bodyBold, fontSize: 14, lineHeight: 19 },

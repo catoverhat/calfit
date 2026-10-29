@@ -226,6 +226,18 @@ export class MemoryDb implements LocalDatabase {
       return this.workoutSessionJoin(params[0] as string) as T[];
     }
 
+    if (normalized.startsWith('select workout_exercises.exercise_id_fk as exercise_id, max(workout_sets.weight)')) {
+      const best = new Map<SqlValue, number>();
+      this.previousPerformance(params[0] as string, params.slice(2) as string[], params[1] as string)
+        .filter((row) => row.weight !== null)
+        .forEach((row) => best.set(row.exercise_id, Math.max(best.get(row.exercise_id) ?? 0, Number(row.weight))));
+      return [...best].map(([exercise_id, best_weight]) => ({ exercise_id, best_weight })) as T[];
+    }
+
+    if (normalized.startsWith('select workout_exercises.exercise_id_fk as exercise_id')) {
+      return this.previousPerformance(params[0] as string, params.slice(1) as string[]) as T[];
+    }
+
     if (normalized.startsWith('select workout_exercises.*')) {
       return this.workoutExerciseJoin(params[0] as string) as T[];
     }
@@ -344,6 +356,25 @@ export class MemoryDb implements LocalDatabase {
         workout_session_id_fk: params[0],
         updated_at: params[1],
       });
+    }
+
+    if (normalized === 'delete from workout_sets where workout_set_id = ?') {
+      return this.deleteWhere('workout_sets', (row) => row.workout_set_id === params[0]);
+    }
+
+    if (normalized === 'delete from workout_sessions where workout_session_id = ?') {
+      // Mirrors the schema's ON DELETE CASCADE / SET NULL foreign keys.
+      const exerciseIds = this.selectBy('workout_exercises', 'workout_session_id_fk', params[0]).map(
+        (row) => row.workout_exercise_id
+      );
+      this.deleteWhere('workout_sets', (row) => exerciseIds.includes(row.workout_exercise_id_fk));
+      this.deleteWhere('workout_exercises', (row) => row.workout_session_id_fk === params[0]);
+      this.ensureTable('workout_plan_entries')
+        .filter((row) => row.workout_session_id_fk === params[0])
+        .forEach((row) => {
+          row.workout_session_id_fk = null;
+        });
+      return this.deleteWhere('workout_sessions', (row) => row.workout_session_id === params[0]);
     }
 
     if (normalized === 'delete from workout_plan_entries where workout_plan_entry_id = ?') {
@@ -550,6 +581,33 @@ export class MemoryDb implements LocalDatabase {
           exercise_updated_at: exercise.updated_at,
         };
       });
+  }
+
+  private previousPerformance(userId: string, exerciseIds: string[], startedBefore?: string): TableRow[] {
+    const sessions = this.selectBy('workout_sessions', 'user_id_fk', userId)
+      .filter((session) => session.status === 'completed')
+      .filter((session) => startedBefore === undefined || String(session.started_at) < startedBefore)
+      .sort((left, right) => compareNullableDates(right.completed_at, left.completed_at));
+
+    return sessions.flatMap((session) =>
+      this.selectBy('workout_exercises', 'workout_session_id_fk', session.workout_session_id)
+        .filter((workoutExercise) => exerciseIds.includes(String(workoutExercise.exercise_id_fk)))
+        .flatMap((workoutExercise) =>
+          this.selectBy('workout_sets', 'workout_exercise_id_fk', workoutExercise.workout_exercise_id)
+            .filter((set) => set.completed === 1)
+            .sort(byNumber('set_number'))
+            .map((set) => ({
+              exercise_id: workoutExercise.exercise_id_fk,
+              workout_session_id: session.workout_session_id,
+              set_number: set.set_number,
+              reps: set.reps,
+              weight: set.weight,
+              speed: set.speed,
+              duration_seconds: set.duration_seconds,
+              distance: set.distance,
+            }))
+        )
+    );
   }
 
   private requireRow(tableName: string, column: string, value: SqlValue): TableRow {

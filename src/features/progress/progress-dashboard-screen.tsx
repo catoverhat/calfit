@@ -5,6 +5,7 @@ import { TabScreen } from '@/components/layout/tab-screen';
 import { MetricCard } from './components/metric-card';
 import {
   ConsistencyCard,
+  LiftProgressCard,
   PeriodSelector,
   ProgressLink,
   ProgressStatus,
@@ -46,6 +47,7 @@ export function ProgressDashboardScreen() {
         {data && !isLoading ? (
           <>
             <ConsistencyCard data={data} />
+            <LiftProgressCard data={data} />
             <View style={styles.section}>
               <View style={styles.sectionHeading}>
                 <Text style={styles.sectionTitle}>Body measurements</Text>

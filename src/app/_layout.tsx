@@ -9,7 +9,8 @@ import { getAppLockRouteAccess } from "@/features/auth/app-lock.viewmodel";
 import { useAppFonts } from "@/hooks/use-app-fonts";
 import { useDevelopmentScreenTimeout } from "@/hooks/use-development-screen-timeout";
 import { WorkoutPreferencesProvider } from "@/features/workout-session/workout-preferences";
-import { AppThemeProvider } from "@/theme/app-theme-provider";
+import { AppThemeProvider, useAppTheme } from "@/theme/app-theme-provider";
+import { Fonts } from "@/theme/tokens";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -38,6 +39,7 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { status } = useAppLock();
+  const { SemanticColors } = useAppTheme();
   const access = getAppLockRouteAccess(status);
 
   return (
@@ -47,7 +49,22 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={access.canAccessProtectedRoutes}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="workout-session/[id]" />
+        <Stack.Screen
+          name="workout-session/[id]"
+          options={{
+            contentStyle: { backgroundColor: SemanticColors.canvas },
+            headerBackButtonDisplayMode: "minimal",
+            headerShadowVisible: false,
+            headerShown: true,
+            headerStyle: { backgroundColor: SemanticColors.canvas },
+            headerTintColor: SemanticColors.textPrimary,
+            headerTitleStyle: {
+              color: SemanticColors.actionSoft,
+              fontFamily: Fonts.heading,
+            },
+            title: "Workout",
+          }}
+        />
       </Stack.Protected>
     </Stack>
   );

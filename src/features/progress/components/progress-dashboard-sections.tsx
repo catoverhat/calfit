@@ -154,6 +154,36 @@ export function ConsistencyCard({ data }: { data: ProgressDashboardData }) {
   );
 }
 
+export function LiftProgressCard({ data }: { data: ProgressDashboardData }) {
+  const styles = useStyles();
+  return (
+    <View style={styles.card}>
+      <View style={styles.cardHeading}>
+        <Text accessibilityRole="header" style={styles.cardTitle}>Lift progress</Text>
+        <Text style={styles.metaText}>Top set weight · your most-trained lifts</Text>
+      </View>
+      {data.lifts.length === 0 ? (
+        <Text style={styles.emptyText}>Log weighted sets to see how each lift moves over time.</Text>
+      ) : data.lifts.map((lift, index) => (
+        <View
+          accessible
+          accessibilityLabel={`${lift.name}. Latest top set ${lift.latest}. ${lift.change}.`}
+          key={lift.id}
+          style={[styles.liftRow, index > 0 && styles.liftRowDivider]}>
+          <View style={styles.liftHeader}>
+            <View style={styles.liftCopy}>
+              <Text style={styles.quickLinkText}>{lift.name}</Text>
+              <Text style={styles.metaText}>{lift.change}</Text>
+            </View>
+            <Text style={styles.liftValue}>{lift.latest}</Text>
+          </View>
+          {lift.segments.length > 0 ? <LinePlot segments={lift.segments} style={styles.liftPlot} /> : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 type ProgressHref = '/progress/history' | '/progress/measurements' | '/progress/storage' | '/workouts';
 
 export function ProgressLink({ compact = false, detail, href, icon, label }: { compact?: boolean; detail?: string; href: ProgressHref; icon: AppIconName; label: string }) {

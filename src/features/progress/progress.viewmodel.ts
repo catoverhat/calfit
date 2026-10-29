@@ -1,11 +1,12 @@
 import type {
   BodyMeasurementRow,
   UserRow,
+  WeightUnit,
   WorkoutHistoryItem,
   WorkoutSessionDetail,
   WorkoutSessionStatus,
 } from '@/db';
-import { normalizeWeightUnit, weightFromCanonical, weightToCanonical } from '@/db';
+import { calculateBmi, normalizeWeightUnit, weightFromCanonical, weightToCanonical } from '@/db';
 import { createTrendSegments, type LineSegment } from './trend-chart';
 
 export type ProgressMetric = { helper: string; label: string; value: string };
@@ -35,8 +36,17 @@ export type MeasurementViewItem = {
   weight: string;
 };
 
+export type LiftProgress = {
+  change: string;
+  id: string;
+  latest: string;
+  name: string;
+  segments: LineSegment[];
+};
+
 export type ProgressDashboardData = {
   avatarUrl: string | null;
+  lifts: LiftProgress[];
   consistencyRows: (number | null)[][];
   consistencySummary: string;
   periodLabel: string;
@@ -56,9 +66,20 @@ export type ProgressDashboardData = {
   weightUnit: string;
 };
 
-export type WorkoutSummaryData = {
-  exerciseCount: number;
+export type WorkoutSummaryExercise = {
+  best: string | null;
   id: string;
+  isRecord: boolean;
+  name: string;
+  sets: string;
+};
+
+export type WorkoutSummaryData = {
+  completedSetCount: number;
+  exerciseCount: number;
+  exercises: WorkoutSummaryExercise[];
+  id: string;
+  recordCount: number;
   status: WorkoutSessionStatus;
   statusLabel: string;
   setCount: number;
@@ -105,6 +126,7 @@ export function createProgressDashboardData(input: {
 
   return {
     avatarUrl: null,
+    lifts: createLiftProgress(allCompleted, weightUnit),
     consistencyRows: createConsistencyRows(allCompleted, now),
     consistencySummary: createConsistencySummary(allCompleted, now),
     periodLabel,
@@ -151,21 +173,26 @@ export function createProgressDashboardData(input: {
   };
 }
 
+/** Rows saved without a BMI (e.g. weight from Profile) show one calculated from `heightCm`. */
 export function createMeasurementViewItems(
   measurements: BodyMeasurementRow[],
-  weightUnit: string
+  weightUnit: string,
+  heightCm: number | null = null
 ): MeasurementViewItem[] {
   const unit = normalizeWeightUnit(weightUnit);
-  return measurements.map((measurement) => ({
-    bmi: measurement.bmi === null ? '—' : formatNumber(measurement.bmi),
-    bodyFat:
-      measurement.body_fat_percentage === null
-        ? '—'
-        : `${formatNumber(measurement.body_fat_percentage)}%`,
-    date: formatDate(measurement.created_at),
-    id: measurement.body_measurement_id,
-    weight: measurement.weight === null ? '—' : `${formatNumber(weightFromCanonical(measurement.weight, unit))} ${unit}`,
-  }));
+  return measurements.map((measurement) => {
+    const bmi = measurement.bmi ?? calculateBmi(measurement.weight, heightCm);
+    return {
+      bmi: bmi === null ? '—' : formatNumber(bmi),
+      bodyFat:
+        measurement.body_fat_percentage === null
+          ? '—'
+          : `${formatNumber(measurement.body_fat_percentage)}%`,
+      date: formatDate(measurement.created_at),
+      id: measurement.body_measurement_id,
+      weight: measurement.weight === null ? '—' : `${formatNumber(weightFromCanonical(measurement.weight, unit))} ${unit}`,
+    };
+  });
 }
 
 export function createMeasurementTrendSegments(measurements: BodyMeasurementRow[], weightUnit = 'kg'): LineSegment[] {
@@ -181,7 +208,7 @@ export function createMeasurementTrendSegments(measurements: BodyMeasurementRow[
 export const HISTORY_FILTERS: { id: ProgressHistoryFilter; label: string }[] = [
   { id: 'all', label: 'All' },
   { id: 'completed', label: 'Completed' },
-  { id: 'in_progress', label: 'In Progress' },
+  { id: 'in_progress', label: 'In progress' },
 ];
 
 export function createHistoryGroups(
@@ -203,16 +230,44 @@ export function createHistoryGroups(
   return Array.from(groups, ([label, workouts]) => ({ label, workouts }));
 }
 
+/** `previousBestWeights` holds canonical best weights from earlier sessions, keyed by exercise id. */
 export function createWorkoutSummaryData(
   session: WorkoutSessionDetail,
-  weightUnit: string
+  weightUnit: string,
+  previousBestWeights: Map<string, number> = new Map()
 ): WorkoutSummaryData {
+  const unit = normalizeWeightUnit(weightUnit);
   const setCount = session.exercises.reduce((count, exercise) => count + exercise.sets.length, 0);
+  const exercises = session.exercises.map((exercise): WorkoutSummaryExercise => {
+    const logged = exercise.sets.filter((set) => set.completed === 1);
+    const top = [...logged].sort(
+      (left, right) => (right.weight ?? 0) - (left.weight ?? 0) || (right.reps ?? 0) - (left.reps ?? 0)
+    )[0];
+    const previousBest = previousBestWeights.get(exercise.exercise_id_fk);
+    let best: string | null = null;
+    if (top?.weight != null) {
+      const weight = `${formatNumber(weightFromCanonical(top.weight, unit))} ${unit}`;
+      best = top.reps === null ? weight : `${weight} × ${top.reps}`;
+    } else if (top?.reps != null) {
+      best = `${top.reps} reps`;
+    }
+    return {
+      best,
+      id: exercise.workout_exercise_id,
+      // A first-ever attempt has nothing to beat, so it is not flagged as a record.
+      isRecord: top?.weight != null && previousBest !== undefined && top.weight > previousBest,
+      name: exercise.exercise.name,
+      sets: `${logged.length} of ${exercise.sets.length} sets`,
+    };
+  });
 
   return {
+    completedSetCount: session.exercises.flatMap((exercise) => exercise.sets).filter((set) => set.completed === 1).length,
     duration: formatDuration(session),
     exerciseCount: session.exercises.length,
+    exercises,
     id: session.workout_session_id,
+    recordCount: exercises.filter((exercise) => exercise.isRecord).length,
     setCount,
     status: session.status,
     statusLabel: formatStatus(session.status),
@@ -221,12 +276,13 @@ export function createWorkoutSummaryData(
   };
 }
 
+/** `heightCm` (from the profile) fills a blank BMI from the entered weight. */
 export function validateMeasurementValues(input: {
   bmi: string;
   bodyFat: string;
   date: string;
   weight: string;
-}, weightUnit = 'kg'): { error: string; values: null } | { error: null; values: MeasurementSaveValues } {
+}, weightUnit = 'kg', heightCm: number | null = null): { error: string; values: null } | { error: null; values: MeasurementSaveValues } {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) {
     return { error: 'Use YYYY-MM-DD for the measurement date.', values: null };
   }
@@ -250,10 +306,24 @@ export function validateMeasurementValues(input: {
     return { error: 'Body fat percentage cannot exceed 100.', values: null };
   }
 
+  const weightKg = weight === null ? null : weightToCanonical(weight, normalizeWeightUnit(weightUnit));
+
   return {
     error: null,
-    values: { bmi, bodyFatPercentage, createdAt: date.toISOString(), weight: weight === null ? null : weightToCanonical(weight, normalizeWeightUnit(weightUnit)) },
+    values: { bmi: bmi ?? calculateBmi(weightKg, heightCm), bodyFatPercentage, createdAt: date.toISOString(), weight: weightKg },
   };
+}
+
+/** Live BMI for the form while the athlete types a weight; null until it can be calculated. */
+export function previewBmi(weight: string, weightUnit: string, heightCm: number | null): string | null {
+  const parsed = parseOptionalPositiveNumber(weight);
+  if (parsed === null || parsed === undefined) return null;
+  const bmi = calculateBmi(weightToCanonical(parsed, normalizeWeightUnit(weightUnit)), heightCm);
+  return bmi === null ? null : formatNumber(bmi);
+}
+
+export function measurementDateInput(daysAgo: number, now = new Date()): string {
+  return formatDateKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo));
 }
 
 export function todayDateInput(now = new Date()): string {
@@ -277,6 +347,43 @@ function mapHistoryCard(session: WorkoutHistoryItem, weightUnit: string): Progre
     title: session.routine_name ?? 'Workout',
     volume: formatVolume(calculateWorkoutVolume(session), weightUnit),
   };
+}
+
+const LIFT_LIMIT = 4;
+const LIFT_TREND_SESSIONS = 8;
+
+/** Top completed set weight per session for the most-trained weighted exercises. */
+function createLiftProgress(completed: WorkoutHistoryItem[], weightUnit: WeightUnit): LiftProgress[] {
+  const byExercise = new Map<string, { name: string; tops: { date: number; weight: number }[] }>();
+  for (const session of completed) {
+    for (const exercise of session.exercises) {
+      const weights = exercise.sets
+        .filter((set) => set.completed === 1 && set.weight !== null && set.weight > 0)
+        .map((set) => set.weight as number);
+      if (weights.length === 0) continue;
+      const entry = byExercise.get(exercise.exercise_id_fk) ?? { name: exercise.exercise.name, tops: [] };
+      entry.tops.push({ date: sessionDate(session).getTime(), weight: Math.max(...weights) });
+      byExercise.set(exercise.exercise_id_fk, entry);
+    }
+  }
+
+  return [...byExercise]
+    .sort(([, left], [, right]) => right.tops.length - left.tops.length)
+    .slice(0, LIFT_LIMIT)
+    .map(([id, { name, tops }]) => {
+      const values = [...tops]
+        .sort((left, right) => left.date - right.date)
+        .slice(-LIFT_TREND_SESSIONS)
+        .map((top) => weightFromCanonical(top.weight, weightUnit));
+      const delta = values.at(-1)! - values[0];
+      let change = 'First weighted session logged';
+      if (values.length > 1) {
+        change = Math.abs(delta) < 0.05
+          ? `Holding steady over ${values.length} sessions`
+          : `${delta > 0 ? '+' : '−'}${formatNumber(Math.abs(delta))} ${weightUnit} over ${values.length} sessions`;
+      }
+      return { change, id, latest: `${formatNumber(values.at(-1)!)} ${weightUnit}`, name, segments: createTrendSegments(values) };
+    });
 }
 
 function calculateWorkoutVolume(session: WorkoutHistoryItem | WorkoutSessionDetail): number {

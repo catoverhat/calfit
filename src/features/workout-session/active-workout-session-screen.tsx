@@ -13,7 +13,14 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AppIcon } from "@/components/ui/app-icon";
-import { completeWorkoutSession, initializeLocalDatabase } from "@/db";
+import {
+  addWorkoutSet,
+  completeWorkoutSession,
+  discardWorkoutSession,
+  initializeLocalDatabase,
+  removeWorkoutSet,
+  type LocalDatabase,
+} from "@/db";
 
 import { useStyles } from "./active-workout-session-screen.styles";
 import { SessionActions } from "./components/session-actions";
@@ -27,8 +34,10 @@ import { useWorkoutPreferences } from "./workout-preferences";
 import type { WorkoutSessionViewModel } from "./workout-session.viewmodel";
 
 export function ActiveWorkoutSessionScreen({
+  onReload,
   workout,
 }: {
+  onReload: () => void;
   workout: WorkoutSessionViewModel;
 }) {
   const styles = useStyles();
@@ -39,7 +48,10 @@ export function ActiveWorkoutSessionScreen({
   useWorkoutScreenAwake(isForeground && keepScreenAwake);
   const [finishError, setFinishError] = useState<string | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isEditingSets, setIsEditingSets] = useState(false);
+  const [confirmation, setConfirmation] = useState<
+    "discard" | "finish" | null
+  >(null);
   const hasSaveErrors = Object.keys(active.saveErrors).length > 0;
   const totalSets = workout.exercises.reduce(
     (sum, exercise) => sum + exercise.sets.length,
@@ -53,7 +65,7 @@ export function ActiveWorkoutSessionScreen({
 
   const finishWorkout = async () => {
     if (isFinishing) return;
-    setShowConfirmation(false);
+    setConfirmation(null);
     setFinishError(null);
     setIsFinishing(true);
     const saved = await active.flush();
@@ -80,13 +92,52 @@ export function ActiveWorkoutSessionScreen({
   };
 
   const requestFinish = () => {
-    if (active.incompleteCount > 0) setShowConfirmation(true);
+    if (active.incompleteCount > 0) setConfirmation("finish");
     else void finishWorkout();
+  };
+
+  const discardWorkout = async () => {
+    if (isFinishing) return;
+    setConfirmation(null);
+    setFinishError(null);
+    setIsFinishing(true);
+    try {
+      const db = await initializeLocalDatabase();
+      await discardWorkoutSession(db, workout.id);
+      router.replace("/(tabs)");
+    } catch (error) {
+      setFinishError(
+        error instanceof Error ? error.message : "Workout could not be discarded.",
+      );
+      setIsFinishing(false);
+    }
+  };
+
+  /** Saves typed values first so the reload after a structure change cannot overwrite them. */
+  const changeSets = async (change: (db: LocalDatabase) => Promise<void>) => {
+    if (isEditingSets) return;
+    setFinishError(null);
+    setIsEditingSets(true);
+    try {
+      if (!(await active.flush())) {
+        setFinishError("Resolve the set errors before changing sets.");
+        return;
+      }
+      await change(await initializeLocalDatabase());
+      onReload();
+    } catch (error) {
+      setFinishError(
+        error instanceof Error ? error.message : "Sets could not be changed.",
+      );
+    } finally {
+      setIsEditingSets(false);
+    }
   };
 
   return (
     <>
       <ScrollView
+        automaticallyAdjustKeyboardInsets
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -188,8 +239,15 @@ export function ActiveWorkoutSessionScreen({
                 ) : null}
                 {expanded ? (
                   <SessionSetEditor
+                    busy={isEditingSets || isFinishing}
                     exercise={exercise}
+                    onAddSet={() =>
+                      void changeSets((db) => addWorkoutSet(db, exercise.id))
+                    }
                     onBlurField={active.blurField}
+                    onRemoveSet={(id) =>
+                      void changeSets((db) => removeWorkoutSet(db, id))
+                    }
                     onToggleSet={(id) => void active.toggleSet(id)}
                     onUpdateField={active.updateField}
                     saveErrors={active.saveErrors}
@@ -217,7 +275,10 @@ export function ActiveWorkoutSessionScreen({
           ) : null}
           <SessionActions
             busy={isFinishing}
-            disabled={isFinishing || active.isSaving || hasSaveErrors}
+            disabled={
+              isFinishing || isEditingSets || active.isSaving || hasSaveErrors
+            }
+            onDiscard={() => setConfirmation("discard")}
             onFinish={requestFinish}
           />
         </View>
@@ -227,8 +288,10 @@ export function ActiveWorkoutSessionScreen({
         <SafeAreaView edges={["bottom"]} style={styles.restDock}>
           <View style={styles.restDockContent}>
             <SessionRestCard
+              durationSeconds={active.restDurationSeconds}
               onAdd={active.addRest}
               onSkip={active.skipRest}
+              onSubtract={active.subtractRest}
               seconds={active.restSeconds}
             />
           </View>
@@ -237,41 +300,60 @@ export function ActiveWorkoutSessionScreen({
 
       <Modal
         animationType="fade"
-        onRequestClose={() => setShowConfirmation(false)}
+        onRequestClose={() => setConfirmation(null)}
         transparent
-        visible={showConfirmation}
+        visible={confirmation !== null}
       >
         <View style={styles.modalBackdrop}>
           <View accessibilityViewIsModal style={styles.confirmationCard}>
-            <Text style={styles.confirmationTitle}>
-              Finish with incomplete sets?
+            <Text accessibilityRole="header" style={styles.confirmationTitle}>
+              {confirmation === "discard"
+                ? "Discard this workout?"
+                : "Finish with incomplete sets?"}
             </Text>
             <Text style={styles.confirmationBody}>
-              {active.incompleteCount}{" "}
-              {active.incompleteCount === 1 ? "set is" : "sets are"} still
-              incomplete. Saved values will remain in workout history.
+              {confirmation === "discard"
+                ? `${completedSets} logged ${completedSets === 1 ? "set" : "sets"} and this session will be deleted. Your workout plan is kept.`
+                : `${active.incompleteCount} ${active.incompleteCount === 1 ? "set is" : "sets are"} still incomplete. Saved values will remain in workout history.`}
             </Text>
             <View style={styles.confirmationActions}>
               <Pressable
                 accessibilityRole="button"
-                onPress={() => setShowConfirmation(false)}
+                onPress={() => setConfirmation(null)}
                 style={({ pressed }) => [
                   styles.confirmationCancel,
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.confirmationCancelText}>Keep Training</Text>
+                <Text style={styles.confirmationCancelText}>Keep training</Text>
               </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => void finishWorkout()}
-                style={({ pressed }) => [
-                  styles.confirmationFinish,
-                  pressed && styles.finishButtonPressed,
-                ]}
-              >
-                <Text style={styles.confirmationFinishText}>Finish Anyway</Text>
-              </Pressable>
+              {confirmation === "discard" ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => void discardWorkout()}
+                  style={({ pressed }) => [
+                    styles.confirmationDanger,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={styles.confirmationDangerText}>
+                    Discard workout
+                  </Text>
+                </Pressable>
+              ) : (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => void finishWorkout()}
+                  style={({ pressed }) => [
+                    styles.confirmationFinish,
+                    pressed && styles.finishButtonPressed,
+                  ]}
+                >
+                  <Text style={styles.confirmationFinishText}>
+                    Finish anyway
+                  </Text>
+                </Pressable>
+              )}
             </View>
           </View>
         </View>

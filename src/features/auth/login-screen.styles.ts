@@ -101,8 +101,8 @@ export const useStyles = createThemedStyles(({ SemanticColors, scheme }) => Styl
   tagline: {
     color: SemanticColors.action,
     fontFamily: Fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 14,
+    fontSize: 12,
+    lineHeight: 16,
     textTransform: 'uppercase',
   },
   messagePanel: {
